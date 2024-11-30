@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
+using FireBreath.PostsMicroservice.Models.Entities;
 
 namespace EasyWeb.TicketsMicroservice.Models.Entities
 {
@@ -10,7 +12,10 @@ namespace EasyWeb.TicketsMicroservice.Models.Entities
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string Path { get; set; }
+        public int PostId { get; set; }
         public int MessageId { get; set; }
+        [ForeignKey("PostId")]
+        public Post Post { get; set; }
         [ForeignKey("MessageId")]
         public Message Message { get; set; }
 
@@ -19,10 +24,11 @@ namespace EasyWeb.TicketsMicroservice.Models.Entities
             this.Path = string.Empty;
         }
 
-        public Attachment(string path, int MessageId)
+        public Attachment(string path, int postId, int messageId)
         {
             this.Path = path;
-            this.MessageId = MessageId;
+            this.PostId = postId;
+            this.MessageId = messageId;
         }
     }
 }

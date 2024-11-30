@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
 using EasyWeb.UsersMicroservice.Translations;
+using Duende.IdentityServer.Extensions;
 
 namespace EasyWeb.UserMicroservice.Controllers
 {
@@ -43,7 +44,7 @@ namespace EasyWeb.UserMicroservice.Controllers
         {
             try
             {
-                var users = await IoTServiceUsers.GetAll();
+                var users = await ServiceUsers.GetAll();
                 return new JsonResult(users);
             }
             catch (Exception e)
@@ -62,7 +63,7 @@ namespace EasyWeb.UserMicroservice.Controllers
         {
             try
             {
-                var user = await IoTServiceUsers.GetById(id);
+                var user = await ServiceUsers.GetById(id);
                 return new JsonResult(user);
             }
             catch (Exception e)
@@ -81,29 +82,40 @@ namespace EasyWeb.UserMicroservice.Controllers
         {
             try
             {
-                var user = new User
+                var errorList = ServiceUsers.ValidateUser(userDto).Result;
+                if (errorList.IsNullOrEmpty())
                 {
-                    UserName = userDto.UserName,
-                    Email = userDto.Email,
-                    PhoneNumber = userDto.PhoneNumber,
-                    Language = userDto.Language,
-                    FullName = userDto.FullName,
-                    Role = userDto.Role
-                };
 
-                string password = HashPassword("EasyWeb@2025");
+                    var user = new User
+                    {
+                        Tag = userDto.Tag,
+                        UserName = userDto.UserName,
+                        Email = userDto.Email,
+                        PhoneNumber = userDto.PhoneNumber,
+                        Country = userDto.Country,
+                        Language = userDto.Language,
+                        Created = userDto.Created,
+                        FullName = userDto.FullName,
+                        Role = userDto.Role,
+                        IsBanned = userDto.IsBanned
+                    };
 
-                var createUser = await _userManager.CreateAsync(user, password);
+                    string password = HashPassword(userDto.Password);
 
-                if (!createUser.Succeeded)
-                {
-                    var errorMessage = string.Join(", ", createUser.Errors.Select(error => error.Description));
-                    return BadRequest(errorMessage);
+                    var createUser = await _userManager.CreateAsync(user, password);
+
+                    if (!createUser.Succeeded)
+                    {
+                        var errorMessage = string.Join(", ", createUser.Errors.Select(error => error.Description));
+                        return BadRequest(errorMessage);
+                    }
+
+                    await _userManager.AddToRoleAsync(user, user.Role);
+
+                    return Ok(createUser);
                 }
 
-                await _userManager.AddToRoleAsync(user, user.Role);
-
-                return Ok(createUser);
+                return BadRequest(Extensions.ToDisplayList(errorList));
             }
             catch (Exception e)
             {
@@ -122,7 +134,7 @@ namespace EasyWeb.UserMicroservice.Controllers
         {
             try
             {
-                var result = await IoTServiceUsers.Update(userId, userDto);
+                var result = await ServiceUsers.Update(userId, userDto);
 
                 if (result.Succeeded)
                 {
@@ -151,7 +163,7 @@ namespace EasyWeb.UserMicroservice.Controllers
             var response = new GenericResponseDto();
             try
             {
-                await IoTServiceUsers.ChangeLanguage(changeLanguage, userId);
+                await ServiceUsers.ChangeLanguage(changeLanguage, userId);
                 response.ReturnData = true;
             }
             catch (Exception e)
@@ -173,7 +185,7 @@ namespace EasyWeb.UserMicroservice.Controllers
             var response = new GenericResponseDto();
             try
             {
-                var result = await IoTServiceUsers.Remove(id);
+                var result = await ServiceUsers.Remove(id);
                 if (result.Errors != null && result.Errors.Any())
                 {
                     response.Error = new GenericErrorDto() { Id = ResponseCodes.DataError, Description = result.Errors.ToList().ToDisplayList(), Location = "Users/Remove" };
@@ -195,7 +207,7 @@ namespace EasyWeb.UserMicroservice.Controllers
         {
             try
             {
-                var result = await IoTServiceUsers.GetAdmins();
+                var result = await ServiceUsers.GetAdmins();
 
                 return new JsonResult(result);
             }
@@ -214,7 +226,7 @@ namespace EasyWeb.UserMicroservice.Controllers
         {
             try
             {
-                var result = await IoTServiceUsers.GetUsers();
+                var result = await ServiceUsers.GetUsers();
 
                 return new JsonResult(result);
             }
@@ -236,7 +248,7 @@ namespace EasyWeb.UserMicroservice.Controllers
         {
             try
             {
-                IoTServiceUsers.SendMail(username, domain, tld);
+                ServiceUsers.SendMail(username, domain, tld);
                 return Ok(true);
             }
             catch (Exception e)
@@ -255,10 +267,10 @@ namespace EasyWeb.UserMicroservice.Controllers
         {
             try
             {
-                var user = await IoTServiceUsers.ResetPassword(resetPass);
+                var user = await ServiceUsers.ResetPassword(resetPass);
                 if (user != null)
                 {
-                    if (await IoTServiceIdentity.UpdateUserPassword(user, resetPass.Password))
+                    if (await ServiceIdentity.UpdateUserPassword(user, resetPass.Password))
                     {
                         return Ok(true);
                     }

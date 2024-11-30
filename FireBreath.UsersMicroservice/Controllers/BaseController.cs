@@ -13,10 +13,10 @@ namespace EasyWeb.UserMicroservice.Controllers
 
         #region Miembros internos
 
-        internal ILogger IoTLogger => (ILogger)_serviceCollection.GetService(typeof(ILogger));
+        internal ILogger Logger => (ILogger)_serviceCollection.GetService(typeof(ILogger));
         internal IConfiguration Configuration => (IConfiguration)_serviceCollection.GetService(typeof(IConfiguration));
-        internal IUsersService IoTServiceUsers => (IUsersService)_serviceCollection.GetService(typeof(IUsersService));
-        internal IIdentitiesService IoTServiceIdentity => (IIdentitiesService)_serviceCollection.GetService(typeof(IIdentitiesService));
+        internal IUsersService ServiceUsers => (IUsersService)_serviceCollection.GetService(typeof(IUsersService));
+        internal IIdentitiesService ServiceIdentity => (IIdentitiesService)_serviceCollection.GetService(typeof(IIdentitiesService));
 
         #endregion
 

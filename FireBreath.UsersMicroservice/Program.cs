@@ -61,7 +61,7 @@ var securityReq = new OpenApiSecurityRequirement()
 
 var contact = new OpenApiContact()
 {
-    Name = "EasyWeb",
+    Name = "FireBreath",
     Email = "juanite.dev@gmail.com",
     Url = new Uri("http://www.example.com")
 };
@@ -222,11 +222,11 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     var supportedCultures = new[]
     {
-                    new CultureInfo("en-US"),
+                    new CultureInfo("en-EN"),
                     new CultureInfo("es-ES")
                 };
 
-    options.DefaultRequestCulture = new RequestCulture(culture: "en-US", uiCulture: "en-US");
+    options.DefaultRequestCulture = new RequestCulture(culture: "en-EN", uiCulture: "en-EN");
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;
 

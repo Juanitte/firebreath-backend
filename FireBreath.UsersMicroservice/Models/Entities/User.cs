@@ -20,15 +20,24 @@ namespace EasyWeb.UserMicroservice.Models.Entities
         /// </summary>
         public User()
         {
+            Tag = string.Empty;
             FullName = string.Empty;
+            Country = Country.UNDEFINED;
             Language = Language.English;
+            Created = DateTime.Now;
+            Role = string.Empty;
+            IsBanned = false;
         }
 
         #endregion
 
+        public string Tag { get; set; }
         public string FullName { get; set; }
+        public Country Country { get; set; }
         public Language Language { get; set; }
+        public DateTime Created { get; set; }
         public string Role { get; set; }
+        public bool IsBanned { get; set; }
     }
 
     /// <summary>

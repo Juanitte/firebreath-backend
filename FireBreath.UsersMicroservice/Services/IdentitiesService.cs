@@ -334,13 +334,13 @@ namespace EasyWeb.UserMicroservice.Services
                 var rolesForUser = await _userManager.GetRolesAsync(user);
 
                 //Claim nombre completo del usuario
-                if (claimsForUser.Any(c => c.Type == Literals.Claim_FullName))
+                if (claimsForUser.Any(c => c.Type == Literals.Claim_Tag))
                 {
-                    await _userManager.ReplaceClaimAsync(user, claimsForUser.FirstOrDefault(c => c.Type == Literals.Claim_FullName), new Claim(Literals.Claim_FullName, user.FullName));
+                    await _userManager.ReplaceClaimAsync(user, claimsForUser.FirstOrDefault(c => c.Type == Literals.Claim_Tag), new Claim(Literals.Claim_Tag, user.Tag));
                 }
                 else
                 {
-                    await _userManager.AddClaimAsync(user, new Claim(Literals.Claim_FullName, user.FullName));
+                    await _userManager.AddClaimAsync(user, new Claim(Literals.Claim_Tag, user.Tag));
                 }
 
                 //Claim del id del idioma del usuario
@@ -469,9 +469,7 @@ namespace EasyWeb.UserMicroservice.Services
             {
                 var roles = new List<IdentityRole<int>>
                 {
-                    new IdentityRole<int>() {Name = Literals.Role_SuperAdmin},
                     new IdentityRole<int>() {Name = Literals.Role_Admin},
-                    new IdentityRole<int>() {Name = Literals.Role_Support},
                     new IdentityRole<int>() {Name = Literals.Role_User}
                 };
 
@@ -496,8 +494,8 @@ namespace EasyWeb.UserMicroservice.Services
         /// <returns></returns>
         public async Task<User> DefaultUser()
         {
-            const string userName = "SuperAdmin";
-            string password = HashPassword("Juanite@2025");
+            const string userName = "Admin";
+            string password = HashPassword("Pass@123");
 
             try
             {
@@ -507,14 +505,14 @@ namespace EasyWeb.UserMicroservice.Services
                     user = new User()
                     {
                         UserName = userName,
-                        Email = "supportmanager@company.com",
+                        Email = "admin@gmail.com",
                         PhoneNumber = "123456789",
-                        FullName = "Super Administrator",
+                        FullName = "Administrator",
                         EmailConfirmed = true,
                         PhoneNumberConfirmed = true,
                         LockoutEnabled = false,
                         LockoutEnd = null,
-                        Role = Literals.Role_SuperAdmin,
+                        Role = Literals.Role_Admin,
                         Language = Language.Spanish
                     };
 
@@ -522,9 +520,9 @@ namespace EasyWeb.UserMicroservice.Services
                     if (result.Succeeded)
                     {
                         var rolesForUser = _userManager.GetRolesAsync(user).Result;
-                        if (!rolesForUser.Contains(Literals.Role_SuperAdmin))
+                        if (!rolesForUser.Contains(Literals.Role_Admin))
                         {
-                            await _userManager.AddToRoleAsync(user, Literals.Role_SuperAdmin);
+                            await _userManager.AddToRoleAsync(user, Literals.Role_Admin);
                         }
 
                         await SetUserClaims(user);

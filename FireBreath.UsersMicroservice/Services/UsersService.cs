@@ -132,6 +132,13 @@ namespace EasyWeb.UserMicroservice.Services
         /// <returns></returns>
         Task<User> ResetPassword(ResetPasswordDto resetPass);
 
+        /// <summary>
+        ///     Valida la creación de un usuario
+        /// </summary>
+        /// <param name="ioTUser"><see cref="CreateUserDto"/> con los datos de creación de usuario</param>
+        /// <returns>Lista de errores</returns>
+        Task<List<string>> ValidateUser(CreateUserDto user);
+
 
     }
     public sealed class UsersService : BaseService, IUsersService
@@ -439,6 +446,9 @@ namespace EasyWeb.UserMicroservice.Services
             user.Email = userDto.Email;
             user.PhoneNumber = userDto.PhoneNumber;
             user.UserName = userDto.UserName;
+            user.Tag = userDto.Tag;
+            user.Country = userDto.Country;
+
 
             _unitOfWork.UsersRepository.Update(user);
             await _unitOfWork.SaveChanges();
@@ -561,31 +571,28 @@ namespace EasyWeb.UserMicroservice.Services
             }
         }
 
-        #endregion
-
-        #region Métodos privados
 
         /// <summary>
         ///     Valida la creación de un usuario
         /// </summary>
         /// <param name="ioTUser"><see cref="CreateUserDto"/> con los datos de creación de usuario</param>
         /// <returns>Lista de errores</returns>
-        private async Task<List<string>> ValidateUser(CreateUserDto ioTUser)
+        public async Task<List<string>> ValidateUser(CreateUserDto user)
         {
             List<string> errorMessages = new List<string>();
 
             //Verificar nombre de usuario único
-            var userNameUser = await _unitOfWork.UsersRepository.Any(a => a.UserName == ioTUser.UserName);
+            var userNameUser = await _unitOfWork.UsersRepository.Any(a => a.UserName == user.UserName);
             if (userNameUser)
             {
-                errorMessages.Add(string.Format(Translation_UsersRoles.NotAvailable_Username, ioTUser.UserName));
+                errorMessages.Add(string.Format(Translation_UsersRoles.NotAvailable_Username, user.UserName));
             }
 
             //Verificar email único
-            var emailUser = await _unitOfWork.UsersRepository.Any(a => a.Email == ioTUser.Email);
+            var emailUser = await _unitOfWork.UsersRepository.Any(a => a.Email == user.Email);
             if (emailUser)
             {
-                errorMessages.Add(string.Format(Translation_UsersRoles.NotAvailable_Email, ioTUser.Email));
+                errorMessages.Add(string.Format(Translation_UsersRoles.NotAvailable_Email, user.Email));
             }
 
             return errorMessages;
