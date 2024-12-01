@@ -1,8 +1,8 @@
 ﻿using Common.Utilities;
-using EasyWeb.UserMicroservice.Models.Dtos.CreateDto;
-using EasyWeb.UserMicroservice.Models.Dtos.EntityDto;
-using EasyWeb.UserMicroservice.Models.Entities;
-using EasyWeb.UserMicroservice.Models.UnitsOfWork;
+using FireBreath.UserMicroservice.Models.Dtos.CreateDto;
+using FireBreath.UserMicroservice.Models.Dtos.EntityDto;
+using FireBreath.UserMicroservice.Models.Entities;
+using FireBreath.UserMicroservice.Models.UnitsOfWork;
 using MailKit.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,9 +10,9 @@ using MimeKit;
 using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
-using EasyWeb.UsersMicroservice.Translations;
+using FireBreath.UsersMicroservice.Translations;
 
-namespace EasyWeb.UserMicroservice.Services
+namespace FireBreath.UserMicroservice.Services
 {
     public interface IUsersService
     {

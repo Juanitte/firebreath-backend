@@ -1,9 +1,9 @@
-﻿using EasyWeb.TicketsMicroservice.Models.Dtos.CreateDto;
-using EasyWeb.TicketsMicroservice.Models.Entities;
-using EasyWeb.TicketsMicroservice.Models.UnitsOfWork;
+﻿using FireBreath.PostsMicroservice.Models.Dtos.CreateDto;
+using FireBreath.PostsMicroservice.Models.Entities;
+using FireBreath.PostsMicroservice.Models.UnitsOfWork;
 using Microsoft.EntityFrameworkCore;
 
-namespace EasyWeb.TicketsMicroservice.Services
+namespace FireBreath.TicketsMicroservice.Services
 {
     public interface IAttachmentsService
     {
@@ -53,7 +53,7 @@ namespace EasyWeb.TicketsMicroservice.Services
     {
         #region Constructores
 
-        public AttachmentsService(JuaniteUnitOfWork ioTUnitOfWork, ILogger logger) : base(ioTUnitOfWork, logger)
+        public AttachmentsService(JuaniteUnitOfWork juaniteUnitOfWork, ILogger logger) : base(juaniteUnitOfWork, logger)
         {
         }
 

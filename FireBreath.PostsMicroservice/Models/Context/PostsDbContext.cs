@@ -1,20 +1,20 @@
-﻿using EasyWeb.TicketsMicroservice.Models.Dtos.EntityDto;
-using EasyWeb.TicketsMicroservice.Models.Entities;
+﻿using FireBreath.PostsMicroservice.Models.Dtos.EntityDto;
+using FireBreath.PostsMicroservice.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace EasyWeb.TicketsMicroservice.Models.Context
+namespace FireBreath.PostsMicroservice.Models.Context
 {
-    public class TicketsDbContext : DbContext
+    public class PostsDbContext : DbContext
     {
         #region DBSets
 
-        public DbSet<Ticket> TicketDb { get; set; }
+        public DbSet<Post> PostsDb { get; set; }
         public DbSet<Message> MessagesDb { get; set; }
-        public DbSet<TicketUserDto> TicketUserDb { get; set; }
+        public DbSet<Attachment> AttachmentsDb { get; set; }
 
         #endregion
 
-        public TicketsDbContext(DbContextOptions options)
+        public PostsDbContext(DbContextOptions options)
         : base(options)
         {
         }
@@ -33,16 +33,15 @@ namespace EasyWeb.TicketsMicroservice.Models.Context
 
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Ticket>().ToTable("Tickets");
+            modelBuilder.Entity<Post>().ToTable("Posts");
             modelBuilder.Entity<Message>().ToTable("Messages");
             modelBuilder.Entity<Attachment>().ToTable("Attachments");
-            modelBuilder.Entity<TicketUserDto>().ToView("Tickets_Username").HasKey(t => t.Id);
 
-            modelBuilder.Entity<Ticket>()
-                .HasMany(t => t.Messages)
-                .WithOne(m => m.Ticket)
-                .HasForeignKey(m => m.TicketId)
-                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Attachment>()
+                .HasOne(t => t.Post)
+                .WithMany(m => m.AttachmentPaths)
+                .HasForeignKey(m => m.PostId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Attachment>()
                 .HasOne(t => t.Message)

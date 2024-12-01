@@ -1,37 +1,34 @@
-﻿namespace EasyWeb.TicketsMicroservice.Models.Dtos.CreateDto
+﻿namespace FireBreath.PostsMicroservice.Models.Dtos.CreateDto
 {
     public class CreateMessageDto
     {
         public string Author { get; set; }
         public string Content { get; set; }
-        public List<IFormFile?> Attachments { get; set; }
-        public int TicketId { get; set; }
-        public bool IsTechnician { get; set; }
+        public List<IFormFile?> Attachments { get; set; } = new List<IFormFile?>();
+        public int SenderId { get; set; }
+        public int ReceiverId { get; set; }
 
         public CreateMessageDto()
         {
-            Author = string.Empty;
-            Content = string.Empty;
-            Attachments = new List<IFormFile?>();
-            TicketId = 0;
+            this.Author = string.Empty;
+            this.Content = string.Empty;
+            this.SenderId = 0;
+            this.ReceiverId = 0;
         }
-
-        public CreateMessageDto(string author, string content, int ticketId, bool isTechnician)
+        public CreateMessageDto(string author, string content, int senderId, int receiverId)
         {
-            Author = author;
-            Content = content;
-            Attachments = new List<IFormFile?>();
-            TicketId = ticketId;
-            IsTechnician = isTechnician;
+            this.Author = author;
+            this.Content = content;
+            this.SenderId = senderId;
+            this.ReceiverId = receiverId;
         }
-
-        public CreateMessageDto(string author, string content, List<IFormFile?> attachments, int ticketId, bool isTechnician)
+        public CreateMessageDto(string author, string content, List<IFormFile?> attachments, int senderId, int receiverId)
         {
-            Author = author;
-            Content = content;
-            Attachments = attachments;
-            TicketId = ticketId;
-            IsTechnician = isTechnician;
+            this.Author = author;
+            this.Content = content;
+            this.SenderId = senderId;
+            this.ReceiverId = receiverId;
+            this.Attachments = attachments;
         }
     }
 }

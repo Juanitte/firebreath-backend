@@ -1,16 +1,16 @@
 ﻿using Common.Dtos;
 using Common.Utilities;
-using EasyWeb.UserMicroservice.Models.Dtos.CreateDto;
-using EasyWeb.UserMicroservice.Models.Dtos.EntityDto;
-using EasyWeb.UserMicroservice.Models.Entities;
+using FireBreath.UserMicroservice.Models.Dtos.CreateDto;
+using FireBreath.UserMicroservice.Models.Dtos.EntityDto;
+using FireBreath.UserMicroservice.Models.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
-using EasyWeb.UsersMicroservice.Translations;
+using FireBreath.UsersMicroservice.Translations;
 using Duende.IdentityServer.Extensions;
 
-namespace EasyWeb.UserMicroservice.Controllers
+namespace FireBreath.UserMicroservice.Controllers
 {
     [ApiController]
     [Route("[controller]")]

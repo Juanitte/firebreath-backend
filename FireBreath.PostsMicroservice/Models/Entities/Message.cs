@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using EasyWeb.UserMicroservice.Models.Entities;
+using FireBreath.UserMicroservice.Models.Entities;
 
-namespace EasyWeb.TicketsMicroservice.Models.Entities
+namespace FireBreath.PostsMicroservice.Models.Entities
 {
     [Table("Messages")]
     public class Message
@@ -23,24 +23,24 @@ namespace EasyWeb.TicketsMicroservice.Models.Entities
 
         public Message()
         {
-            Author = string.Empty;
-            Content = string.Empty;
+            this.Author = string.Empty;
+            this.Content = string.Empty;
             this.Timestamp = DateTime.Now;
-            SenderId = 0;
-            Sender = null;
-            ReceiverId = 0;
-            Receiver = null;
+            this.SenderId = 0;
+            this.Sender = null;
+            this.ReceiverId = 0;
+            this.Receiver = null;
         }
 
         public Message(string content, string author, int senderId, int receiverId)
         {
-            Author = author;
-            Content = content;
+            this.Author = author;
+            this.Content = content;
             this.Timestamp = DateTime.Now;
-            SenderId = senderId;
-            Sender = null;
-            ReceiverId = receiverId;
-            Receiver = null;
+            this.SenderId = senderId;
+            this.Sender = null;
+            this.ReceiverId = receiverId;
+            this.Receiver = null;
         }
     }
 }

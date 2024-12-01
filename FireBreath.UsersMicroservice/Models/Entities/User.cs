@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Security.Principal;
 
-namespace EasyWeb.UserMicroservice.Models.Entities
+namespace FireBreath.UserMicroservice.Models.Entities
 {
     /// <summary>
     ///     Definición de los usuarios de la aplicación

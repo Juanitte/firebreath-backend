@@ -1,4 +1,4 @@
-﻿namespace EasyWeb.UserMicroservice.Helpers
+﻿namespace FireBreath.UserMicroservice.Helpers
 {
     public class AppSettings
     {

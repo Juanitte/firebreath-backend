@@ -1,4 +1,4 @@
-﻿namespace EasyWeb.TicketsMicroservice.Utilities
+﻿namespace FireBreath.PostsMicroservice.Utilities
 {
     public static class Extension
     {

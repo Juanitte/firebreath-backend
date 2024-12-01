@@ -1,9 +1,9 @@
-﻿using EasyWeb.UserMicroservice.Models.Context;
-using EasyWeb.UserMicroservice.Models.Entities;
-using EasyWeb.UserMicroservice.Models.Repositories;
+﻿using FireBreath.UserMicroservice.Models.Context;
+using FireBreath.UserMicroservice.Models.Entities;
+using FireBreath.UserMicroservice.Models.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace EasyWeb.UserMicroservice.Models.UnitsOfWork
+namespace FireBreath.UserMicroservice.Models.UnitsOfWork
 {
     public sealed class JuaniteUnitOfWork
     {

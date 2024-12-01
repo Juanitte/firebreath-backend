@@ -3,12 +3,12 @@ using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using System.Text;
 using EasyWeb.UserMicroservice.Models.Entities;
-using EasyWeb.UserMicroservice.Models.Dtos.EntityDto;
-using static EasyWeb.UserMicroservice.Services.UsersService;
+using FireBreath.UserMicroservice.Models.Dtos.EntityDto;
+using static FireBreath.UserMicroservice.Services.UsersService;
 using System.Security.Cryptography;
-using EasyWeb.UserMicroservice.Models.UnitsOfWork;
+using FireBreath.UserMicroservice.Models.UnitsOfWork;
 
-namespace EasyWeb.UserMicroservice.Services
+namespace FireBreath.UserMicroservice.Services
 {
     /// <summary>
     ///     Interfaz que define los métodos referentes al usuario actual

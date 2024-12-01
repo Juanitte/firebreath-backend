@@ -1,7 +1,7 @@
-﻿using EasyWeb.TicketsMicroservice.Models.UnitsOfWork;
+﻿using FireBreath.PostsMicroservice.Models.UnitsOfWork;
 using System.Security.Principal;
 
-namespace EasyWeb.TicketsMicroservice.Services
+namespace FireBreath.TicketsMicroservice.Services
 {
     /// <summary>
     ///     Modelo del servicio base

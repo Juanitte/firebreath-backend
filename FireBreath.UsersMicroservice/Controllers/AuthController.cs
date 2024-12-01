@@ -1,7 +1,7 @@
 ﻿using Common.Utilities;
-using EasyWeb.UserMicroservice.Helpers;
-using EasyWeb.UserMicroservice.Models.Dtos.EntityDto;
-using EasyWeb.UserMicroservice.Models.Dtos.ResponseDto;
+using FireBreath.UserMicroservice.Helpers;
+using FireBreath.UserMicroservice.Models.Dtos.EntityDto;
+using FireBreath.UserMicroservice.Models.Dtos.ResponseDto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -11,9 +11,9 @@ using static EasyWeb.UserMicroservice.Services.UsersService;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using EasyWeb.UsersMicroservice.Translations;
+using FireBreath.UsersMicroservice.Translations;
 
-namespace EasyWeb.UserMicroservice.Controllers
+namespace FireBreath.UserMicroservice.Controllers
 {
     public class AuthController : BaseController
     {

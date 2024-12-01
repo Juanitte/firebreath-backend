@@ -1,7 +1,7 @@
 ﻿using Common.Dtos;
 using System.ComponentModel;
 
-namespace EasyWeb.UserMicroservice.Models.Dtos.FilterDto
+namespace FireBreath.UserMicroservice.Models.Dtos.FilterDto
 {
     public class UserFilterRequestDto : GenericFilterRequestDto
     {

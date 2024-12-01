@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace EasyWeb.TicketsMicroservice.Migrations
 {
-    [DbContext(typeof(TicketsDbContext))]
+    [DbContext(typeof(PostsDbContext))]
     [Migration("20241025123821_Db1")]
     partial class Db1
     {

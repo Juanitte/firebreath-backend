@@ -1,15 +1,15 @@
 ﻿using Common.Utilities;
-using EasyWeb.TicketsMicroservice.Models.Dtos.CreateDto;
-using EasyWeb.TicketsMicroservice.Models.Dtos.EntityDto;
-using EasyWeb.TicketsMicroservice.Models.Entities;
-using EasyWeb.TicketsMicroservice.Models.UnitsOfWork;
+using FireBreath.PostsMicroservice.Models.Dtos.CreateDto;
+using FireBreath.PostsMicroservice.Models.Dtos.EntityDto;
+using FireBreath.PostsMicroservice.Models.Entities;
+using FireBreath.PostsMicroservice.Models.UnitsOfWork;
 using EasyWeb.TicketsMicroservice.Translations;
 using EasyWeb.TicketsMicroservice.Utilities;
 using MailKit.Security;
 using Microsoft.EntityFrameworkCore;
 using MimeKit;
 
-namespace EasyWeb.TicketsMicroservice.Services
+namespace FireBreath.TicketsMicroservice.Services
 {
     public interface IMessagesService
     {
@@ -66,7 +66,7 @@ namespace EasyWeb.TicketsMicroservice.Services
     {
         #region Constructores
 
-        public MessagesService(JuaniteUnitOfWork ioTUnitOfWork, ILogger logger) : base(ioTUnitOfWork, logger)
+        public MessagesService(JuaniteUnitOfWork juaniteUnitOfWork, ILogger logger) : base(juaniteUnitOfWork, logger)
         {
         }
 

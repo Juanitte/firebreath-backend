@@ -1,6 +1,7 @@
-using EasyWeb.TicketsMicroservice.Models.Context;
-using EasyWeb.TicketsMicroservice.Models.UnitsOfWork;
-using EasyWeb.TicketsMicroservice.Services;
+using FireBreath.PostsMicroservice.Models.Context;
+using FireBreath.PostsMicroservice.Models.UnitsOfWork;
+using FireBreath.PostsMicroservice.Services;
+using FireBreath.TicketsMicroservice.Services;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -55,7 +56,7 @@ var securityReq = new OpenApiSecurityRequirement()
 
 var contact = new OpenApiContact()
 {
-    Name = "EasyWeb",
+    Name = "FireBreath",
     Email = "juanite.dev@gmail.com",
     Url = new Uri("http://www.example.com")
 };
@@ -95,11 +96,11 @@ loggerFactory.AddSerilog(new LoggerConfiguration()
                             ).CreateLogger());
 
 builder.Services.AddSingleton(typeof(ILoggerFactory), loggerFactory);
-builder.Services.AddSingleton(typeof(Microsoft.Extensions.Logging.ILogger), loggerFactory.CreateLogger("EatEazy_RestaurantsMicroservice"));
+builder.Services.AddSingleton(typeof(Microsoft.Extensions.Logging.ILogger), loggerFactory.CreateLogger("FireBreath_PostsMicroservice"));
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddDbContext<TicketsDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<PostsDbContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddScoped<JuaniteUnitOfWork>();
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Translations");
@@ -107,11 +108,11 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     var supportedCultures = new[]
     {
-                    new CultureInfo("en-US"),
+                    new CultureInfo("en-EN"),
                     new CultureInfo("es-ES")
                 };
 
-    options.DefaultRequestCulture = new RequestCulture(culture: "en-US", uiCulture: "en-US");
+    options.DefaultRequestCulture = new RequestCulture(culture: "en-EN", uiCulture: "en-EN");
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;
 
@@ -123,7 +124,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 
 //Añadimos servicio de filtro
 builder.Services.AddTransient<IBlockingService, BlockingService>();
-builder.Services.AddScoped<ITicketsService, TicketsService>();
+builder.Services.AddScoped<ITicketsService, PostsService>();
 builder.Services.AddScoped<IMessagesService, MessagesService>();
 builder.Services.AddScoped<IAttachmentsService, AttachmentsService>();
 
@@ -146,7 +147,7 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var serviceProvider = scope.ServiceProvider;
-    var dbContext = serviceProvider.GetRequiredService<TicketsDbContext>();
+    var dbContext = serviceProvider.GetRequiredService<PostsDbContext>();
     dbContext.Database.Migrate();
 }
 

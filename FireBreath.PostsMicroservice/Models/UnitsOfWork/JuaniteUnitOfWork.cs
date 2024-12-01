@@ -1,9 +1,8 @@
-﻿using EasyWeb.TicketsMicroservice.Models.Context;
-using EasyWeb.TicketsMicroservice.Models.Dtos.EntityDto;
-using EasyWeb.TicketsMicroservice.Models.Entities;
-using EasyWeb.TicketsMicroservice.Models.Repositories;
+﻿using FireBreath.PostsMicroservice.Models.Context;
+using FireBreath.PostsMicroservice.Models.Entities;
+using FireBreath.PostsMicroservice.Models.Repositories;
 
-namespace EasyWeb.TicketsMicroservice.Models.UnitsOfWork
+namespace FireBreath.PostsMicroservice.Models.UnitsOfWork
 {
     public sealed class JuaniteUnitOfWork
     {
@@ -12,7 +11,7 @@ namespace EasyWeb.TicketsMicroservice.Models.UnitsOfWork
         /// <summary>
         ///     Contexto de acceso a la base de datos
         /// </summary>
-        private readonly TicketsDbContext _context;
+        private readonly PostsDbContext _context;
 
         /// <summary>
         ///     Logger de la aplicación
@@ -24,7 +23,7 @@ namespace EasyWeb.TicketsMicroservice.Models.UnitsOfWork
         /// <summary>
         ///     Repositorio de incidencias
         /// </summary>
-        private JuaniteRepository<Ticket> _ticketsRepository;
+        private JuaniteRepository<Post> _postsRepository;
 
         /// <summary>
         ///     Repositorio de mensajes
@@ -37,11 +36,6 @@ namespace EasyWeb.TicketsMicroservice.Models.UnitsOfWork
         /// </summary>
         private JuaniteRepository<Attachment> _attachmentsRepository;
 
-        /// <summary>
-        ///     Repositorio de incidencias + nombre de técnico
-        /// </summary>
-        private JuaniteRepository<TicketUserDto> _ticketUserRepository;
-
         #endregion
 
         #endregion
@@ -51,7 +45,7 @@ namespace EasyWeb.TicketsMicroservice.Models.UnitsOfWork
         /// <summary>
         ///     Repositorio de incidencias
         /// </summary>
-        public JuaniteRepository<Ticket> TicketsRepository => _ticketsRepository ?? (_ticketsRepository = new JuaniteRepository<Ticket>(_context, _logger));
+        public JuaniteRepository<Post> PostsRepository => _postsRepository ?? (_postsRepository = new JuaniteRepository<Post>(_context, _logger));
 
         /// <summary>
         ///     Repositorio de mensajes
@@ -63,11 +57,6 @@ namespace EasyWeb.TicketsMicroservice.Models.UnitsOfWork
         /// </summary>
         public JuaniteRepository<Attachment> AttachmentsRepository => _attachmentsRepository ?? (_attachmentsRepository = new JuaniteRepository<Attachment>(_context, _logger));
 
-        /// <summary>
-        ///     Repositorio de incidencias + nombre de técnico
-        /// </summary>
-        public JuaniteRepository<TicketUserDto> TicketUserRepository => _ticketUserRepository ?? (_ticketUserRepository = new JuaniteRepository<TicketUserDto>(_context, _logger));
-
         #endregion
 
         #region Constructores
@@ -76,8 +65,8 @@ namespace EasyWeb.TicketsMicroservice.Models.UnitsOfWork
         ///     Constructor por defecto
         /// </summary>
         /// <param name="logger"><see cref="ILogger"/></param>
-        /// <param name="context"><see cref="TicketsDbContext"/></param>
-        public JuaniteUnitOfWork(ILogger logger, TicketsDbContext context)
+        /// <param name="context"><see cref="PostsDbContext"/></param>
+        public JuaniteUnitOfWork(ILogger logger, PostsDbContext context)
         {
             _context = context;
             _logger = logger;

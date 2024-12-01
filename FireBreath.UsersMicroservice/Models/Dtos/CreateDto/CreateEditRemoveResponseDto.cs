@@ -1,4 +1,4 @@
-﻿namespace EasyWeb.UserMicroservice.Models.Dtos.CreateDto
+﻿namespace FireBreath.UserMicroservice.Models.Dtos.CreateDto
 {
     public class CreateEditRemoveResponseDto
     {

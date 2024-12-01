@@ -1,11 +1,11 @@
 ﻿using Common.Utilities;
-using EasyWeb.TicketsMicroservice.Models.Context;
+using FireBreath.PostsMicroservice.Models.Context;
 using Microsoft.EntityFrameworkCore;
 using static Common.Attributes.ModelAttributes;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace EasyWeb.TicketsMicroservice.Models.Repositories
+namespace FireBreath.PostsMicroservice.Models.Repositories
 {
     public class ResponseGetFilteredDto<T> where T : class
     {
@@ -21,7 +21,7 @@ namespace EasyWeb.TicketsMicroservice.Models.Repositories
         /// <summary>
         ///     Contexto de acceso a la base de datos
         /// </summary>
-        private readonly TicketsDbContext _context;
+        private readonly PostsDbContext _context;
 
         /// <summary>
         ///     Logger de la aplicación
@@ -42,7 +42,7 @@ namespace EasyWeb.TicketsMicroservice.Models.Repositories
         /// </summary>
         /// <param name="context"><see cref="DbContext"/>Contexto de acceso a la base de datos</param>
         /// <param name="logger"><see cref="ILogger"/>Logger de la aplicación</param>
-        public JuaniteRepository(TicketsDbContext context, ILogger logger)
+        public JuaniteRepository(PostsDbContext context, ILogger logger)
         {
             _context = context;
             _dbSet = context.Set<T>();

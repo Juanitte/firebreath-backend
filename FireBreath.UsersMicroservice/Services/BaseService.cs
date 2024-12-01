@@ -1,7 +1,7 @@
-﻿using EasyWeb.UserMicroservice.Models.UnitsOfWork;
+﻿using FireBreath.UserMicroservice.Models.UnitsOfWork;
 using System.Security.Principal;
 
-namespace EasyWeb.UserMicroservice.Services
+namespace FireBreath.UserMicroservice.Services
 {
     /// <summary>
     ///     Modelo de servicio base

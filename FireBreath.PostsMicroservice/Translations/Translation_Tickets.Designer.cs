@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace EasyWeb.TicketsMicroservice.Translations {
+namespace FireBreath.PostsMicroservice.Translations {
     using System;
     
     

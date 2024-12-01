@@ -1,8 +1,8 @@
-﻿using EasyWeb.UserMicroservice.Models.Context;
+﻿using FireBreath.UserMicroservice.Models.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace EasyWeb.UserMicroservice.Models.Repositories
+namespace FireBreath.UserMicroservice.Models.Repositories
 {
     /// <summary>
     ///     Repositorio de modelo T

@@ -89,7 +89,7 @@ namespace EasyWeb.TicketsMicroservice.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("tickets/getallfilter")]
-        public async Task<JsonResult> GetAllFilter([FromQuery] TicketFilterRequestDto filter)
+        public async Task<JsonResult> GetAllFilter([FromQuery] PostFilterRequestDto filter)
         {
             try
             {
@@ -98,7 +98,7 @@ namespace EasyWeb.TicketsMicroservice.Controllers
             }
             catch (Exception e)
             {
-                return new JsonResult(new ResponseFilterTicketDto());
+                return new JsonResult(new ResponseFilterPostDto());
             }
         }
 
@@ -143,10 +143,10 @@ namespace EasyWeb.TicketsMicroservice.Controllers
         /// <summary>
         ///     Método que crea una nueva incidencia
         /// </summary>
-        /// <param name="createTicket"><see cref="CreateTicketDto"/> con los datos de la incidencia</param>
+        /// <param name="createTicket"><see cref="CreatePostDto"/> con los datos de la incidencia</param>
         /// <returns></returns>
         [HttpPost("tickets/create")]
-        public async Task<IActionResult> Create([FromForm] CreateTicketDto createTicket)
+        public async Task<IActionResult> Create([FromForm] CreatePostDto createTicket)
         {
             try
             {

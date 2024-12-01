@@ -1,4 +1,4 @@
-﻿namespace EasyWeb.TicketsMicroservice.Models.Dtos.EntityDto
+﻿namespace FireBreath.PostsMicroservice.Models.Dtos.EntityDto
 {
     public class MessageDto
     {
@@ -7,8 +7,8 @@
         public string Content { get; set; }
         public DateTime Timestamp { get; set; }
         public List<AttachmentDto?> AttachmentPaths { get; set; } = new List<AttachmentDto?>();
-        public int TicketId { get; set; }
-        public bool IsTechnician { get; set; }
+        public int SenderId { get; set; }
+        public int ReceiverId { get; set; }
 
         public MessageDto()
         {
@@ -16,7 +16,8 @@
             this.Author = string.Empty;
             this.Content = string.Empty;
             this.Timestamp = DateTime.Now;
-            this.IsTechnician = false;
+            this.SenderId = 0;
+            this.ReceiverId = 0;
         }
     }
 }

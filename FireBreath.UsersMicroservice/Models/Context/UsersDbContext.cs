@@ -1,9 +1,9 @@
-﻿using EasyWeb.UserMicroservice.Models.Entities;
+﻿using FireBreath.UserMicroservice.Models.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace EasyWeb.UserMicroservice.Models.Context
+namespace FireBreath.UserMicroservice.Models.Context
 {
     public class UsersDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {

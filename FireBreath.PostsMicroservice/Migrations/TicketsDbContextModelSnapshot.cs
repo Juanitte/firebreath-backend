@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace EasyWeb.TicketsMicroservice.Migrations
 {
-    [DbContext(typeof(TicketsDbContext))]
+    [DbContext(typeof(PostsDbContext))]
     partial class TicketsDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

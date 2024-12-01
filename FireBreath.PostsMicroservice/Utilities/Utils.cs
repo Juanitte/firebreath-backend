@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace EasyWeb.TicketsMicroservice.Utilities
+namespace FireBreath.PostsMicroservice.Utilities
 {
     public class Utils
     {

@@ -1,20 +1,23 @@
-﻿namespace EasyWeb.TicketsMicroservice.Models.Dtos.CreateDto
+﻿namespace FireBreath.PostsMicroservice.Models.Dtos.CreateDto
 {
     public class CreateAttachmentDto
     {
         public string Path { get; set; }
-        public int MessageID { get; set; }
+        public int PostId { get; set; }
+        public int MessageId { get; set; }
 
         public CreateAttachmentDto()
         {
-            Path = string.Empty;
-            MessageID = 0;
+            this.Path = string.Empty;
+            this.PostId = 0;
+            this.MessageId = 0;
         }
 
-        public CreateAttachmentDto(string path, int messageID)
+        public CreateAttachmentDto(string path, int postId, int messageId)
         {
-            Path = path;
-            MessageID = messageID;
+            this.Path = path;
+            this.PostId = postId;
+            this.MessageId = messageId;
         }
     }
 }

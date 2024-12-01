@@ -1,18 +1,18 @@
 ﻿using Common.Utilities;
-using EasyWeb.TicketsMicroservice.Models.Dtos.CreateDto;
-using EasyWeb.TicketsMicroservice.Models.Dtos.EntityDto;
-using EasyWeb.TicketsMicroservice.Models.Dtos.RequestDto;
-using EasyWeb.TicketsMicroservice.Models.Dtos.ResponseDto;
-using EasyWeb.TicketsMicroservice.Models.Entities;
-using EasyWeb.TicketsMicroservice.Models.UnitsOfWork;
+using FireBreath.PostsMicroservice.Models.Dtos.CreateDto;
+using FireBreath.PostsMicroservice.Models.Dtos.EntityDto;
+using FireBreath.PostsMicroservice.Models.Dtos.RequestDto;
+using FireBreath.PostsMicroservice.Models.Dtos.ResponseDto;
+using FireBreath.PostsMicroservice.Models.Entities;
+using FireBreath.PostsMicroservice.Models.UnitsOfWork;
 using EasyWeb.TicketsMicroservice.Translations;
 using EasyWeb.TicketsMicroservice.Utilities;
 using MailKit.Security;
 using MimeKit;
 using Microsoft.EntityFrameworkCore;
-using Attachment = EasyWeb.TicketsMicroservice.Models.Entities.Attachment;
+using Attachment = FireBreath.PostsMicroservice.Models.Entities.Attachment;
 
-namespace EasyWeb.TicketsMicroservice.Services
+namespace FireBreath.PostsMicroservice.Services
 {
     /// <summary>
     ///     Interfaz del servicio de incidencias
@@ -23,34 +23,27 @@ namespace EasyWeb.TicketsMicroservice.Services
         ///     Obtiene todas las incidencias
         /// </summary>
         /// <returns>una lista de incidencias <see cref="Ticket"/></returns>
-        public Task<List<TicketDto>> GetAll();
-
-        /// <summary>
-        ///     Obtiene todas las incidencias con el nombre completo del técnico asignado
-        ///     usando una vista
-        /// </summary>
-        /// <returns></returns>
-        public Task<List<TicketUserDto>> GetAllWithNames();
+        public Task<List<PostDto>> GetAll();
 
         /// <summary>
         ///     Obtiene todas las incidencias sin terminar
         /// </summary>
         /// <returns>una lista de incidencias <see cref="Ticket"/></returns>
-        public Task<List<TicketDto>> GetNoFinished();
+        public Task<List<PostDto>> GetNoFinished();
 
         /// <summary>
         ///     Obtiene la incidencia cuyo id se ha pasado como parámetro
         /// </summary>
         /// <param name="id">el id de la incidencia a buscar</param>
         /// <returns><see cref="Ticket"/> con los datos de la incidencia</returns>
-        public Task<TicketDto> Get(int id);
+        public Task<PostDto> Get(int id);
 
         /// <summary>
         ///     Crea una nueva incidencia
         /// </summary>
-        /// <param name="ticket"><see cref="Ticket"/> con los datos de la incidencia</param>
-        /// <returns><see cref="Ticket"/> con los datos de la incidencia</returns>
-        public Task<CreateEditRemoveResponseDto> Create(CreateTicketDto createTicket);
+        /// <param name="createPost"><see cref="CreatePostDto"/> con los datos de la incidencia</param>
+        /// <returns><see cref="CreateEditRemoveResponseDto"/> con los datos de la incidencia</returns>
+        public Task<CreateEditRemoveResponseDto> Create(CreatePostDto createPost);
 
         /// <summary>
         ///     Actualiza los datos de una incidencia
@@ -58,14 +51,14 @@ namespace EasyWeb.TicketsMicroservice.Services
         /// <param name="ticketId">el id de la incidencia</param>
         /// <param name="ticket"><see cref="Ticket"/> con los datos modificados de la incidencia</param>
         /// <returns></returns>
-        public Task<CreateEditRemoveResponseDto> Update(int ticketId, CreateTicketDataDto ticket);
+        public Task<CreateEditRemoveResponseDto> Update(int ticketId, CreatePostDto post);
 
         /// <summary>
         ///     Elimina la incidencia cuyo id se ha pasado como parámetro
         /// </summary>
         /// <param name="ticketId">el id de la incidencia</param>
         /// <returns></returns>
-        public Task<CreateEditRemoveResponseDto> Remove(int ticketId);
+        public Task<CreateEditRemoveResponseDto> Remove(int postId);
 
         /// <summary>
         ///     Cambia la prioridad de una incidencia cuyo id se ha pasado como parámetro
@@ -102,7 +95,7 @@ namespace EasyWeb.TicketsMicroservice.Services
         ///     Obtiene los tickets filtrados
         /// </summary>
         /// <returns></returns>
-        Task<ResponseFilterTicketDto> GetAllFilter(TicketFilterRequestDto filter);
+        Task<ResponseFilterPostDto> GetAllFilter(PostFilterRequestDto filter);
 
         /// <summary>
         ///     Envía un email
@@ -125,11 +118,11 @@ namespace EasyWeb.TicketsMicroservice.Services
         /// <returns>una lista con las incidencias <see cref="TicketUser"/></returns>
         public IEnumerable<TicketUserDto> GetByUserWithNames(int userId);
     }
-    public class TicketsService : BaseService, ITicketsService
+    public class PostsService : BaseService, ITicketsService
     {
         #region Constructores
 
-        public TicketsService(JuaniteUnitOfWork ioTUnitOfWork, ILogger logger) : base(ioTUnitOfWork, logger)
+        public PostsService(JuaniteUnitOfWork ioTUnitOfWork, ILogger logger) : base(ioTUnitOfWork, logger)
         {
         }
 
@@ -228,7 +221,7 @@ namespace EasyWeb.TicketsMicroservice.Services
         /// </summary>
         /// <param name="ticket"><see cref="Ticket"/> con los datos de la incidencia</param>
         /// <returns><see cref="Ticket"/> con los datos de la incidencia</returns>
-        public async Task<CreateEditRemoveResponseDto> Create(CreateTicketDto createTicket)
+        public async Task<CreateEditRemoveResponseDto> Create(CreatePostDto createTicket)
         {
             try
             {
@@ -322,11 +315,11 @@ namespace EasyWeb.TicketsMicroservice.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<TicketDto> Get(int id)
+        public async Task<PostDto> Get(int id)
         {
             try
             {
-                return await Task.FromResult(Extensions.ConvertModel(_unitOfWork.TicketsRepository.GetFirst(g => g.Id.Equals(id)), new TicketDto()));
+                return await Task.FromResult(Extensions.ConvertModel(_unitOfWork.TicketsRepository.GetFirst(g => g.Id.Equals(id)), new PostDto()));
             }
             catch (Exception e)
             {
@@ -357,12 +350,12 @@ namespace EasyWeb.TicketsMicroservice.Services
         ///     Obtiene todas las incidencias
         /// </summary>
         /// <returns></returns>
-        public async Task<List<TicketDto>> GetAll()
+        public async Task<List<PostDto>> GetAll()
         {
             try
             {
                 var tickets = await _unitOfWork.TicketsRepository.GetAll().ToListAsync();
-                List<TicketDto> result = tickets.Select(t => Extensions.ConvertModel(t, new TicketDto())).ToList();
+                List<PostDto> result = tickets.Select(t => Extensions.ConvertModel(t, new PostDto())).ToList();
                 return result;
             }
             catch (Exception e)
@@ -394,12 +387,12 @@ namespace EasyWeb.TicketsMicroservice.Services
         ///     Obtiene todas las incidencias sin terminar
         /// </summary>
         /// <returns></returns>
-        public async Task<List<TicketDto>> GetNoFinished()
+        public async Task<List<PostDto>> GetNoFinished()
         {
             try
             {
                 var tickets = await _unitOfWork.TicketsRepository.GetAll(t => t.Status != Status.FINISHED).ToListAsync();
-                List<TicketDto> result = tickets.Select(t => Extensions.ConvertModel(t, new TicketDto())).ToList();
+                List<PostDto> result = tickets.Select(t => Extensions.ConvertModel(t, new PostDto())).ToList();
                 return result;
             }
             catch (Exception e)
@@ -413,11 +406,11 @@ namespace EasyWeb.TicketsMicroservice.Services
         ///     Obtiene las incidencias filtradas
         /// </summary>
         /// <returns></returns>
-        public async Task<ResponseFilterTicketDto> GetAllFilter(TicketFilterRequestDto filter)
+        public async Task<ResponseFilterPostDto> GetAllFilter(PostFilterRequestDto filter)
         {
             try
             {
-                var response = new ResponseFilterTicketDto();
+                var response = new ResponseFilterPostDto();
 
                 //Filtrar por estado
                 var byStatusQuery = (int)filter.Status == -1

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using FireBreath.PostsMicroservice.Models.Entities;
 
-namespace EasyWeb.TicketsMicroservice.Models.Entities
+namespace FireBreath.PostsMicroservice.Models.Entities
 {
     [Table("Attachments")]
     public class Attachment
@@ -15,9 +15,9 @@ namespace EasyWeb.TicketsMicroservice.Models.Entities
         public int PostId { get; set; }
         public int MessageId { get; set; }
         [ForeignKey("PostId")]
-        public Post Post { get; set; }
+        public Post? Post { get; set; }
         [ForeignKey("MessageId")]
-        public Message Message { get; set; }
+        public Message? Message { get; set; }
 
         public Attachment()
         {

@@ -1,6 +1,6 @@
 ﻿using Common.Utilities;
 
-namespace EasyWeb.UserMicroservice.Models.Dtos.EntityDto
+namespace FireBreath.UserMicroservice.Models.Dtos.EntityDto
 {
     public class UserDto
     {

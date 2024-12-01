@@ -1,7 +1,7 @@
-﻿using EasyWeb.UserMicroservice.Services;
+﻿using FireBreath.UserMicroservice.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EasyWeb.UserMicroservice.Controllers
+namespace FireBreath.UserMicroservice.Controllers
 {
     public class BaseController : ControllerBase
     {
