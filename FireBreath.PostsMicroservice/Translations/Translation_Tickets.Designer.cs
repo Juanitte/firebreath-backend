@@ -22,14 +22,14 @@ namespace FireBreath.PostsMicroservice.Translations {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class Translation_Tickets {
+    public class Translation_Posts {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Translation_Tickets() {
+        internal Translation_Posts() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace FireBreath.PostsMicroservice.Translations {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Tickets.TicketsMicroservice.Translations.Translation_Tickets", typeof(Translation_Tickets).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Tickets.TicketsMicroservice.Translations.Translation_Tickets", typeof(Translation_Posts).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

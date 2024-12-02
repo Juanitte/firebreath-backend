@@ -1,9 +1,9 @@
-﻿using FireBreath.UserMicroservice.Models.Entities;
+﻿using FireBreath.UsersMicroservice.Models.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace FireBreath.UserMicroservice.Models.Context
+namespace FireBreath.UsersMicroservice.Models.Context
 {
     public class UsersDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
@@ -27,6 +27,8 @@ namespace FireBreath.UserMicroservice.Models.Context
 
             modelBuilder.Entity<User>().ToTable("Users");
             modelBuilder.Entity<IdentityRole<int>>().ToTable("Roles").HasKey(r => r.Id);
+            modelBuilder.Entity<Follow>().ToTable("Follows");
+            modelBuilder.Entity<Block>().ToTable("Blocks");
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

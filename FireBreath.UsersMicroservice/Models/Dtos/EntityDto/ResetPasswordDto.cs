@@ -1,4 +1,4 @@
-﻿namespace FireBreath.UserMicroservice.Models.Dtos.EntityDto
+﻿namespace FireBreath.UsersMicroservice.Models.Dtos.EntityDto
 {
     public class ResetPasswordDto
     {

@@ -1,7 +1,7 @@
-﻿using FireBreath.UserMicroservice.Services;
+﻿using FireBreath.UsersMicroservice.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FireBreath.UserMicroservice.Controllers
+namespace FireBreath.UsersMicroservice.Controllers
 {
     public class BaseController : ControllerBase
     {

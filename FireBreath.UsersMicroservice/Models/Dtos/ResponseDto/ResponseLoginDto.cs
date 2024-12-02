@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using System.Runtime.Serialization;
 
-namespace FireBreath.UserMicroservice.Models.Dtos.ResponseDto
+namespace FireBreath.UsersMicroservice.Models.Dtos.ResponseDto
 {
     public class ResponseLoginDto
     {

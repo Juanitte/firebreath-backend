@@ -1,7 +1,6 @@
 using FireBreath.PostsMicroservice.Models.Context;
 using FireBreath.PostsMicroservice.Models.UnitsOfWork;
 using FireBreath.PostsMicroservice.Services;
-using FireBreath.TicketsMicroservice.Services;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

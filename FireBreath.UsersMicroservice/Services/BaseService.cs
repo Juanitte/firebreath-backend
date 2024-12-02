@@ -1,7 +1,7 @@
-﻿using FireBreath.UserMicroservice.Models.UnitsOfWork;
+﻿using FireBreath.UsersMicroservice.Models.UnitsOfWork;
 using System.Security.Principal;
 
-namespace FireBreath.UserMicroservice.Services
+namespace FireBreath.UsersMicroservice.Services
 {
     /// <summary>
     ///     Modelo de servicio base

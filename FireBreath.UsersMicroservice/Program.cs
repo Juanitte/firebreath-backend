@@ -12,10 +12,10 @@ using System.Text;
 using Common.Utilities;
 using Common.Dtos;
 using RequestFiltering.Services;
-using FireBreath.UserMicroservice.Services;
-using FireBreath.UserMicroservice.Models.Context;
-using FireBreath.UserMicroservice.Models.Entities;
-using FireBreath.UserMicroservice.Models.UnitsOfWork;
+using FireBreath.UsersMicroservice.Services;
+using FireBreath.UsersMicroservice.Models.Context;
+using FireBreath.UsersMicroservice.Models.Entities;
+using FireBreath.UsersMicroservice.Models.UnitsOfWork;
 using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);

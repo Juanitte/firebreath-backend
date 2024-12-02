@@ -1,8 +1,8 @@
-﻿using FireBreath.UserMicroservice.Models.Context;
+﻿using FireBreath.UsersMicroservice.Models.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace FireBreath.UserMicroservice.Models.Repositories
+namespace FireBreath.UsersMicroservice.Models.Repositories
 {
     /// <summary>
     ///     Repositorio de modelo T
@@ -128,13 +128,13 @@ namespace FireBreath.UserMicroservice.Models.Repositories
         /// <summary>
         ///     Obtiene un <see cref="T"/> en base a su id
         /// </summary>
-        /// <param name="id">Id a obtener</param>
+        /// <param name="keyValues">Id a obtener</param>
         /// <returns><see cref="T"/></returns>
-        public virtual async Task<T> Get(int id)
+        public virtual async Task<T> Get(params object[] keyValues)
         {
             try
             {
-                return await _dbSet.FindAsync(id);
+                return await _dbSet.FindAsync(keyValues);
             }
             catch (Exception e)
             {
@@ -175,12 +175,12 @@ namespace FireBreath.UserMicroservice.Models.Repositories
         /// <summary>
         ///     Elimina un elemento del tipo <see cref="T"/> de la base de datos en base a su id
         /// </summary>
-        /// <param name="id">El id a eliminar</param>
-        public virtual async Task Remove(int id)
+        /// <param name="keyValues">El id a eliminar</param>
+        public virtual async Task Remove(params object[] keyValues)
         {
             try
             {
-                var entity = await Get(id);
+                var entity = await Get(keyValues);
                 if (_context.Entry(entity).State == EntityState.Detached)
                 {
                     _dbSet.Attach(entity);

@@ -1,10 +1,10 @@
 ﻿using Common.Dtos;
 using Common.Utilities;
-using EasyWeb.TicketsMicroservice.Models.Dtos.CreateDto;
-using EasyWeb.TicketsMicroservice.Models.Dtos.EntityDto;
+using FireBreath.PostsMicroservice.Models.Dtos.CreateDto;
+using FireBreath.PostsMicroservice.Models.Dtos.EntityDto;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EasyWeb.TicketsMicroservice.Controllers
+namespace FireBreath.PostsMicroservice.Controllers
 {
     public class MessagesController : BaseController
     {
@@ -34,7 +34,7 @@ namespace EasyWeb.TicketsMicroservice.Controllers
         {
             try
             {
-                var messages = await IoTServiceMessages.GetAll();
+                var messages = await JuaniteServiceMessages.GetAll();
                 return new JsonResult(messages);
             }
             catch (Exception e)
@@ -53,7 +53,7 @@ namespace EasyWeb.TicketsMicroservice.Controllers
         {
             try
             {
-                var message = await IoTServiceMessages.Get(id);
+                var message = await JuaniteServiceMessages.Get(id);
                 return new JsonResult(message);
             }
             catch (Exception e)
@@ -74,7 +74,7 @@ namespace EasyWeb.TicketsMicroservice.Controllers
             {
                 var response = new CreateEditRemoveResponseDto();
 
-                response = await IoTServiceMessages.Create(createMessage);
+                response = await JuaniteServiceMessages.Create(createMessage);
 
                 return Ok(true);
             }
@@ -95,7 +95,7 @@ namespace EasyWeb.TicketsMicroservice.Controllers
         {
             try
             {
-                var result = await IoTServiceMessages.Update(messageId, newMessage);
+                var result = await JuaniteServiceMessages.Update(messageId, newMessage);
                 return Ok(result);
             }
             catch (Exception e)
@@ -116,7 +116,7 @@ namespace EasyWeb.TicketsMicroservice.Controllers
             var response = new GenericResponseDto();
             try
             {
-                var result = await IoTServiceMessages.Remove(id);
+                var result = await JuaniteServiceMessages.Remove(id);
                 if (result.Errors != null && result.Errors.Any())
                 {
                     response.Error = new GenericErrorDto() { Id = ResponseCodes.DataError, Description = result.Errors.ToList().ToDisplayList(), Location = "Messages/Remove" };
@@ -130,17 +130,17 @@ namespace EasyWeb.TicketsMicroservice.Controllers
         }
 
         /// <summary>
-        ///     Elimina los mensajes referentes a una incidencia cuyo id se pasa como parámetro
+        ///     Elimina los mensajes enviados por el usuario cuyo id se pasa como parámetro
         /// </summary>
-        /// <param name="ticketId">el id de la incidencia</param>
+        /// <param name="senderId">el id del remitente</param>
         /// <returns></returns>
-        [HttpDelete("messages/removebyticket/{ticketId}")]
-        public async Task<IActionResult> RemoveByTicket(int ticketId)
+        [HttpDelete("messages/removebysender/{senderId}")]
+        public async Task<IActionResult> RemoveBySender(int senderId)
         {
             var response = new GenericResponseDto();
             try
             {
-                var result = await IoTServiceMessages.RemoveByTicket(ticketId);
+                var result = await JuaniteServiceMessages.RemoveBySender(senderId);
                 if (result.Errors != null && result.Errors.Any())
                 {
                     response.Error = new GenericErrorDto() { Id = ResponseCodes.DataError, Description = result.Errors.ToList().ToDisplayList(), Location = "Messages/Remove" };
@@ -154,16 +154,58 @@ namespace EasyWeb.TicketsMicroservice.Controllers
         }
 
         /// <summary>
-        ///     Obtiene los mensajes referentes a una incidencia cuyo id se pasa como parámetro
+        ///     Elimina los mensajes recibidos por el usuario cuyo id se pasa como parámetro
         /// </summary>
-        /// <param name="ticketId">el id de la incidencia</param>
-        /// <returns>un <see cref="IEnumerable{T}"/> de <see cref="Message"/> con los mensajes de la incidencia</returns>
-        [HttpGet("messages/getbyticket/{ticketId}")]
-        public async Task<ActionResult<IEnumerable<MessageDto?>>> GetByTicket(int ticketId)
+        /// <param name="receiverId">el id del receptor</param>
+        /// <returns></returns>
+        [HttpDelete("messages/removebyreceiver/{receiverId}")]
+        public async Task<IActionResult> RemoveByReceiver(int receiverId)
+        {
+            var response = new GenericResponseDto();
+            try
+            {
+                var result = await JuaniteServiceMessages.RemoveByReceiver(receiverId);
+                if (result.Errors != null && result.Errors.Any())
+                {
+                    response.Error = new GenericErrorDto() { Id = ResponseCodes.DataError, Description = result.Errors.ToList().ToDisplayList(), Location = "Messages/Remove" };
+                }
+            }
+            catch (Exception e)
+            {
+                response.Error = new GenericErrorDto() { Id = ResponseCodes.OtherError, Description = e.Message, Location = "Messages/Remove" };
+            }
+            return Ok(response);
+        }
+
+        /// <summary>
+        ///     Obtiene los mensajes enviados por el usuario cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="senderId">el id de remitente</param>
+        /// <returns>un <see cref="IEnumerable{T}"/> de <see cref="MessageDto"/> con los mensajes del usuario</returns>
+        [HttpGet("messages/getbysender/{senderId}")]
+        public async Task<ActionResult<IEnumerable<MessageDto?>>> GetBySender(int senderId)
         {
             try
             {
-                return await IoTServiceMessages.GetByTicket(ticketId);
+                return await JuaniteServiceMessages.GetBySender(senderId);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los mensajes recibidos por el usuario cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="receiverId">el id de receptor</param>
+        /// <returns>un <see cref="IEnumerable{T}"/> de <see cref="MessageDto"/> con los mensajes del usuario</returns>
+        [HttpGet("messages/getbyreceiver/{receiverId}")]
+        public async Task<ActionResult<IEnumerable<MessageDto?>>> GetByReceiver(int receiverId)
+        {
+            try
+            {
+                return await JuaniteServiceMessages.GetByReceiver(receiverId);
             }
             catch (Exception e)
             {
@@ -176,12 +218,12 @@ namespace EasyWeb.TicketsMicroservice.Controllers
         /// </summary>
         /// <param name="attachmentPath">el nombre del archivo</param>
         /// <returns></returns>
-        [HttpGet("messages/download/{ticketId}/{attachmentPath}")]
-        public IActionResult DownloadAttachment(string attachmentPath, int ticketId)
+        [HttpGet("messages/download/{userId}/{attachmentPath}")]
+        public IActionResult DownloadAttachment(string attachmentPath, int userId)
         {
             try
             {
-                string directoryPath = Path.Combine("C:/ProyectoIoT/Back/ApiTest/AttachmentStorage/", ticketId.ToString());
+                string directoryPath = Path.Combine("C:/ProyectoIoT/Back/ApiTest/AttachmentStorage/", userId.ToString());
                 string filePath = Path.Combine(directoryPath, attachmentPath);
 
                 if (System.IO.File.Exists(filePath))
@@ -194,7 +236,7 @@ namespace EasyWeb.TicketsMicroservice.Controllers
                 }
                 else
                 {
-                    return NotFound("Archivo no encontrado");
+                    return NotFound("File not found");
                 }
             }
             catch (Exception e)

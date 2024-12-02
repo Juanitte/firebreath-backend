@@ -28,7 +28,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
-    <ProjectReference Include="..\FireBreath.UsersMicroservice\FireBreath.UsersMicroservice.csproj" />
     <ProjectReference Include="..\RequestFiltering\RequestFiltering.csproj" />
   </ItemGroup>
 

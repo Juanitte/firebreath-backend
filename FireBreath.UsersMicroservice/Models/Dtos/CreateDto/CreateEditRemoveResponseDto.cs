@@ -1,4 +1,4 @@
-﻿namespace FireBreath.UserMicroservice.Models.Dtos.CreateDto
+﻿namespace FireBreath.UsersMicroservice.Models.Dtos.CreateDto
 {
     public class CreateEditRemoveResponseDto
     {

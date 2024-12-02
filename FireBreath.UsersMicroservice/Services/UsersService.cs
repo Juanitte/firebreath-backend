@@ -1,8 +1,8 @@
 ﻿using Common.Utilities;
-using FireBreath.UserMicroservice.Models.Dtos.CreateDto;
-using FireBreath.UserMicroservice.Models.Dtos.EntityDto;
-using FireBreath.UserMicroservice.Models.Entities;
-using FireBreath.UserMicroservice.Models.UnitsOfWork;
+using FireBreath.UsersMicroservice.Models.Dtos.CreateDto;
+using FireBreath.UsersMicroservice.Models.Dtos.EntityDto;
+using FireBreath.UsersMicroservice.Models.Entities;
+using FireBreath.UsersMicroservice.Models.UnitsOfWork;
 using MailKit.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +12,7 @@ using System.Security.Principal;
 using System.Text;
 using FireBreath.UsersMicroservice.Translations;
 
-namespace FireBreath.UserMicroservice.Services
+namespace FireBreath.UsersMicroservice.Services
 {
     public interface IUsersService
     {
@@ -138,6 +138,34 @@ namespace FireBreath.UserMicroservice.Services
         /// <param name="ioTUser"><see cref="CreateUserDto"/> con los datos de creación de usuario</param>
         /// <returns>Lista de errores</returns>
         Task<List<string>> ValidateUser(CreateUserDto user);
+
+        /// <summary>
+        ///     Gestiona el seguir a un usuario
+        /// </summary>
+        /// <param name="follow"><see cref="FollowDto"/> con los datos del follow</param>
+        /// <returns></returns>
+        Task<CreateEditRemoveResponseDto> FollowUser(FollowDto follow);
+
+        /// <summary>
+        ///     Gestiona el bloquear a un usuario
+        /// </summary>
+        /// <param name="block"><see cref="BlockDto"/> con los datos del bloqueo</param>
+        /// <returns></returns>
+        Task<CreateEditRemoveResponseDto> BlockUser(BlockDto block);
+
+        /// <summary>
+        ///     Gestiona el dejar de seguir a un usuario
+        /// </summary>
+        /// <param name="follow"><see cref="FollowDto"/> con los datos del follow</param>
+        /// <returns></returns>
+        Task<CreateEditRemoveResponseDto> UnfollowUser(FollowDto follow);
+
+        /// <summary>
+        ///     Gestiona el desbloquear a un usuario
+        /// </summary>
+        /// <param name="block"><see cref="BlockDto"/> con los datos del bloqueo</param>
+        /// <returns></returns>
+        Task<CreateEditRemoveResponseDto> UnblockUser(BlockDto block);
 
 
     }
@@ -443,6 +471,8 @@ namespace FireBreath.UserMicroservice.Services
                 return IdentityResult.Failed();
             }
             user.FullName = userDto.FullName;
+            user.Bio = userDto.Bio;
+            user.Avatar = userDto.Avatar;
             user.Email = userDto.Email;
             user.PhoneNumber = userDto.PhoneNumber;
             user.UserName = userDto.UserName;
@@ -527,7 +557,7 @@ namespace FireBreath.UserMicroservice.Services
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Get Users => ");
+                _logger.LogError(e, "Get Admins => ");
                 throw;
             }
         }
@@ -598,6 +628,165 @@ namespace FireBreath.UserMicroservice.Services
             return errorMessages;
         }
 
+        /// <summary>
+        ///     Gestiona el seguir a un usuario
+        /// </summary>
+        /// <param name="follow"><see cref="FollowDto"/> con los datos del follow</param>
+        /// <returns></returns>
+        public async Task<CreateEditRemoveResponseDto> FollowUser(FollowDto follow)
+        {
+            var response = new CreateEditRemoveResponseDto();
+            try
+            {
+                var userDb = await _unitOfWork.UsersRepository.Get(follow.UserId);
+                if (userDb != null)
+                {
+                    userDb = await _unitOfWork.UsersRepository.Get(follow.FollowerId);
+                    if (userDb != null)
+                    {
+                        var followData = new Follow(follow.UserId, follow.FollowerId);
+                        if(_unitOfWork.FollowsRepository.Add(followData) != null)
+                        {
+                            await _unitOfWork.SaveChanges();
+                            response.IsSuccess(followData.UserId);
+                        }
+                    }
+                    else
+                    {
+                        response.Id = follow.UserId;
+                        response.Errors = new List<string> { Translation_Errors.Error_user_update };
+                    }
+                }
+                else
+                {
+                    response.Id = follow.UserId;
+                    response.Errors = new List<string> { Translation_Errors.Error_user_update };
+                }
+
+                return response;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "UsersService.FollowUser => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Gestiona el bloquear a un usuario
+        /// </summary>
+        /// <param name="block"><see cref="BlockDto"/> con los datos del bloqueo</param>
+        /// <returns></returns>
+        public async Task<CreateEditRemoveResponseDto> BlockUser(BlockDto block)
+        {
+            var response = new CreateEditRemoveResponseDto();
+            try
+            {
+                var userDb = await _unitOfWork.UsersRepository.Get(block.UserId);
+                if (userDb != null)
+                {
+                    userDb = await _unitOfWork.UsersRepository.Get(block.BlockedUserId);
+                    if (userDb != null)
+                    {
+                        var blockData = new Block(block.UserId, block.BlockedUserId);
+                        if (_unitOfWork.BlocksRepository.Add(blockData) != null)
+                        {
+                            await _unitOfWork.SaveChanges();
+                            response.IsSuccess(blockData.UserId);
+                        }
+                    }
+                    else
+                    {
+                        response.Id = block.UserId;
+                        response.Errors = new List<string> { Translation_Errors.Error_user_update };
+                    }
+                }
+                else
+                {
+                    response.Id = block.UserId;
+                    response.Errors = new List<string> { Translation_Errors.Error_user_update };
+                }
+
+                return response;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "UsersService.BlockUser => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Gestiona el dejar de seguir a un usuario
+        /// </summary>
+        /// <param name="follow"><see cref="FollowDto"/> con los datos del follow</param>
+        /// <returns></returns>
+        public async Task<CreateEditRemoveResponseDto> UnfollowUser(FollowDto follow)
+        {
+            try
+            {
+                var response = new CreateEditRemoveResponseDto();
+
+                var user = await GetById(follow.UserId);
+
+                if (user != null)
+                {
+                    user = await GetById(follow.FollowerId);
+                    if (user != null)
+                    {
+                        await _unitOfWork.FollowsRepository.Remove([follow.UserId, follow.FollowerId]);
+                        await _unitOfWork.SaveChanges();
+                    }
+                }
+                else
+                {
+                    response.Errors = new List<string> { String.Format(Translation_UsersRoles.ID_no_found_description, follow.UserId) };
+                }
+                response.Id = follow.UserId;
+                return response;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "UsersService.UnfollowUser => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Gestiona el desbloquear a un usuario
+        /// </summary>
+        /// <param name="block"><see cref="BlockDto"/> con los datos del bloqueo</param>
+        /// <returns></returns>
+        public async Task<CreateEditRemoveResponseDto> UnblockUser(BlockDto block)
+        {
+            try
+            {
+                var response = new CreateEditRemoveResponseDto();
+
+                var user = await GetById(block.UserId);
+
+                if (user != null)
+                {
+                    user = await GetById(block.BlockedUserId);
+                    if (user != null)
+                    {
+                        await _unitOfWork.BlocksRepository.Remove([block.UserId, block.BlockedUserId]);
+                        await _unitOfWork.SaveChanges();
+                    }
+                }
+                else
+                {
+                    response.Errors = new List<string> { String.Format(Translation_UsersRoles.ID_no_found_description, block.UserId) };
+                }
+                response.Id = block.UserId;
+                return response;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "UsersService.UnBlockUser => ");
+                throw;
+            }
+        }
 
         #endregion
 

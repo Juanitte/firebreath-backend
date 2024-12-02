@@ -1,9 +1,9 @@
-﻿using FireBreath.UserMicroservice.Models.Context;
-using FireBreath.UserMicroservice.Models.Entities;
-using FireBreath.UserMicroservice.Models.Repositories;
+﻿using FireBreath.UsersMicroservice.Models.Context;
+using FireBreath.UsersMicroservice.Models.Entities;
+using FireBreath.UsersMicroservice.Models.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace FireBreath.UserMicroservice.Models.UnitsOfWork
+namespace FireBreath.UsersMicroservice.Models.UnitsOfWork
 {
     public sealed class JuaniteUnitOfWork
     {
@@ -32,6 +32,16 @@ namespace FireBreath.UserMicroservice.Models.UnitsOfWork
 
         private JuaniteRepository<Role> _rolesRepository;
 
+        /// <summary>
+        ///     Repositorio de follows
+        /// </summary>
+        private JuaniteRepository<Follow> _followsRepository;
+
+        /// <summary>
+        ///     Repositorio de bloqueos
+        /// </summary>
+        private JuaniteRepository<Block> _blocksRepository;
+
         #endregion
         #endregion
 
@@ -46,6 +56,16 @@ namespace FireBreath.UserMicroservice.Models.UnitsOfWork
         ///     Repositorio de roles
         /// </summary>
         public JuaniteRepository<Role> RolesRepository => _rolesRepository ?? (_rolesRepository = new JuaniteRepository<Role>(_context, _logger));
+
+        /// <summary>
+        ///     Repositorio de follows
+        /// </summary>
+        public JuaniteRepository<Follow> FollowsRepository => _followsRepository ?? (_followsRepository = new JuaniteRepository<Follow>(_context, _logger));
+
+        /// <summary>
+        ///     Repositorio de bloqueos
+        /// </summary>
+        public JuaniteRepository<Block> BlocksRepository => _blocksRepository ?? (_blocksRepository = new JuaniteRepository<Block>(_context, _logger));
 
         #endregion
 

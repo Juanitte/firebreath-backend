@@ -3,7 +3,7 @@ using FireBreath.PostsMicroservice.Models.Entities;
 using FireBreath.PostsMicroservice.Models.UnitsOfWork;
 using Microsoft.EntityFrameworkCore;
 
-namespace FireBreath.TicketsMicroservice.Services
+namespace FireBreath.PostsMicroservice.Services
 {
     public interface IAttachmentsService
     {

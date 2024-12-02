@@ -1,6 +1,6 @@
 ﻿using Common.Utilities;
 
-namespace FireBreath.UserMicroservice.Models.Dtos.EntityDto
+namespace FireBreath.UsersMicroservice.Models.Dtos.EntityDto
 {
     /// <summary>
     ///     Dto de cambio de idioma

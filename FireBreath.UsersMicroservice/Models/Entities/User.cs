@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Security.Principal;
 
-namespace FireBreath.UserMicroservice.Models.Entities
+namespace FireBreath.UsersMicroservice.Models.Entities
 {
     /// <summary>
     ///     Definición de los usuarios de la aplicación
@@ -32,6 +32,8 @@ namespace FireBreath.UserMicroservice.Models.Entities
         #endregion
 
         public string Tag { get; set; }
+        public string Bio { get; set; }
+        public string Avatar { get; set; }
         public string FullName { get; set; }
         public Country Country { get; set; }
         public Language Language { get; set; }

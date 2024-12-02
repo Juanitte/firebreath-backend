@@ -11,6 +11,7 @@ namespace FireBreath.PostsMicroservice.Models.Context
         public DbSet<Post> PostsDb { get; set; }
         public DbSet<Message> MessagesDb { get; set; }
         public DbSet<Attachment> AttachmentsDb { get; set; }
+        public DbSet<Like> LikesDb { get; set; }
 
         #endregion
 
@@ -36,6 +37,8 @@ namespace FireBreath.PostsMicroservice.Models.Context
             modelBuilder.Entity<Post>().ToTable("Posts");
             modelBuilder.Entity<Message>().ToTable("Messages");
             modelBuilder.Entity<Attachment>().ToTable("Attachments");
+            modelBuilder.Entity<Like>().ToTable("Likes");
+            modelBuilder.Entity<Share>().ToTable("Shares");
 
             modelBuilder.Entity<Attachment>()
                 .HasOne(t => t.Post)

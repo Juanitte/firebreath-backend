@@ -3,13 +3,13 @@ using FireBreath.PostsMicroservice.Models.Dtos.CreateDto;
 using FireBreath.PostsMicroservice.Models.Dtos.EntityDto;
 using FireBreath.PostsMicroservice.Models.Entities;
 using FireBreath.PostsMicroservice.Models.UnitsOfWork;
-using EasyWeb.TicketsMicroservice.Translations;
-using EasyWeb.TicketsMicroservice.Utilities;
+using FireBreath.PostsMicroservice.Translations;
+using FireBreath.PostsMicroservice.Utilities;
 using MailKit.Security;
 using Microsoft.EntityFrameworkCore;
 using MimeKit;
 
-namespace FireBreath.TicketsMicroservice.Services
+namespace FireBreath.PostsMicroservice.Services
 {
     public interface IMessagesService
     {

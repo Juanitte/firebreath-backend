@@ -1,7 +1,7 @@
 ﻿using Common.Dtos;
 using System.ComponentModel;
 
-namespace FireBreath.UserMicroservice.Models.Dtos.FilterDto
+namespace FireBreath.UsersMicroservice.Models.Dtos.FilterDto
 {
     public class UserFilterRequestDto : GenericFilterRequestDto
     {

@@ -5,8 +5,8 @@ using FireBreath.PostsMicroservice.Models.Dtos.RequestDto;
 using FireBreath.PostsMicroservice.Models.Dtos.ResponseDto;
 using FireBreath.PostsMicroservice.Models.Entities;
 using FireBreath.PostsMicroservice.Models.UnitsOfWork;
-using EasyWeb.TicketsMicroservice.Translations;
-using EasyWeb.TicketsMicroservice.Utilities;
+using FireBreath.PostsMicroservice.Translations;
+using FireBreath.PostsMicroservice.Utilities;
 using MailKit.Security;
 using MimeKit;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +17,7 @@ namespace FireBreath.PostsMicroservice.Services
     /// <summary>
     ///     Interfaz del servicio de incidencias
     /// </summary>
-    public interface ITicketsService
+    public interface IPostsService
     {
         /// <summary>
         ///     Obtiene todas las incidencias

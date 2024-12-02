@@ -1,14 +1,15 @@
 ﻿using Common.Dtos;
 using Common.Utilities;
-using EasyWeb.TicketsMicroservice.Models.Dtos.CreateDto;
-using EasyWeb.TicketsMicroservice.Models.Dtos.RequestDto;
-using EasyWeb.TicketsMicroservice.Models.Dtos.ResponseDto;
+using FireBreath.PostsMicroservice.Models.Dtos.CreateDto;
+using FireBreath.PostsMicroservice.Models.Dtos.EntityDto;
+using FireBreath.PostsMicroservice.Models.Dtos.RequestDto;
+using FireBreath.PostsMicroservice.Models.Dtos.ResponseDto;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EasyWeb.TicketsMicroservice.Controllers
+namespace FireBreath.PostsMicroservice.Controllers
 {
     [ApiController]
-    public class TicketsController : BaseController
+    public class PostsController : BaseController
     {
         #region Miembros privados
 
@@ -18,7 +19,7 @@ namespace EasyWeb.TicketsMicroservice.Controllers
 
         #region Constructores
 
-        public TicketsController(IServiceProvider serviceCollection, IWebHostEnvironment hostingEnvironment) : base(serviceCollection)
+        public PostsController(IServiceProvider serviceCollection, IWebHostEnvironment hostingEnvironment) : base(serviceCollection)
         {
             _hostingEnvironment = hostingEnvironment;
         }
@@ -28,73 +29,35 @@ namespace EasyWeb.TicketsMicroservice.Controllers
         #region Métodos públicos
 
         /// <summary>
-        ///     Método que obtiene todas las incidencias
+        ///     Método que obtiene todos los posts
         /// </summary>
         /// <returns></returns>
-        [HttpGet("tickets/getall")]
+        [HttpGet("posts/getall")]
         public async Task<IActionResult> GetAll()
         {
             try
             {
-                var tickets = await JuaniteServiceTickets.GetAll();
+                var posts = await JuaniteServicePosts.GetAll();
 
-                return new JsonResult(tickets);
+                return new JsonResult(posts);
             }
             catch (Exception e)
             {
-                return new JsonResult(new List<CreateTicketDataDto>());
+                return new JsonResult(new List<PostDto>());
             }
         }
 
         /// <summary>
-        ///     Método que obtiene todas las incidencias con el nombre del técnico asignado
+        ///     Método que obtiene todos los posts filtrados
         /// </summary>
         /// <returns></returns>
-        [HttpGet("tickets/getallwithnames")]
-        public async Task<IActionResult> GetAllWithNames()
-        {
-            try
-            {
-                var tickets = await JuaniteServiceTickets.GetAllWithNames();
-
-                return new JsonResult(tickets);
-            }
-            catch (Exception e)
-            {
-                return new JsonResult(new List<CreateTicketDataDto>());
-            }
-        }
-
-        /// <summary>
-        ///     Método que obtiene todas las incidencias sin terminar
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("tickets/getnofinished")]
-        public async Task<IActionResult> GetNoFinished()
-        {
-            try
-            {
-                var tickets = await JuaniteServiceTickets.GetNoFinished();
-
-                return new JsonResult(tickets);
-            }
-            catch (Exception e)
-            {
-                return new JsonResult(new List<CreateTicketDataDto>());
-            }
-        }
-
-        /// <summary>
-        ///     Método que obtiene todas las incidencias filtradas
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("tickets/getallfilter")]
+        [HttpGet("posts/getallfilter")]
         public async Task<JsonResult> GetAllFilter([FromQuery] PostFilterRequestDto filter)
         {
             try
             {
-                var tickets = await JuaniteServiceTickets.GetAllFilter(filter);
-                return new JsonResult(tickets);
+                var posts = await JuaniteServicePosts.GetAllFilter(filter);
+                return new JsonResult(posts);
             }
             catch (Exception e)
             {
@@ -103,54 +66,35 @@ namespace EasyWeb.TicketsMicroservice.Controllers
         }
 
         /// <summary>
-        ///     Método que obtiene una incidencia según su id
+        ///     Método que obtiene un post según su id
         /// </summary>
-        /// <param name="id">El id de la incidencia a buscar</param>
+        /// <param name="id">El id del post a buscar</param>
         /// <returns></returns>
-        [HttpGet("tickets/getbyid/{id}")]
+        [HttpGet("posts/getbyid/{id}")]
         public async Task<JsonResult> GetById(int id)
         {
             try
             {
-                var ticket = await JuaniteServiceTickets.Get(id);
-                return new JsonResult(ticket);
+                var post = await JuaniteServicePosts.Get(id);
+                return new JsonResult(post);
             }
             catch (Exception e)
             {
-                return new JsonResult(new CreateTicketDataDto());
+                return new JsonResult(new PostDto());
             }
         }
 
         /// <summary>
-        ///     Método que obtiene una incidencia según su id
+        ///     Método que crea un nuevo post
         /// </summary>
-        /// <param name="id">El id de la incidencia a buscar</param>
+        /// <param name="createPost"><see cref="CreatePostDto"/> con los datos del post</param>
         /// <returns></returns>
-        [HttpGet("tickets/getbyidwithname/{id}")]
-        public async Task<JsonResult> GetByIdWithName(int id)
+        [HttpPost("posts/create")]
+        public async Task<IActionResult> Create([FromForm] CreatePostDto createPost)
         {
             try
             {
-                var ticket = await JuaniteServiceTickets.GetWithName(id);
-                return new JsonResult(ticket);
-            }
-            catch (Exception e)
-            {
-                return new JsonResult(new CreateTicketDataDto());
-            }
-        }
-
-        /// <summary>
-        ///     Método que crea una nueva incidencia
-        /// </summary>
-        /// <param name="createTicket"><see cref="CreatePostDto"/> con los datos de la incidencia</param>
-        /// <returns></returns>
-        [HttpPost("tickets/create")]
-        public async Task<IActionResult> Create([FromForm] CreatePostDto createTicket)
-        {
-            try
-            {
-                var result = await JuaniteServiceTickets.Create(createTicket);
+                var result = await JuaniteServicePosts.Create(createPost);
 
                 return Ok(true);
             }
@@ -161,17 +105,17 @@ namespace EasyWeb.TicketsMicroservice.Controllers
         }
 
         /// <summary>
-        ///     Método que actualiza una incidencia con id proporcionado como parámetro
+        ///     Método que actualiza un post con id proporcionado como parámetro
         /// </summary>
-        /// <param name="ticketId">El id de la incidencia a editar</param>
-        /// <param name="ticket"><see cref="CreateTicketDataDto"/> con los nuevos datos de la incidencia</param>
+        /// <param name="postId">El id del post a editar</param>
+        /// <param name="newPost"><see cref="CreatePostDto"/> con los nuevos datos del post</param>
         /// <returns></returns>
-        [HttpPost("tickets/update/{ticketId}")]
-        public async Task<IActionResult> Update(int ticketId, [FromBody] CreateTicketDataDto newTicket)
+        [HttpPost("posts/update/{postId}")]
+        public async Task<IActionResult> Update(int postId, [FromBody] CreatePostDto newPost)
         {
             try
             {
-                var result = await JuaniteServiceTickets.Update(ticketId, newTicket);
+                var result = await JuaniteServicePosts.Update(postId, newPost);
 
                 if (result != null)
                 {
@@ -179,7 +123,7 @@ namespace EasyWeb.TicketsMicroservice.Controllers
                 }
                 else
                 {
-                    return Problem(Translations.Translation_Tickets.Error_update);
+                    return Problem(Translations.Translation_Posts.Error_update);
                 }
             }
             catch (Exception e)

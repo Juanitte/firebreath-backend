@@ -1,8 +1,8 @@
 ﻿using Common.Dtos;
 using Common.Utilities;
-using FireBreath.UserMicroservice.Models.Dtos.CreateDto;
-using FireBreath.UserMicroservice.Models.Dtos.EntityDto;
-using FireBreath.UserMicroservice.Models.Entities;
+using FireBreath.UsersMicroservice.Models.Dtos.CreateDto;
+using FireBreath.UsersMicroservice.Models.Dtos.EntityDto;
+using FireBreath.UsersMicroservice.Models.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
@@ -10,7 +10,7 @@ using System.Text;
 using FireBreath.UsersMicroservice.Translations;
 using Duende.IdentityServer.Extensions;
 
-namespace FireBreath.UserMicroservice.Controllers
+namespace FireBreath.UsersMicroservice.Controllers
 {
     [ApiController]
     [Route("[controller]")]
@@ -89,6 +89,8 @@ namespace FireBreath.UserMicroservice.Controllers
                     var user = new User
                     {
                         Tag = userDto.Tag,
+                        Bio = userDto.Bio,
+                        Avatar = userDto.Avatar,
                         UserName = userDto.UserName,
                         Email = userDto.Email,
                         PhoneNumber = userDto.PhoneNumber,
@@ -234,6 +236,98 @@ namespace FireBreath.UserMicroservice.Controllers
             {
                 return new JsonResult(new UserDto());
             }
+        }
+
+        /// <summary>
+        ///     Gestiona el seguir a un usuario
+        /// </summary>
+        /// <param name="follow"><see cref="FollowDto"/> con los datos del follow</param>
+        /// <returns></returns>
+        [HttpPost("users/followuser")]
+        public async Task<IActionResult> FollowUser(FollowDto follow)
+        {
+            var response = new GenericResponseDto();
+            try
+            {
+                await ServiceUsers.FollowUser(follow);
+                response.ReturnData = true;
+            }
+            catch (Exception e)
+            {
+                response.Error = new GenericErrorDto() { Id = ResponseCodes.OtherError, Description = e.Message, Location = "Users/FollowUser" };
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+
+        /// <summary>
+        ///     Gestiona el bloquear a un usuario
+        /// </summary>
+        /// <param name="block"><see cref="BlockDto"/> con los datos del bloqueo</param>
+        /// <returns></returns>
+        [HttpPost("users/blockuser")]
+        public async Task<IActionResult> BlockUser(BlockDto block)
+        {
+            var response = new GenericResponseDto();
+            try
+            {
+                await ServiceUsers.BlockUser(block);
+                response.ReturnData = true;
+            }
+            catch (Exception e)
+            {
+                response.Error = new GenericErrorDto() { Id = ResponseCodes.OtherError, Description = e.Message, Location = "Users/BlockUser" };
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+
+        /// <summary>
+        ///     Gestiona el dejar de seguir a un usuario
+        /// </summary>
+        /// <param name="follow"><see cref="FollowDto"/> con los datos del follow</param>
+        /// <returns></returns>
+        [HttpDelete("users/unfollow")]
+        public async Task<IActionResult> UnfollowUser(FollowDto follow)
+        {
+            var response = new GenericResponseDto();
+            try
+            {
+                var result = await ServiceUsers.UnfollowUser(follow);
+                if (result.Errors != null && result.Errors.Any())
+                {
+                    response.Error = new GenericErrorDto() { Id = ResponseCodes.DataError, Description = result.Errors.ToList().ToDisplayList(), Location = "Users/UnfollowUser" };
+                }
+            }
+            catch (Exception e)
+            {
+                response.Error = new GenericErrorDto() { Id = ResponseCodes.OtherError, Description = e.Message, Location = "Users/UnfollowUser" };
+            }
+            return Ok(response);
+        }
+
+        /// <summary>
+        ///     Gestiona el desbloquear a un usuario
+        /// </summary>
+        /// <param name="block"><see cref="BlockDto"/> con los datos del bloqueo</param>
+        /// <returns></returns>
+        [HttpDelete("users/unblock")]
+        public async Task<IActionResult> UnblockUser(BlockDto block)
+        {
+            var response = new GenericResponseDto();
+            try
+            {
+                var result = await ServiceUsers.UnblockUser(block);
+                if (result.Errors != null && result.Errors.Any())
+                {
+                    response.Error = new GenericErrorDto() { Id = ResponseCodes.DataError, Description = result.Errors.ToList().ToDisplayList(), Location = "Users/UnblockUser" };
+                }
+            }
+            catch (Exception e)
+            {
+                response.Error = new GenericErrorDto() { Id = ResponseCodes.OtherError, Description = e.Message, Location = "Users/UnblockUser" };
+            }
+            return Ok(response);
         }
 
         /// <summary>

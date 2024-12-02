@@ -1,11 +1,13 @@
 ﻿using Common.Utilities;
 
-namespace FireBreath.UserMicroservice.Models.Dtos.EntityDto
+namespace FireBreath.UsersMicroservice.Models.Dtos.EntityDto
 {
     public class UserDto
     {
         public int Id { get; set; }
         public string Tag { get; set; }
+        public string Bio { get; set; }
+        public string Avatar { get; set; }
         public string FullName { get; set; }
         public Country Country { get; set; }
         public Language Language { get; set; }
@@ -29,6 +31,8 @@ namespace FireBreath.UserMicroservice.Models.Dtos.EntityDto
             PhoneNumber = string.Empty;
             Role = string.Empty;
             IsBanned = false;
+            Bio = string.Empty;
+            Avatar = string.Empty;
         }
     }
 }

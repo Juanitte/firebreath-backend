@@ -1,10 +1,12 @@
 ﻿using Common.Utilities;
 
-namespace FireBreath.UserMicroservice.Models.Dtos.CreateDto
+namespace FireBreath.UsersMicroservice.Models.Dtos.CreateDto
 {
     public class CreateUserDto
     {
         public string Tag {  get; set; }
+        public string Bio { get; set; }
+        public string Avatar { get; set; }
         public string UserName { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
@@ -26,9 +28,11 @@ namespace FireBreath.UserMicroservice.Models.Dtos.CreateDto
             this.Country = Country.UNDEFINED;
             this.Language = Language.English;
             this.Password = string.Empty;
+            this.Bio = string.Empty;
+            this.Avatar = string.Empty;
         }
 
-        public CreateUserDto(string tag, string userName, string password, string email, string phoneNumber, string fullName, Country country, Language language)
+        public CreateUserDto(string tag, string bio, string avatar, string userName, string password, string email, string phoneNumber, string fullName, Country country, Language language)
         {
             this.Tag = tag;
             this.UserName = userName;
@@ -38,6 +42,8 @@ namespace FireBreath.UserMicroservice.Models.Dtos.CreateDto
             this.FullName = fullName;
             this.Country = country;
             this.Language = language;
+            this.Bio = bio;
+            this.Avatar = avatar;
         }
     }
 }

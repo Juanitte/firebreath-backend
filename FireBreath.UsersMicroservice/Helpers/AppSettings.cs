@@ -1,4 +1,4 @@
-﻿namespace FireBreath.UserMicroservice.Helpers
+﻿namespace FireBreath.UsersMicroservice.Helpers
 {
     public class AppSettings
     {

@@ -1,7 +1,7 @@
-﻿using EasyWeb.TicketsMicroservice.Services;
+﻿using FireBreath.PostsMicroservice.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EasyWeb.TicketsMicroservice.Controllers
+namespace FireBreath.PostsMicroservice.Controllers
 {
     public class BaseController : ControllerBase
     {
@@ -15,7 +15,7 @@ namespace EasyWeb.TicketsMicroservice.Controllers
 
         internal ILogger JuaniteLogger => (ILogger)_serviceCollection.GetService(typeof(ILogger));
         internal IConfiguration Configuration => (IConfiguration)_serviceCollection.GetService(typeof(IConfiguration));
-        internal ITicketsService JuaniteServiceTickets => (ITicketsService)_serviceCollection.GetService(typeof(ITicketsService));
+        internal IPostsService JuaniteServicePosts => (IPostsService)_serviceCollection.GetService(typeof(IPostsService));
         internal IMessagesService JuaniteServiceMessages => (IMessagesService)_serviceCollection.GetService(typeof(IMessagesService));
         internal IAttachmentsService JuaniteServiceAttachments => (IAttachmentsService)_serviceCollection.GetService(typeof(IAttachmentsService));
 
