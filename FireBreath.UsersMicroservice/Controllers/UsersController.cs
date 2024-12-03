@@ -365,9 +365,7 @@ namespace FireBreath.UsersMicroservice.Controllers
                 if (user != null)
                 {
                     if (await ServiceIdentity.UpdateUserPassword(user, resetPass.Password))
-                    {
                         return Ok(true);
-                    }
                 }
                 return BadRequest(false);
             }
@@ -377,6 +375,98 @@ namespace FireBreath.UsersMicroservice.Controllers
             }
         }
 
+        /// <summary>
+        ///     Comprueba si un usuario sigue a otro
+        /// </summary>
+        /// <param name="follow"><see cref="FollowDto"/> con los datos del follow</param>
+        /// <returns></returns>
+        [HttpGet("users/isFollowing")]
+        public async Task<bool> IsFollowing(FollowDto follow)
+        {
+            try
+            {
+                if (await ServiceUsers.IsFollowing(follow))
+                    return true;
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        ///     Comprueba si un usuario tiene bloqueado a otro
+        /// </summary>
+        /// <param name="block"><see cref="BlockDto"/> con los datos del bloqueo</param>
+        /// <returns></returns>
+        [HttpGet("users/isBlocked")]
+        public async Task<bool> IsBlocked(BlockDto block)
+        {
+            try
+            {
+                if (await ServiceUsers.IsBlocked(block))
+                    return true;
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene todos los seguidores de un user cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [HttpGet("users/getfollowers/{userId}")]
+        public async Task<JsonResult> GetFollowers(int userId)
+        {
+            try
+            {
+                var result = await ServiceUsers.GetFollowers(userId);
+
+                return new JsonResult(result);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new UserDto());
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene el avatar de un usuario
+        /// </summary>
+        /// <param name="userId">id del usuario</param>
+        /// <returns></returns>
+        [HttpGet("users/getavatar/{userId}")]
+        public async Task<IActionResult> GetAvatar(int userId)
+        {
+            try
+            {
+                var user = await ServiceUsers.GetById(userId);
+                if (user != null)
+                {
+                    string directoryPath = Path.Combine("C:/ProyectoIoT/Back/ApiTest/AttachmentStorage/", userId.ToString());
+                    string filePath = Path.Combine(directoryPath, user.Avatar);
+
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
+
+                        string contentType = "application/octet-stream";
+
+                        return File(fileBytes, contentType, user.Avatar);
+                    }
+                }
+                return NotFound("File not found");
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
 
         #endregion
 

@@ -11,6 +11,7 @@ using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 using FireBreath.UsersMicroservice.Translations;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FireBreath.UsersMicroservice.Services
 {
@@ -166,6 +167,27 @@ namespace FireBreath.UsersMicroservice.Services
         /// <param name="block"><see cref="BlockDto"/> con los datos del bloqueo</param>
         /// <returns></returns>
         Task<CreateEditRemoveResponseDto> UnblockUser(BlockDto block);
+
+        /// <summary>
+        ///     Comprueba si un usuario sigue a otro
+        /// </summary>
+        /// <param name="follow"><see cref="FollowDto"/> con los datos del follow</param>
+        /// <returns></returns>
+        Task<bool> IsFollowing(FollowDto follow);
+
+        /// <summary>
+        ///     Comprueba si un usuario tiene bloqueado a otro
+        /// </summary>
+        /// <param name="block"><see cref="BlockDto"/> con los datos del bloqueo</param>
+        /// <returns></returns>
+        Task<bool> IsBlocked(BlockDto block);
+
+        /// <summary>
+        ///     Obtiene todos los seguidores de un user cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<List<UserDto>> GetFollowers(int userId);
 
 
     }
@@ -784,6 +806,73 @@ namespace FireBreath.UsersMicroservice.Services
             catch (Exception e)
             {
                 _logger.LogError(e, "UsersService.UnBlockUser => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Comprueba si un usuario sigue a otro
+        /// </summary>
+        /// <param name="follow"><see cref="FollowDto"/> con los datos del follow</param>
+        /// <returns></returns>
+        public async Task<bool> IsFollowing(FollowDto follow)
+        {
+            try
+            {
+                if (await _unitOfWork.FollowsRepository.Get([follow.UserId, follow.FollowerId]) != null)
+                    return true;
+                return false;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "UsersService.IsFollowing => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Comprueba si un usuario tiene bloqueado a otro
+        /// </summary>
+        /// <param name="block"><see cref="BlockDto"/> con los datos del bloqueo</param>
+        /// <returns></returns>
+        public async Task<bool> IsBlocked(BlockDto block)
+        {
+            try
+            {
+                if (await _unitOfWork.FollowsRepository.Get([block.UserId, block.BlockedUserId]) != null)
+                    return true;
+                return false;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "UsersService.IsBlocked => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene todos los seguidores de un user cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<List<UserDto>> GetFollowers(int userId)
+        {
+            try
+            {
+                var follows = await _unitOfWork.FollowsRepository.GetAll().Where(f => f.UserId == userId).ToListAsync();
+                List<int> followerIds = new List<int>();
+                foreach (var follow in follows)
+                {
+                    if(follow.UserId == userId)
+                        followerIds.Add(follow.FollowerId);
+                }
+                var users = await _unitOfWork.UsersRepository.GetAll().Where(u => followerIds.Contains(u.Id)).ToListAsync();
+                var result = users.Select(u => Extensions.ConvertModel(u, new UserDto())).ToList();
+                return result;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "UsersService.GetFollowers => ");
                 throw;
             }
         }
