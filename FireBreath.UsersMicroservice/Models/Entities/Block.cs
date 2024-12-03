@@ -1,16 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FireBreath.UsersMicroservice.Models.Entities
 {
     [Table("Blocks")]
+    [PrimaryKey(nameof(UserId), nameof(BlockedUserId))]
     public class Block
     {
-        [Key]
-        [Column(Order = 1)]
         public int UserId { get; set; }
-        [Key]
-        [Column(Order = 2)]
         public int BlockedUserId { get; set; }
 
         public Block()

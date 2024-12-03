@@ -39,7 +39,7 @@ namespace FireBreath.UsersMicroservice.Translations {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Tickets.UsersMicroservice.Translations.Translation_Account", typeof(Translation_Account).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("FireBreath.UsersMicroservice.Translations.Translation_Account", typeof(Translation_Account).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

@@ -4,7 +4,7 @@ using System.Security.Claims;
 using System.Text;
 using FireBreath.UsersMicroservice.Models.Entities;
 using FireBreath.UsersMicroservice.Models.Dtos.EntityDto;
-using static FireBreath.UserMicroservice.Services.UsersService;
+using static FireBreath.UsersMicroservice.Services.UsersService;
 using System.Security.Cryptography;
 using FireBreath.UsersMicroservice.Models.UnitsOfWork;
 

@@ -33,13 +33,13 @@ namespace FireBreath.UsersMicroservice.Controllers
 
             try
             {
-                var user = await IoTServiceUsers.GetByEmail(login.Email);
+                var user = await ServiceUsers.GetByEmail(login.Email);
                 if (user == null)
                 {
                     return BadRequest(new ResponseLoginDto() { ErrorDescripcion = Translation_Account.User_not_found });
                 }
 
-                var authenticated = await IoTServiceUsers.Login(login);
+                var authenticated = await ServiceUsers.Login(login);
                 if (!authenticated)
                 {
                     return BadRequest(new ResponseLoginDto() { ErrorDescripcion = Translation_Account.Incorrect_password });
@@ -50,7 +50,7 @@ namespace FireBreath.UsersMicroservice.Controllers
                     new Claim(Literals.Claim_UserId, user.Id.ToString()),
                     new Claim(ClaimTypes.Name, user.UserName),
                     new Claim(Literals.Claim_Role, user.Role),
-                    new Claim(Literals.Claim_FullName, user.FullName),
+                    new Claim(Literals.Claim_Tag, user.Tag),
                     new Claim(Literals.Claim_Email, user.Email),
                     new Claim(Literals.Claim_PhoneNumber, user.PhoneNumber),
                     new Claim(Literals.Claim_LanguageId, user.Language.ToString())

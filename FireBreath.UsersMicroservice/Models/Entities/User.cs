@@ -27,6 +27,8 @@ namespace FireBreath.UsersMicroservice.Models.Entities
             Created = DateTime.Now;
             Role = string.Empty;
             IsBanned = false;
+            Avatar = string.Empty;
+            Bio = string.Empty;
         }
 
         #endregion
