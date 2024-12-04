@@ -380,7 +380,7 @@ namespace FireBreath.UsersMicroservice.Controllers
         /// </summary>
         /// <param name="follow"><see cref="FollowDto"/> con los datos del follow</param>
         /// <returns></returns>
-        [HttpGet("users/isFollowing")]
+        [HttpGet("users/isfollowing")]
         public async Task<bool> IsFollowing(FollowDto follow)
         {
             try
@@ -400,7 +400,7 @@ namespace FireBreath.UsersMicroservice.Controllers
         /// </summary>
         /// <param name="block"><see cref="BlockDto"/> con los datos del bloqueo</param>
         /// <returns></returns>
-        [HttpGet("users/isBlocked")]
+        [HttpGet("users/isblocked")]
         public async Task<bool> IsBlocked(BlockDto block)
         {
             try
