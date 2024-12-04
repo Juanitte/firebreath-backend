@@ -128,14 +128,19 @@ namespace FireBreath.UsersMicroservice.Services
         {
             try
             {
-                var result = await _signInManager.PasswordSignInAsync(userDb, password, rememberUser, lockoutOnFailure: true);
+
+                // Re-cargar el usuario desde UserManager para evitar problemas de contexto
+                var freshUser = await _userManager.FindByIdAsync(userDb.Id.ToString());
+                if (freshUser == null)
+                {
+                    throw new UserNotFoundException();
+                }
+                var result = await _signInManager.PasswordSignInAsync(freshUser, password, rememberUser, lockoutOnFailure: true);
+
                 if (result.Succeeded)
                 {
-                    var user = await _userManager.FindByEmailAsync(userDb.Email);
-                    var roles = await GetUserRoles(user);
-
-                    await SetUserClaims(user);
-
+                    var roles = await GetUserRoles(freshUser);
+                    await SetUserClaims(freshUser);
                     return true;
                 }
                 else if (result.IsLockedOut)
@@ -144,23 +149,16 @@ namespace FireBreath.UsersMicroservice.Services
                 }
                 else
                 {
-                    var user = await _userManager.FindByEmailAsync(userDb.Email);
-                    if (user == null)
-                    {
-                        throw new UserNotFoundException();
-                    }
-                    else
-                    {
-                        throw new PasswordNotValidException();
-                    }
+                    throw new PasswordNotValidException();
                 }
             }
             catch (Exception e)
             {
-                _logger.LogError(e.Message, "IdentitiesService.Login");
+                _logger.LogError(e, "IdentitiesService.Login");
                 throw;
             }
         }
+
 
         /// <summary>
         ///     Crea un nuevo usuario en el sistema
@@ -489,7 +487,7 @@ namespace FireBreath.UsersMicroservice.Services
         }
 
         /// <summary>
-        ///     Genera el usuario SupportManager
+        ///     Genera el usuario Admin
         /// </summary>
         /// <returns></returns>
         public async Task<User> DefaultUser()

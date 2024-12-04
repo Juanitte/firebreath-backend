@@ -183,7 +183,7 @@ ILoggerFactory loggerFactory = new LoggerFactory();
 loggerFactory.AddSerilog(new LoggerConfiguration()
                             .MinimumLevel.Debug()
                             .WriteTo.File(
-                                "C:/ProyectoIoT/Back/Logs/log-{Date}.txt",
+                                "C:/2ºDAW/Proyecto_Integrado/Storage/Logs/log-{Date}.txt",
                                 rollingInterval: RollingInterval.Day,
                                 restrictedToMinimumLevel: LogEventLevel.Information
                             ).CreateLogger());

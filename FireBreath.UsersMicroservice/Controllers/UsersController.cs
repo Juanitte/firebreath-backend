@@ -381,7 +381,7 @@ namespace FireBreath.UsersMicroservice.Controllers
         /// <param name="follow"><see cref="FollowDto"/> con los datos del follow</param>
         /// <returns></returns>
         [HttpGet("users/isfollowing")]
-        public async Task<bool> IsFollowing(FollowDto follow)
+        public async Task<bool> IsFollowing([FromQuery]FollowDto follow)
         {
             try
             {
@@ -401,7 +401,7 @@ namespace FireBreath.UsersMicroservice.Controllers
         /// <param name="block"><see cref="BlockDto"/> con los datos del bloqueo</param>
         /// <returns></returns>
         [HttpGet("users/isblocked")]
-        public async Task<bool> IsBlocked(BlockDto block)
+        public async Task<bool> IsBlocked([FromQuery]BlockDto block)
         {
             try
             {

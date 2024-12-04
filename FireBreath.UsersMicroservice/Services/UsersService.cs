@@ -418,7 +418,7 @@ namespace FireBreath.UsersMicroservice.Services
                     }
                     return login;
                 }
-                return false;
+                throw new UserNotFoundException();
             }
             catch (UserLockedException)
             {
@@ -839,7 +839,7 @@ namespace FireBreath.UsersMicroservice.Services
         {
             try
             {
-                if (await _unitOfWork.FollowsRepository.Get([block.UserId, block.BlockedUserId]) != null)
+                if (await _unitOfWork.BlocksRepository.Get([block.UserId, block.BlockedUserId]) != null)
                     return true;
                 return false;
             }
