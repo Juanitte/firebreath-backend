@@ -7,7 +7,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7109
+                    "Port": 7063
                 }
             ],
             "UpstreamPathTemplate": "/gateway/users/authenticate",
@@ -21,7 +21,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7109
+                    "Port": 7063
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/getall",
@@ -37,7 +37,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7109
+                    "Port": 7063
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/getbyid/{id}",
@@ -48,10 +48,10 @@
             "DownstreamPathTemplate": "/Users/users/create",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 7109
-                }
+              {
+                "Host": "localhost",
+                "Port": 7063
+              }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/create",
             "UpstreamHttpMethod": [ "POST" ]
@@ -61,10 +61,10 @@
             "DownstreamPathTemplate": "/Users/users/update/{userId}",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 7109
-                }
+              {
+                "Host": "localhost",
+                "Port": 7063
+              }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/update/{userId}",
             "UpstreamHttpMethod": [ "POST" ],
@@ -77,10 +77,10 @@
             "DownstreamPathTemplate": "/Users/users/changelanguage/{userId}",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 7109
-                }
+              {
+                "Host": "localhost",
+                "Port": 7063
+              }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/changelanguage/{userId}",
             "UpstreamHttpMethod": [ "POST" ],
@@ -93,10 +93,10 @@
             "DownstreamPathTemplate": "/Users/users/remove/{id}",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 7109
-                }
+              {
+                "Host": "localhost",
+                "Port": 7063
+              }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/remove/{id}",
             "UpstreamHttpMethod": [ "DELETE" ],
@@ -109,10 +109,10 @@
             "DownstreamPathTemplate": "/Users/users/getadmins",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 7109
-                }
+              {
+                "Host": "localhost",
+                "Port": 7063
+              }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/getadmins",
             "UpstreamHttpMethod": [ "GET" ],
@@ -128,10 +128,10 @@
             "DownstreamPathTemplate": "/Users/users/getusers",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 7109
-                }
+              {
+                "Host": "localhost",
+                "Port": 7063
+              }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/getusers",
             "UpstreamHttpMethod": [ "GET" ],
@@ -144,10 +144,10 @@
             "DownstreamPathTemplate": "/Users/users/sendemail/{username}/{domain}/{tld}",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 7109
-                }
+              {
+                "Host": "localhost",
+                "Port": 7063
+              }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/sendemail/{username}/{domain}/{tld}",
             "UpstreamHttpMethod": [ "GET" ]
@@ -157,10 +157,10 @@
             "DownstreamPathTemplate": "/Users/users/resetpassword",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 7109
-                }
+              {
+                "Host": "localhost",
+                "Port": 7063
+              }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/resetpassword",
             "UpstreamHttpMethod": [ "POST" ]
@@ -170,10 +170,10 @@
             "DownstreamPathTemplate": "/Users/users/followuser",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 7109
-                }
+              {
+                "Host": "localhost",
+                "Port": 7063
+              }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/followuser",
             "UpstreamHttpMethod": [ "POST" ],
@@ -186,10 +186,10 @@
             "DownstreamPathTemplate": "/Users/users/blockuser",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 7109
-                }
+              {
+                "Host": "localhost",
+                "Port": 7063
+              }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/blockuser",
             "UpstreamHttpMethod": [ "POST" ],
@@ -202,10 +202,10 @@
             "DownstreamPathTemplate": "/Users/users/unfollow",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 7109
-                }
+              {
+                "Host": "localhost",
+                "Port": 7063
+              }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/unfollow",
             "UpstreamHttpMethod": [ "DELETE" ],
@@ -218,10 +218,10 @@
             "DownstreamPathTemplate": "/Users/users/unblock",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 7109
-                }
+              {
+                "Host": "localhost",
+                "Port": 7063
+              }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/unblock",
             "UpstreamHttpMethod": [ "DELETE" ],
@@ -234,10 +234,10 @@
             "DownstreamPathTemplate": "/Users/users/isfollowing",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 7109
-                }
+              {
+                "Host": "localhost",
+                "Port": 7063
+              }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/isfollowing",
             "UpstreamHttpMethod": [ "GET" ],
@@ -250,10 +250,10 @@
             "DownstreamPathTemplate": "/Users/users/isblocked",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 7109
-                }
+              {
+                "Host": "localhost",
+                "Port": 7063
+              }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/isblocked",
             "UpstreamHttpMethod": [ "GET" ],
@@ -266,10 +266,10 @@
             "DownstreamPathTemplate": "/Users/users/getfollowers/{userId}",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 7109
-                }
+              {
+                "Host": "localhost",
+                "Port": 7063
+              }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/getfollowers/{userId}",
             "UpstreamHttpMethod": [ "GET" ],
@@ -282,10 +282,10 @@
             "DownstreamPathTemplate": "/Users/users/getavatar/{userId}",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 7109
-                }
+              {
+                "Host": "localhost",
+                "Port": 7063
+              }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/getavatar/{userId}",
             "UpstreamHttpMethod": [ "GET" ]
