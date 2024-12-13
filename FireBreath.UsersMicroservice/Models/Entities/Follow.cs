@@ -10,6 +10,7 @@ namespace FireBreath.UsersMicroservice.Models.Entities
     {
         public int UserId { get; set; }
         public int FollowerId { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
         public Follow()
         {
@@ -20,6 +21,12 @@ namespace FireBreath.UsersMicroservice.Models.Entities
         {
             this.UserId = userId;
             this.FollowerId = followerId;
+        }
+        public Follow(int UserId, int FollowerId, DateTime timestamp)
+        {
+            this.UserId = UserId;
+            this.FollowerId = FollowerId;
+            this.Timestamp = timestamp;
         }
     }
 }

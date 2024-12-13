@@ -11,7 +11,7 @@ namespace FireBreath.PostsMicroservice.Models.Entities
         public int Id { get; set; }
         public string Author { get; set; }
         public string Content { get; set; }
-        public DateTime Timestamp { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
         public List<Attachment?> AttachmentPaths { get; set; } = new List<Attachment?>();
         public int SenderId { get; set; }
         public int ReceiverId {  get; set; }
@@ -20,7 +20,6 @@ namespace FireBreath.PostsMicroservice.Models.Entities
         {
             this.Author = string.Empty;
             this.Content = string.Empty;
-            this.Timestamp = DateTime.Now;
             this.SenderId = 0;
             this.ReceiverId = 0;
         }
@@ -29,7 +28,27 @@ namespace FireBreath.PostsMicroservice.Models.Entities
         {
             this.Author = author;
             this.Content = content;
-            this.Timestamp = DateTime.Now;
+            this.SenderId = senderId;
+            this.ReceiverId = receiverId;
+        }
+
+        public Message(int id, string author, string content, DateTime timestamp, int senderId, int receiverId)
+        {
+            this.Id = id;
+            this.Author = author;
+            this.Content = content;
+            this.Timestamp = timestamp;
+            this.SenderId = senderId;
+            this.ReceiverId = receiverId;
+        }
+
+        public Message(int id, string author, string content, DateTime timestamp, List<Attachment?> attachmentPaths, int senderId, int receiverId)
+        {
+            this.Id = id;
+            this.Author = author;
+            this.Content = content;
+            this.Timestamp = timestamp;
+            this.AttachmentPaths = attachmentPaths;
             this.SenderId = senderId;
             this.ReceiverId = receiverId;
         }

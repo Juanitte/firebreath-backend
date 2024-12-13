@@ -12,6 +12,7 @@ namespace FireBreath.PostsMicroservice.Models.Context
         public DbSet<Message> MessagesDb { get; set; }
         public DbSet<Attachment> AttachmentsDb { get; set; }
         public DbSet<Like> LikesDb { get; set; }
+        public DbSet<Share> SharesDb { get; set; }
 
         #endregion
 

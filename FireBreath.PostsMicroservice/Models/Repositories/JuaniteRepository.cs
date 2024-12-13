@@ -134,13 +134,13 @@ namespace FireBreath.PostsMicroservice.Models.Repositories
         /// <summary>
         ///     Obtiene un <see cref="T"/> en base a su id
         /// </summary>
-        /// <param name="id">Id a obtener</param>
+        /// <param name="keyValues">Id a obtener</param>
         /// <returns><see cref="T"/></returns>
-        public virtual async Task<T> Get(int id)
+        public virtual async Task<T> Get(params object[] keyValues)
         {
             try
             {
-                return await _dbSet.FindAsync(id);
+                return await _dbSet.FindAsync(keyValues);
             }
             catch (Exception e)
             {
@@ -275,7 +275,7 @@ namespace FireBreath.PostsMicroservice.Models.Repositories
                         return _dbSet.Where(PropertyContains<T>(propertyInfo, stringValue)).ToList()?.AsQueryable();
                 }
             }
-            throw new ArgumentException(string.Format(Translations.Translation_Tickets.Error_filter, propertyName, filterType));
+            throw new ArgumentException(string.Format(Translations.Translation_Posts.Error_filter, propertyName, filterType));
 
         }
 
