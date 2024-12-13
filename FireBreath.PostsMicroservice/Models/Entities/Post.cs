@@ -15,7 +15,7 @@ namespace FireBreath.PostsMicroservice.Models.Entities
         [Filters]
         public string Content { get; set; }
         [Filters]
-        public DateTime Timestamp { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
         public List<Attachment?> AttachmentPaths { get; set; } = new List<Attachment?>();
         public int UserId { get; set; }
         public int PostId { get; set; }
@@ -24,7 +24,6 @@ namespace FireBreath.PostsMicroservice.Models.Entities
         {
             this.Author = string.Empty;
             this.Content = string.Empty;
-            this.Timestamp = DateTime.Now;
             this.UserId = 0;
             this.PostId = 0;
         }
@@ -33,7 +32,27 @@ namespace FireBreath.PostsMicroservice.Models.Entities
         {
             this.Author = author;
             this.Content = content;
-            this.Timestamp = DateTime.Now;
+            this.UserId = userId;
+            this.PostId = postId;
+        }
+
+        public Post(int id, string author, string content, DateTime timestamp, int userId, int postId)
+        {
+            this.Id = id;
+            this.Author = author;
+            this.Content = content;
+            this.Timestamp = timestamp;
+            this.UserId = userId;
+            this.PostId = postId;
+        }
+
+        public Post(int id, string author, string content, DateTime timestamp, List<Attachment?> attachmentPaths, int userId, int postId)
+        {
+            this.Id = id;
+            this.Author = author;
+            this.Content = content;
+            this.Timestamp = timestamp;
+            this.AttachmentPaths = attachmentPaths;
             this.UserId = userId;
             this.PostId = postId;
         }

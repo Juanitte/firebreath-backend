@@ -21,7 +21,7 @@ namespace FireBreath.PostsMicroservice.Models.UnitsOfWork
         #region Repositorios
 
         /// <summary>
-        ///     Repositorio de incidencias
+        ///     Repositorio de posts
         /// </summary>
         private JuaniteRepository<Post> _postsRepository;
 
@@ -36,6 +36,16 @@ namespace FireBreath.PostsMicroservice.Models.UnitsOfWork
         /// </summary>
         private JuaniteRepository<Attachment> _attachmentsRepository;
 
+        /// <summary>
+        ///     Repositorio de likes
+        /// </summary>
+        private JuaniteRepository<Like> _likesRepository;
+
+        /// <summary>
+        ///     Repositorio de shares
+        /// </summary>
+        private JuaniteRepository<Share> _sharesRepository;
+
         #endregion
 
         #endregion
@@ -43,7 +53,7 @@ namespace FireBreath.PostsMicroservice.Models.UnitsOfWork
         #region Propiedades públicas
 
         /// <summary>
-        ///     Repositorio de incidencias
+        ///     Repositorio de posts
         /// </summary>
         public JuaniteRepository<Post> PostsRepository => _postsRepository ?? (_postsRepository = new JuaniteRepository<Post>(_context, _logger));
 
@@ -56,6 +66,16 @@ namespace FireBreath.PostsMicroservice.Models.UnitsOfWork
         ///     Repositorio de archivos adjuntos
         /// </summary>
         public JuaniteRepository<Attachment> AttachmentsRepository => _attachmentsRepository ?? (_attachmentsRepository = new JuaniteRepository<Attachment>(_context, _logger));
+
+        /// <summary>
+        ///     Repositorio de likes
+        /// </summary>
+        public JuaniteRepository<Like> LikesRepository => _likesRepository ?? (_likesRepository = new JuaniteRepository<Like>(_context, _logger));
+
+        /// <summary>
+        ///     Repositorio de shares
+        /// </summary>
+        public JuaniteRepository<Share> SharesRepository => _sharesRepository ?? (_sharesRepository = new JuaniteRepository<Share>(_context, _logger));
 
         #endregion
 

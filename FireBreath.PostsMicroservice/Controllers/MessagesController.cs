@@ -143,12 +143,12 @@ namespace FireBreath.PostsMicroservice.Controllers
                 var result = await JuaniteServiceMessages.RemoveBySender(senderId);
                 if (result.Errors != null && result.Errors.Any())
                 {
-                    response.Error = new GenericErrorDto() { Id = ResponseCodes.DataError, Description = result.Errors.ToList().ToDisplayList(), Location = "Messages/Remove" };
+                    response.Error = new GenericErrorDto() { Id = ResponseCodes.DataError, Description = result.Errors.ToList().ToDisplayList(), Location = "Messages/RemoveBySender" };
                 }
             }
             catch (Exception e)
             {
-                response.Error = new GenericErrorDto() { Id = ResponseCodes.OtherError, Description = e.Message, Location = "Messages/Remove" };
+                response.Error = new GenericErrorDto() { Id = ResponseCodes.OtherError, Description = e.Message, Location = "Messages/RemoveBySender" };
             }
             return Ok(response);
         }
@@ -167,12 +167,12 @@ namespace FireBreath.PostsMicroservice.Controllers
                 var result = await JuaniteServiceMessages.RemoveByReceiver(receiverId);
                 if (result.Errors != null && result.Errors.Any())
                 {
-                    response.Error = new GenericErrorDto() { Id = ResponseCodes.DataError, Description = result.Errors.ToList().ToDisplayList(), Location = "Messages/Remove" };
+                    response.Error = new GenericErrorDto() { Id = ResponseCodes.DataError, Description = result.Errors.ToList().ToDisplayList(), Location = "Messages/RemoveByReceiver" };
                 }
             }
             catch (Exception e)
             {
-                response.Error = new GenericErrorDto() { Id = ResponseCodes.OtherError, Description = e.Message, Location = "Messages/Remove" };
+                response.Error = new GenericErrorDto() { Id = ResponseCodes.OtherError, Description = e.Message, Location = "Messages/RemoveByReceiver" };
             }
             return Ok(response);
         }

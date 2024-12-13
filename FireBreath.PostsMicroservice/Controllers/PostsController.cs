@@ -133,119 +133,46 @@ namespace FireBreath.PostsMicroservice.Controllers
         }
 
         /// <summary>
-        ///     Método que cambia la prioridad a la incidencia con id pasado como parámetro
+        ///     Método que elimina un post cuyo id se ha pasado como parámetro
         /// </summary>
-        /// <param name="ticketId">El id de la incidencia a modificar</param>
-        /// <param name="priority">el valor de la prioridad</param>
+        /// <param name="id">el id del post a eliminar</param>
         /// <returns></returns>
-        [HttpPost("tickets/changepriority/{ticketId}/{priority}")]
-        public async Task<IActionResult> ChangePriority(int ticketId, int priority)
-        {
-
-            var result = await JuaniteServiceTickets.ChangePriority(ticketId, (Priorities)priority);
-            if (result)
-            {
-                return Ok(true);
-            }
-            return BadRequest(false);
-        }
-
-        /// <summary>
-        ///     Método que cambia el estado a la incidencia con id pasado como parámetro
-        /// </summary>
-        /// <param name="ticketId">El id de la incidencia a modificar</param>
-        /// <param name="status">el valor del estado</param>
-        /// <returns></returns>
-        [HttpPost("tickets/changestatus/{ticketId}/{status}")]
-        public async Task<IActionResult> ChangeStatus(int ticketId, int status)
-        {
-
-            var result = await JuaniteServiceTickets.ChangeStatus(ticketId, (Status)status);
-            if (result)
-            {
-                return Ok(true);
-            }
-            return BadRequest(false);
-        }
-
-        /// <summary>
-        ///     Método que asigna una incidencia con id pasado como parámetro a un usuario con id pasado como parámetro
-        /// </summary>
-        /// <param name="ticketId">El id de la incidencia a asignar</param>
-        /// <param name="userId">el id del usuario</param>
-        /// <returns></returns>
-        [HttpPost("tickets/asign/{ticketId}/{userId}")]
-        public async Task<IActionResult> AsignTicket(int ticketId, int userId)
-        {
-
-            var result = await JuaniteServiceTickets.AsignTicket(ticketId, userId);
-            if (result)
-            {
-                return Ok(true);
-            }
-            return BadRequest(false);
-        }
-
-        /// <summary>
-        ///     Método que elimina una incidencia cuyo id se ha pasado como parámetro
-        /// </summary>
-        /// <param name="id">el id de la incidencia a eliminar</param>
-        /// <returns></returns>
-        [HttpDelete("tickets/remove/{id}")]
+        [HttpDelete("posts/remove/{id}")]
         public async Task<IActionResult> Remove(int id)
         {
             var response = new GenericResponseDto();
             try
             {
-                await JuaniteServiceMessages.RemoveByTicket(id);
-                var result = await JuaniteServiceTickets.Remove(id);
+                await JuaniteServiceAttachments.RemoveByPost(id);
+                var result = await JuaniteServicePosts.Remove(id);
                 if (result.Errors != null && result.Errors.Any())
                 {
-                    response.Error = new GenericErrorDto() { Id = ResponseCodes.DataError, Description = result.Errors.ToList().ToDisplayList(), Location = "Tickets/Remove" };
+                    response.Error = new GenericErrorDto() { Id = ResponseCodes.DataError, Description = result.Errors.ToList().ToDisplayList(), Location = "Posts/Remove" };
                 }
             }
             catch (Exception e)
             {
-                response.Error = new GenericErrorDto() { Id = ResponseCodes.OtherError, Description = e.Message, Location = "Tickets/Remove" };
+                response.Error = new GenericErrorDto() { Id = ResponseCodes.OtherError, Description = e.Message, Location = "Posts/Remove" };
             }
             return Ok(response);
         }
 
         /// <summary>
-        ///     Obtiene las incidencias pertenecientes a un usuario cuyo id se pasa como parámetro
+        ///     Obtiene los posts pertenecientes a un usuario cuyo id se pasa como parámetro
         /// </summary>
         /// <param name="userId">el id del usuario</param>
-        /// <returns><see cref="JsonResult"/> con los datos de los tickets</returns>
-        [HttpGet("/tickets/getbyuser/{userId}")]
+        /// <returns><see cref="JsonResult"/> con los datos de los posts</returns>
+        [HttpGet("/posts/getbyuser/{userId}")]
         public async Task<JsonResult> GetByUser(int userId)
         {
             try
             {
-                var tickets = JuaniteServiceTickets.GetByUser(userId);
-                return new JsonResult(tickets);
+                var posts = JuaniteServicePosts.GetByUser(userId);
+                return new JsonResult(posts);
             }
             catch (Exception e)
             {
-                return new JsonResult(new CreateTicketDataDto());
-            }
-        }
-
-        /// <summary>
-        ///     Obtiene las incidencias pertenecientes a un usuario cuyo id se pasa como parámetro
-        /// </summary>
-        /// <param name="userId">el id del usuario</param>
-        /// <returns><see cref="JsonResult"/> con los datos de los tickets</returns>
-        [HttpGet("/tickets/getbyuserwithnames/{userId}")]
-        public async Task<JsonResult> GetByUserWithNames(int userId)
-        {
-            try
-            {
-                var tickets = JuaniteServiceTickets.GetByUserWithNames(userId);
-                return new JsonResult(tickets);
-            }
-            catch (Exception e)
-            {
-                return new JsonResult(new CreateTicketDataDto());
+                return new JsonResult(new CreatePostDto());
             }
         }
 

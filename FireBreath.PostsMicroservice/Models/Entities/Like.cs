@@ -1,17 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FireBreath.PostsMicroservice.Models.Entities
 {
     [Table("Likes")]
+    [PrimaryKey(nameof(UserId), nameof(PostId))]
     public class Like
     {
-        [Key]
-        [Column(Order = 1)]
         public int UserId { get; set; }
-        [Key]
-        [Column(Order = 2)]
         public int PostId { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
         public Like()
         {
@@ -22,6 +21,12 @@ namespace FireBreath.PostsMicroservice.Models.Entities
         {
             this.UserId = userId;
             this.PostId = postId;
+        }
+        public Like(int userId, int postId, DateTime timestamp)
+        {
+            this.UserId = userId;
+            this.PostId = postId;
+            this.Timestamp = timestamp;
         }
     }
 }
