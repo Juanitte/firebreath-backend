@@ -533,7 +533,7 @@ namespace FireBreath.UsersMicroservice.Services
         /// <param name="email">el email destino</param>
         /// <param name="link">el enlace de restablecer contraseña</param>
         /// <returns></returns>
-        public async void SendMail(string username, string domain, string tld)
+        public void SendMail(string username, string domain, string tld)
         {
             try
             {
@@ -619,7 +619,7 @@ namespace FireBreath.UsersMicroservice.Services
             catch (Exception e)
             {
                 _logger.LogError(e, "Reset password => ");
-                return null;
+                throw;
             }
         }
 

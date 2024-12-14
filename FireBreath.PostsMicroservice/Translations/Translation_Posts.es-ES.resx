@@ -118,28 +118,28 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Email_body" xml:space="preserve">
-    <value>Hola, querido cliente. Puedes llevar el seguimiento de tu incidencia y comunicarte con un técnico a través del siguiente enlace: </value>
+    <value>¡Alguien te ha mencionado! Puedes comprobarlo en la web o a través del siguiente enlace.</value>
   </data>
   <data name="Email_title" xml:space="preserve">
-    <value>IoT seguimiento de incidencia.</value>
+    <value>Notificaciones FireBreath</value>
   </data>
-  <data name="Error_create_ticket" xml:space="preserve">
-    <value>No se pudo crear la incidencia</value>
+  <data name="Error_create_post" xml:space="preserve">
+    <value>No se pudo crear el post</value>
   </data>
   <data name="Error_filter" xml:space="preserve">
     <value>El campo {0} no posee el tipo de filtrado {1}</value>
   </data>
-  <data name="Error_ticket_filter" xml:space="preserve">
-    <value>Error al obtener las incidencias filtradas</value>
+  <data name="Error_post_filter" xml:space="preserve">
+    <value>Error al obtener los posts filtrados</value>
   </data>
   <data name="Error_update" xml:space="preserve">
     <value>Error al actualizar la incidencia</value>
   </data>
+  <data name="Post_not_found" xml:space="preserve">
+    <value>Post no encontrado</value>
+  </data>
   <data name="Ticket_already_assigned" xml:space="preserve">
     <value>La incidencia ya está asignada a un técnico</value>
-  </data>
-  <data name="Ticket_not_found" xml:space="preserve">
-    <value>Incidencia no encontrada</value>
   </data>
   <data name="Ticket_no_messages" xml:space="preserve">
     <value>La incidencia no tiene mensajes</value>

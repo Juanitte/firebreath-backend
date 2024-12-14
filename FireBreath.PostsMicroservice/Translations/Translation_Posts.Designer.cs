@@ -39,7 +39,7 @@ namespace FireBreath.PostsMicroservice.Translations {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Tickets.TicketsMicroservice.Translations.Translation_Tickets", typeof(Translation_Posts).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("FireBreath.PostsMicroservice.Translations.Translation_Posts", typeof(Translation_Posts).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -81,9 +81,9 @@ namespace FireBreath.PostsMicroservice.Translations {
         /// <summary>
         ///   Busca una cadena traducida similar a Couldn&apos;t create ticket.
         /// </summary>
-        public static string Error_create_ticket {
+        public static string Error_create_post {
             get {
-                return ResourceManager.GetString("Error_create_ticket", resourceCulture);
+                return ResourceManager.GetString("Error_create_post", resourceCulture);
             }
         }
         
@@ -99,9 +99,9 @@ namespace FireBreath.PostsMicroservice.Translations {
         /// <summary>
         ///   Busca una cadena traducida similar a Couldn&apos;t obtain the filtered tickets.
         /// </summary>
-        public static string Error_ticket_filter {
+        public static string Error_post_filter {
             get {
-                return ResourceManager.GetString("Error_ticket_filter", resourceCulture);
+                return ResourceManager.GetString("Error_post_filter", resourceCulture);
             }
         }
         
@@ -135,9 +135,9 @@ namespace FireBreath.PostsMicroservice.Translations {
         /// <summary>
         ///   Busca una cadena traducida similar a Ticket not found.
         /// </summary>
-        public static string Ticket_not_found {
+        public static string Post_not_found {
             get {
-                return ResourceManager.GetString("Ticket_not_found", resourceCulture);
+                return ResourceManager.GetString("Post_not_found", resourceCulture);
             }
         }
     }

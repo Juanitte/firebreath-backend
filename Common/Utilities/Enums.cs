@@ -30,90 +30,15 @@ namespace Common.Utilities
         notEquals
     }
 
-    /// <summary>
-    ///     Tipos de campo para las tablas
-    /// </summary>
-    public enum FieldType
+    public enum AttachmentContainerType
     {
-        TINYINT = 0,
-        SMALLINT = 1,
-        INT = 2,
-        BIGINT = 3,
-        BIT = 4,
-        DECIMAL = 5,
-        DATE = 6,
-        TIME = 7,
-        DATETIME = 8,
-        CHAR = 9,
-        VARCHAR = 10,
-        BINARY = 11
+        POST,
+        MESSAGE
     }
 
     /// <summary>
-    ///     Tipos de dato para los atributos
+    ///     Países del mundo
     /// </summary>
-    public enum AttributeType
-    {
-        INT = 0,
-        BOOL = 1,
-        FLOAT = 2,
-        DATE = 3,
-        TIME = 4,
-        DATETIME = 5,
-        CHAR = 6,
-        STRING = 7
-    }
-
-    /// <summary>
-    ///     Tipos de relaciones entre tablas
-    /// </summary>
-    public enum Relations
-    {
-        NONE = -1,
-        ONE_TO_ONE = 0,
-        ONE_TO_MANY = 1,
-        MANY_TO_ONE = 2,
-        MANY_TO_MANY = 3
-    }
-
-    /// <summary>
-    ///     Tipos de operadores de comparación
-    /// </summary>
-    public enum CompareOperator
-    {
-        LESS = 0,
-        LESS_EQUAL = 1,
-        EQUAL = 2,
-        GREATER = 3,
-        GREATER_EQUAL = 4
-    }
-
-    /// <summary>
-    ///     Tipos de prioridades de incidencia
-    /// </summary>
-    public enum Priorities
-    {
-        ALL = -1,
-        NOT_SURE = 0,
-        LOWEST = 1,
-        LOW = 2,
-        MEDIUM = 3,
-        HIGH = 4,
-        HIGHEST = 5
-    }
-
-    /// <summary>
-    ///     Tipos de estados de incidencia
-    /// </summary>
-    public enum Status
-    {
-        ALL = -1,
-        PENDING = 0,
-        OPENED = 1,
-        PAUSED = 2,
-        FINISHED = 3
-    }
-
     public enum Country
     {
         AFGHANISTAN, ALBANIA, ALGERIA, ANDORRA, ANGOLA, ANTIGUA_AND_BARBUDA, ARGENTINA, ARMENIA, AUSTRALIA, AUSTRIA,
