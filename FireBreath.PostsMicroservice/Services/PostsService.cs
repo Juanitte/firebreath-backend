@@ -15,114 +15,70 @@ using Attachment = FireBreath.PostsMicroservice.Models.Entities.Attachment;
 namespace FireBreath.PostsMicroservice.Services
 {
     /// <summary>
-    ///     Interfaz del servicio de incidencias
+    ///     Interfaz del servicio de posts
     /// </summary>
     public interface IPostsService
     {
         /// <summary>
-        ///     Obtiene todas las incidencias
+        ///     Obtiene todos los posts
         /// </summary>
-        /// <returns>una lista de incidencias <see cref="Ticket"/></returns>
+        /// <returns>una lista de posts <see cref="PostDto"/></returns>
         public Task<List<PostDto>> GetAll();
 
         /// <summary>
-        ///     Obtiene todas las incidencias sin terminar
+        ///     Obtiene el post cuyo id se ha pasado como parámetro
         /// </summary>
-        /// <returns>una lista de incidencias <see cref="Ticket"/></returns>
-        public Task<List<PostDto>> GetNoFinished();
-
-        /// <summary>
-        ///     Obtiene la incidencia cuyo id se ha pasado como parámetro
-        /// </summary>
-        /// <param name="id">el id de la incidencia a buscar</param>
-        /// <returns><see cref="Ticket"/> con los datos de la incidencia</returns>
+        /// <param name="id">el id del post a buscar</param>
+        /// <returns><see cref="PostDto"/> con los datos del post</returns>
         public Task<PostDto> Get(int id);
 
         /// <summary>
-        ///     Crea una nueva incidencia
+        ///     Crea un nuevo post
         /// </summary>
-        /// <param name="createPost"><see cref="CreatePostDto"/> con los datos de la incidencia</param>
-        /// <returns><see cref="CreateEditRemoveResponseDto"/> con los datos de la incidencia</returns>
+        /// <param name="createPost"><see cref="CreatePostDto"/> con los datos del post</param>
+        /// <returns><see cref="CreateEditRemoveResponseDto"/> con los datos del post</returns>
         public Task<CreateEditRemoveResponseDto> Create(CreatePostDto createPost);
 
         /// <summary>
-        ///     Actualiza los datos de una incidencia
+        ///     Actualiza los datos de un post
         /// </summary>
-        /// <param name="ticketId">el id de la incidencia</param>
-        /// <param name="ticket"><see cref="Ticket"/> con los datos modificados de la incidencia</param>
+        /// <param name="postId">el id del post</param>
+        /// <param name="newPost"><see cref="CreatePostDto"/> con los datos modificados del post</param>
         /// <returns></returns>
-        public Task<CreateEditRemoveResponseDto> Update(int ticketId, CreatePostDto post);
+        public Task<CreateEditRemoveResponseDto> Update(int postId, CreatePostDto newPost);
 
         /// <summary>
-        ///     Elimina la incidencia cuyo id se ha pasado como parámetro
+        ///     Elimina el post cuyo id se ha pasado como parámetro
         /// </summary>
-        /// <param name="ticketId">el id de la incidencia</param>
+        /// <param name="postId">el id del post</param>
         /// <returns></returns>
         public Task<CreateEditRemoveResponseDto> Remove(int postId);
 
         /// <summary>
-        ///     Cambia la prioridad de una incidencia cuyo id se ha pasado como parámetro
-        /// </summary>
-        /// <param name="ticketId">el id de la incidencia</param>
-        /// <param name="priority">la nueva prioridad de la incidencia</param>
-        /// <returns></returns>
-        public Task<bool> ChangePriority(int ticketId, Priorities priority);
-
-        /// <summary>
-        ///     Cambia el estado de una incidencia cuyo id se ha pasado como parámetro
-        /// </summary>
-        /// <param name="ticketId">el id de la incidencia</param>
-        /// <param name="state">el nuevo estado de la incidencia</param>
-        /// <returns></returns>
-        public Task<bool> ChangeStatus(int ticketId, Status status);
-
-        /// <summary>
-        ///     Asigna la incidencia cuyo id se pasa como parámetro al usuario cuyo id se pasa como parámetro
-        /// </summary>
-        /// <param name="ticketId">el id de la incidencia</param>
-        /// <param name="userId">el id del usuario</param>
-        /// <returns></returns>
-        public Task<bool> AsignTicket(int ticketId, int userId);
-
-        /// <summary>
-        ///     Obtiene las incidencias asignadas al usuario cuyo id se pasa como parámetro
+        ///     Obtiene los posts asignados al usuario cuyo id se pasa como parámetro
         /// </summary>
         /// <param name="userId">el id del usuario</param>
-        /// <returns>una lista con las incidencias asignadas al usuario <see cref="Ticket"/></returns>
-        public IEnumerable<Ticket> GetByUser(int userId);
-
+        /// <returns>una lista con los posts asignados al usuario <see cref="Post"/></returns>
+        public IEnumerable<PostDto> GetByUser(int userId);
+        
         /// <summary>
-        ///     Obtiene los tickets filtrados
+        ///     Obtiene los posts filtrados
         /// </summary>
         /// <returns></returns>
         Task<ResponseFilterPostDto> GetAllFilter(PostFilterRequestDto filter);
-
+        
         /// <summary>
         ///     Envía un email
         /// </summary>
         /// <param name="email">el email destino</param>
-        /// <param name="link">el enlace de seguimiento</param>
+        /// <param name="link">el enlace al post</param>
         public bool SendMail(string email, string link);
-
-        /// <summary>
-        ///     Obtiene la incidencia cuyo id se pasa como parámetro
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public Task<TicketUserDto> GetWithName(int id);
-
-        /// <summary>
-        ///     Obtiene las incidencias asignadas al usuario cuyo id se pasa como parámetro
-        /// </summary>
-        /// <param name="userId">el id del usuario</param>
-        /// <returns>una lista con las incidencias <see cref="TicketUser"/></returns>
-        public IEnumerable<TicketUserDto> GetByUserWithNames(int userId);
     }
-    public class PostsService : BaseService, ITicketsService
+    public class PostsService : BaseService, IPostsService
     {
         #region Constructores
 
-        public PostsService(JuaniteUnitOfWork ioTUnitOfWork, ILogger logger) : base(ioTUnitOfWork, logger)
+        public PostsService(JuaniteUnitOfWork juaniteUnitOfWork, ILogger logger) : base(juaniteUnitOfWork, logger)
         {
         }
 
@@ -131,187 +87,90 @@ namespace FireBreath.PostsMicroservice.Services
         #region Implementación de métodos de la interfaz
 
         /// <summary>
-        ///     Asigna la incidencia cuyo id se pasa como parámetro al usuario cuyo id se pasa como parámetro
+        ///     Crea un nuevo post
         /// </summary>
-        /// <param name="ticketId">el id de la incidencia</param>
-        /// <param name="userId">el id del usuario</param>
-        /// <returns></returns>
-        public async Task<bool> AsignTicket(int ticketId, int userId)
-        {
-            try
-            {
-                var ticket = await _unitOfWork.TicketsRepository.Get(ticketId);
-                if (ticket != null)
-                {
-                    if (!ticket.IsAssigned)
-                    {
-                        ticket.Status = Status.OPENED;
-                        ticket.IsAssigned = true;
-                    }
-                    ticket.UserId = userId;
-                    _unitOfWork.TicketsRepository.Update(ticket);
-                    await _unitOfWork.SaveChanges();
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "TicketsService.AsignTicket => ");
-                throw;
-            }
-        }
-
-        /// <summary>
-        ///     Cambia la prioridad de la incidencia cuyo id se pasa como parámetro
-        /// </summary>
-        /// <param name="ticketId">el id de la incidencia</param>
-        /// <param name="priority">la nueva prioridad de la incidencia</param>
-        /// <returns></returns>
-        public async Task<bool> ChangePriority(int ticketId, Priorities priority)
-        {
-            try
-            {
-                var ticket = await _unitOfWork.TicketsRepository.Get(ticketId);
-                if (ticket != null)
-                {
-                    ticket.Priority = priority;
-                    _unitOfWork.TicketsRepository.Update(ticket);
-                    await _unitOfWork.SaveChanges();
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "TicketsService.ChangePriority => ");
-                throw;
-            }
-        }
-
-        /// <summary>
-        ///     Cambia el estado de una incidencia cuyo id se pasa como parámetro
-        /// </summary>
-        /// <param name="ticketId">el id de la incidencia</param>
-        /// <param name="state">el nuevo estado de la incidencia</param>
-        /// <returns></returns>
-        public async Task<bool> ChangeStatus(int ticketId, Status status)
-        {
-            try
-            {
-                var ticket = await _unitOfWork.TicketsRepository.Get(ticketId);
-                if (ticket != null)
-                {
-                    ticket.Status = status;
-                    _unitOfWork.TicketsRepository.Update(ticket);
-                    await _unitOfWork.SaveChanges();
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "TicketsService.ChangeState => ");
-                throw;
-            }
-        }
-
-        /// <summary>
-        ///     Crea una nueva incidencia
-        /// </summary>
-        /// <param name="ticket"><see cref="Ticket"/> con los datos de la incidencia</param>
-        /// <returns><see cref="Ticket"/> con los datos de la incidencia</returns>
-        public async Task<CreateEditRemoveResponseDto> Create(CreatePostDto createTicket)
+        /// <param name="createPost"><see cref="CreatePostDto"/> con los datos del post</param>
+        /// <returns><see cref="CreateEditRemoveResponseDto"/></returns>
+        public async Task<CreateEditRemoveResponseDto> Create(CreatePostDto createPost)
         {
             try
             {
                 var response = new CreateEditRemoveResponseDto();
 
-                var ticket = new Ticket(createTicket.TicketDto.Title, createTicket.TicketDto.Name, createTicket.TicketDto.Email);
+                var post = new Post(createPost.Author, createPost.Content, createPost.UserId, createPost.PostId);
 
-                if (createTicket.MessageDto != null)
+                if (post != null)
                 {
 
-                    if (_unitOfWork.TicketsRepository.Add(ticket) != null)
+                    if (_unitOfWork.PostsRepository.Add(post) != null)
                     {
                         await _unitOfWork.SaveChanges();
-                        response.IsSuccess(ticket.Id);
-                        var message = new Message(createTicket.MessageDto.Content, createTicket.MessageDto.Author, ticket.Id);
+                        response.IsSuccess(post.Id);
 
-
-
-                        if (!createTicket.MessageDto.Attachments.IsNullOrEmpty())
+                        if (!createPost.Attachments.IsNullOrEmpty())
                         {
-                            foreach (var attachment in createTicket.MessageDto.Attachments)
+                            foreach (var attachment in createPost.Attachments)
                             {
                                 if (attachment != null)
                                 {
-                                    string attachmentPath = await Utils.SaveAttachmentToFileSystem(attachment, ticket.Id);
-                                    Attachment newAttachment = new Attachment(attachmentPath, message.Id);
-                                    message.AttachmentPaths.Add(newAttachment);
+                                    string attachmentPath = await Utils.SaveAttachmentToFileSystem(attachment, post.Id, AttachmentContainerType.POST);
+                                    Attachment newAttachment = new Attachment(attachmentPath, post.Id, 0);
+                                    _unitOfWork.AttachmentsRepository.Add(newAttachment);
                                 }
                             }
+                            await _unitOfWork.SaveChanges();
                         }
-
-                        ticket.Messages.Add(message);
-                        ticket.NewMessagesCount++;
-
-                        _unitOfWork.TicketsRepository.Update(ticket);
-                        await _unitOfWork.SaveChanges();
-                        string hashedId = Utils.Hash(ticket.Id.ToString());
-
-                        var isSent = SendMail(ticket.Email, string.Concat(Literals.Link_Review, hashedId, "/", ticket.Id));
                     }
                 }
                 else
                 {
-                    response.Id = ticket.Id;
-                    response.Errors = new List<string> { Translation_Tickets.Error_create_ticket };
+                    response.Id = 0;
+                    response.Errors = new List<string> { Translation_Posts.Error_create_post };
                 }
                 return response;
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "TicketsService.Create => ");
+                _logger.LogError(e, "PostsService.Create => ");
                 throw;
             }
         }
 
         /// <summary>
-        ///     Elimina una incidencia cuyo id se pasa como parámetro
+        ///     Elimina un post cuyo id se pasa como parámetro
         /// </summary>
-        /// <param name="ticketId">el id de la incidencia</param>
+        /// <param name="postId">el id del post</param>
         /// <returns><see cref="CreateEditRemoveResponseDto"/></returns>
-        public async Task<CreateEditRemoveResponseDto> Remove(int ticketId)
+        public async Task<CreateEditRemoveResponseDto> Remove(int postId)
         {
             try
             {
                 var response = new CreateEditRemoveResponseDto();
 
-                var user = _unitOfWork.TicketsRepository.GetFirst(g => g.Id == ticketId);
+                var post = _unitOfWork.PostsRepository.GetFirst(g => g.Id == postId);
 
-                if (user != null)
+                if (post != null)
                 {
-                    await _unitOfWork.TicketsRepository.Remove(ticketId);
+                    await _unitOfWork.PostsRepository.Remove(postId);
                     await _unitOfWork.SaveChanges();
-                    response.IsSuccess(ticketId);
+                    response.IsSuccess(postId);
                 }
                 else
                 {
-                    response.Id = ticketId;
-                    response.Errors = new List<string> { Translation_Tickets.Ticket_not_found };
+                    response.Id = postId;
+                    response.Errors = new List<string> { Translation_Posts.Post_not_found };
                 }
                 return response;
             }
             catch (Exception e)
             {
-                _logger.LogError(ticketId, "TicketsService.Remove => ");
+                _logger.LogError(postId, "PostsService.Remove => ");
                 throw;
             }
         }
 
         /// <summary>
-        ///     Obtiene la incidencia cuyo id se pasa como parámetro
+        ///     Obtiene el post cuyo id se pasa como parámetro
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -319,91 +178,36 @@ namespace FireBreath.PostsMicroservice.Services
         {
             try
             {
-                return await Task.FromResult(Extensions.ConvertModel(_unitOfWork.TicketsRepository.GetFirst(g => g.Id.Equals(id)), new PostDto()));
+                return await Task.FromResult(Extensions.ConvertModel(_unitOfWork.PostsRepository.GetFirst(g => g.Id.Equals(id)), new PostDto()));
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "TicketsService.Get =>");
+                _logger.LogError(e, "PostsService.Get =>");
                 throw;
             }
         }
 
         /// <summary>
-        ///     Obtiene la incidencia cuyo id se pasa como parámetro
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<TicketUserDto> GetWithName(int id)
-        {
-            try
-            {
-                return await Task.FromResult(_unitOfWork.TicketUserRepository.GetFirst(g => g.Id.Equals(id)));
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "TicketsService.GetWithName =>");
-                throw;
-            }
-        }
-
-        /// <summary>
-        ///     Obtiene todas las incidencias
+        ///     Obtiene todos los posts
         /// </summary>
         /// <returns></returns>
         public async Task<List<PostDto>> GetAll()
         {
             try
             {
-                var tickets = await _unitOfWork.TicketsRepository.GetAll().ToListAsync();
-                List<PostDto> result = tickets.Select(t => Extensions.ConvertModel(t, new PostDto())).ToList();
+                var posts = await _unitOfWork.PostsRepository.GetAll().ToListAsync();
+                List<PostDto> result = posts.Select(t => Extensions.ConvertModel(t, new PostDto())).ToList();
                 return result;
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "TicketsService.GetAll => ");
+                _logger.LogError(e, "PostsService.GetAll => ");
                 throw;
             }
         }
 
         /// <summary>
-        ///     Obtiene todas las incidencias junto con el nombre del técnico asignado.
-        /// </summary>
-        /// <returns></returns>
-        public async Task<List<TicketUserDto>> GetAllWithNames()
-        {
-            try
-            {
-                var tickets = await _unitOfWork.TicketUserRepository.GetAll().ToListAsync();
-                return tickets;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "TicketService.GetAllWithNames => ");
-                throw;
-            }
-        }
-
-        /// <summary>
-        ///     Obtiene todas las incidencias sin terminar
-        /// </summary>
-        /// <returns></returns>
-        public async Task<List<PostDto>> GetNoFinished()
-        {
-            try
-            {
-                var tickets = await _unitOfWork.TicketsRepository.GetAll(t => t.Status != Status.FINISHED).ToListAsync();
-                List<PostDto> result = tickets.Select(t => Extensions.ConvertModel(t, new PostDto())).ToList();
-                return result;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "TicketsService.GetNoFinished => ");
-                throw;
-            }
-        }
-
-        /// <summary>
-        ///     Obtiene las incidencias filtradas
+        ///     Obtiene los posts filtrados
         /// </summary>
         /// <returns></returns>
         public async Task<ResponseFilterPostDto> GetAllFilter(PostFilterRequestDto filter)
@@ -412,133 +216,180 @@ namespace FireBreath.PostsMicroservice.Services
             {
                 var response = new ResponseFilterPostDto();
 
-                //Filtrar por estado
-                var byStatusQuery = (int)filter.Status == -1
-                    ? _unitOfWork.TicketUserRepository.GetAll()
-                    : _unitOfWork.TicketUserRepository.GetFiltered("Status", filter.Status, FilterType.equals);
+                // Filtrar con equals
+                var equalsQuery = string.IsNullOrEmpty(filter.SearchString)
+                    ? _unitOfWork.PostsRepository.GetAll()
+                    : _unitOfWork.PostsRepository.GetFiltered(filter.PropertyName, filter.SearchString, FilterType.equals);
 
-                // Filtrar por prioridad
-                var byPriorityQuery = (int)filter.Priority == -1
-                    ? _unitOfWork.TicketUserRepository.GetAll()
-                    : _unitOfWork.TicketUserRepository.GetFiltered("Priority", filter.Priority, FilterType.equals);
+                var containsQuery = string.IsNullOrEmpty(filter.SearchString)
+                    ? _unitOfWork.PostsRepository.GetAll()
+                    : _unitOfWork.PostsRepository.GetFiltered(filter.SearchString);
 
-                // Filtrar por id de técnico
-                var byUserQuery = filter.UserId == 0
-                    ? _unitOfWork.TicketUserRepository.GetAll()
-                    : GetByUserWithNames(filter.UserId).AsQueryable();
+                // Combinar resultados, eliminar duplicados y ordenar
+                var result = equalsQuery
+                    .Concat(containsQuery)
+                    .Distinct()
+                    .OrderByDescending(post =>
+                        equalsQuery.Contains(post) ? int.MaxValue :
+                        CalculateCosineSimilarity(post.Content, filter.SearchString))
+                    .ToList();
 
-                // Filtrar por fecha
-                var byStartDateQuery = filter.Start.Equals(new DateTime(1900, 1, 1)) && filter.End.Equals(new DateTime(3000, 1, 1))
-                    ? _unitOfWork.TicketUserRepository.GetAll()
-                    : _unitOfWork.TicketUserRepository.GetAll(ticket => ticket.Timestamp <= filter.End);
-
-                var byEndDateQuery = filter.Start.Equals(new DateTime(1900, 1, 1)) && filter.End.Equals(new DateTime(3000, 1, 1))
-                    ? _unitOfWork.TicketUserRepository.GetAll()
-                    : _unitOfWork.TicketUserRepository.GetAll(ticket => ticket.Timestamp >= filter.Start);
-
-                // Filtrar por texto introducido
-                var bySearchStringQuery = string.IsNullOrEmpty(filter.SearchString)
-                    ? _unitOfWork.TicketUserRepository.GetAll()
-                    : _unitOfWork.TicketUserRepository.GetFiltered(filter.SearchString);
-
-                // Unir todas las consultas filtradas
-                var filteredTickets = new List<List<TicketUserDto>>
+                // Si buscamos los recientes, combinar la ordenación por relevancia y fecha
+                if (filter.ByDate)
                 {
-                    byStatusQuery.ToList(),
-                    byPriorityQuery.ToList(),
-                    byUserQuery.ToList(),
-                    byStartDateQuery.ToList(),
-                    byEndDateQuery.ToList(),
-                    bySearchStringQuery.ToList()
-                };
+                    result = result
+                        .OrderByDescending(post => post.Timestamp)
+                        .ThenByDescending(post => equalsQuery.Contains(post) ? int.MaxValue : CalculateCosineSimilarity(post.Content, filter.SearchString))
+                        .ToList();
+                }
 
-                // Encontrar la intersección de todas las listas filtradas
-                var result = filteredTickets
-                    .Aggregate((previousList, nextList) => previousList.Intersect(nextList).ToList());
-
-                response.Tickets = result.Select(s => s.ToResumeDto()).ToList();
+                response.Posts = result.Select(s => s.ConvertModel(new PostDto())).ToList();
 
                 return response;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Translation_Tickets.Error_ticket_filter);
+                _logger.LogError(ex, Translation_Posts.Error_post_filter);
                 throw;
             }
         }
 
+        #region Algoritmos de filtrado
+
         /// <summary>
-        ///     Obtiene las incidencias asignadas al usuario cuyo id se pasa como parámetro
+        /// Calcula la similitud coseno entre el contenido de un post y la cadena de búsqueda.
+        /// </summary>
+        private double CalculateCosineSimilarity(string postContent, string searchString)
+        {
+            if (string.IsNullOrEmpty(postContent) || string.IsNullOrEmpty(searchString)) return 0;
+
+            // Dividir el texto en palabras
+            var postWords = Tokenize(postContent);
+            var searchWords = Tokenize(searchString);
+
+            // Obtener la frecuencia de términos (TF) para ambos textos
+            var postTf = CalculateTermFrequency(postWords);
+            var searchTf = CalculateTermFrequency(searchWords);
+
+            // Calcular TF-IDF
+            var vocabulary = postTf.Keys.Union(searchTf.Keys).ToList();
+            var postVector = CreateTfIdfVector(postTf, vocabulary);
+            var searchVector = CreateTfIdfVector(searchTf, vocabulary);
+
+            // Calcular similitud coseno
+            return ComputeCosineSimilarity(postVector, searchVector);
+        }
+
+        /// <summary>
+        /// Tokeniza un texto en palabras.
+        /// </summary>
+        private List<string> Tokenize(string text)
+        {
+            return text.ToLower().Split(new[] { ' ', '.', ',', ';', '!', '?' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+        }
+
+        /// <summary>
+        /// Calcula la frecuencia de términos (TF) en un conjunto de palabras.
+        /// </summary>
+        private Dictionary<string, int> CalculateTermFrequency(List<string> words)
+        {
+            var frequency = new Dictionary<string, int>();
+            foreach (var word in words)
+            {
+                if (frequency.ContainsKey(word))
+                    frequency[word]++;
+                else
+                    frequency[word] = 1;
+            }
+            return frequency;
+        }
+
+        /// <summary>
+        /// Crea un vector TF-IDF dado un diccionario de frecuencias y un vocabulario.
+        /// </summary>
+        private List<double> CreateTfIdfVector(Dictionary<string, int> termFrequency, List<string> vocabulary)
+        {
+            var vector = new List<double>();
+            foreach (var term in vocabulary)
+            {
+                vector.Add(termFrequency.ContainsKey(term) ? termFrequency[term] : 0);
+            }
+            return vector;
+        }
+
+        /// <summary>
+        /// Calcula la similitud coseno entre dos vectores.
+        /// </summary>
+        private double ComputeCosineSimilarity(List<double> vectorA, List<double> vectorB)
+        {
+            double dotProduct = 0;
+            double magnitudeA = 0;
+            double magnitudeB = 0;
+
+            for (int i = 0; i < vectorA.Count; i++)
+            {
+                dotProduct += vectorA[i] * vectorB[i];
+                magnitudeA += Math.Pow(vectorA[i], 2);
+                magnitudeB += Math.Pow(vectorB[i], 2);
+            }
+
+            if (magnitudeA == 0 || magnitudeB == 0) return 0;
+
+            return dotProduct / (Math.Sqrt(magnitudeA) * Math.Sqrt(magnitudeB));
+        }
+
+        #endregion
+
+        /// <summary>
+        ///     Obtiene los posts asignados al usuario cuyo id se pasa como parámetro
         /// </summary>
         /// <param name="userId">el id del usuario</param>
-        /// <returns>una lista con las incidencias <see cref="Ticket"/></returns>
-        public IEnumerable<Ticket> GetByUser(int userId)
+        /// <returns>una lista con los posts <see cref="PostDto"/></returns>
+        public IEnumerable<PostDto> GetByUser(int userId)
         {
             try
             {
-                var tickets = _unitOfWork.TicketsRepository.GetAll(ticket => ticket.UserId == userId).ToList();
-                return tickets;
+                var posts = _unitOfWork.PostsRepository.GetAll(post => post.UserId == userId).Select(p => p.ConvertModel(new PostDto())).ToList();
+                return posts;
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "TicketsService.GetByUser => ");
+                _logger.LogError(e, "PostsService.GetByUser => ");
                 throw;
             }
         }
 
         /// <summary>
-        ///     Obtiene las incidencias asignadas al usuario cuyo id se pasa como parámetro
+        ///     Actualiza la información de un post
         /// </summary>
-        /// <param name="userId">el id del usuario</param>
-        /// <returns>una lista con las incidencias <see cref="TicketUser"/></returns>
-        public IEnumerable<TicketUserDto> GetByUserWithNames(int userId)
-        {
-            try
-            {
-                var tickets = _unitOfWork.TicketUserRepository.GetAll(ticket => ticket.UserId == userId).Distinct().ToList();
-                return tickets;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "TicketsService.GetByUserWithNames => ");
-                throw;
-            }
-        }
-
-        /// <summary>
-        ///     Actualiza la información de una incidencia
-        /// </summary>
-        /// <param name="ticketId">el id de la incidencia</param>
-        /// <param name="ticket"><see cref="Ticket"/> con los datos de la nueva incidencia</param>
+        /// <param name="postId">el id del post</param>
+        /// <param name="newPost"><see cref="CreatePostDto"/> con los datos del nuevo post</param>
         /// <returns></returns>
-        public async Task<CreateEditRemoveResponseDto> Update(int ticketId, CreateTicketDataDto newTicket)
+        public async Task<CreateEditRemoveResponseDto> Update(int postId, CreatePostDto newPost)
         {
             try
             {
                 var response = new CreateEditRemoveResponseDto();
-                Ticket ticket = await _unitOfWork.TicketsRepository.Get(ticketId);
-                if (ticket != null)
+                Post post = await _unitOfWork.PostsRepository.Get(postId);
+                if (post != null)
                 {
-                    ticket.Email = newTicket.Email;
-                    ticket.Title = newTicket.Title;
-                    ticket.Name = newTicket.Name;
-                    ticket.HasNewMessages = newTicket.HasNewMessages;
-                    ticket.NewMessagesCount = newTicket.NewMessagesCount;
+                    post.Content = newPost.Content;
+                    post.LastEdited = DateTime.UtcNow;
 
-                    _unitOfWork.TicketsRepository.Update(ticket);
+                    _unitOfWork.PostsRepository.Update(post);
                     await _unitOfWork.SaveChanges();
-                    response.IsSuccess(ticketId);
+                    response.IsSuccess(postId);
                 }
                 else
                 {
-                    response.Id = ticketId;
-                    response.Errors = new List<string> { Translation_Tickets.Ticket_not_found };
+                    response.Id = postId;
+                    response.Errors = new List<string> { Translation_Posts.Post_not_found };
                 }
                 return response;
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "TicketsService.Update => ");
+                _logger.LogError(e, "PostsService.Update => ");
                 throw;
             }
         }
@@ -547,7 +398,7 @@ namespace FireBreath.PostsMicroservice.Services
         ///     Envía un email
         /// </summary>
         /// <param name="email">el email destino</param>
-        /// <param name="link">el enlace de seguimiento</param>
+        /// <param name="link">el enlace al post</param>
         /// <returns></returns>
         public bool SendMail(string email, string link)
         {
@@ -556,8 +407,8 @@ namespace FireBreath.PostsMicroservice.Services
                 var message = new MimeMessage();
                 message.From.Add(new MailboxAddress(Literals.Email_Name, Literals.Email_Address));
                 message.To.Add(new MailboxAddress("", email));
-                message.Subject = Translation_Tickets.Email_title;
-                message.Body = new TextPart("plain") { Text = string.Concat(Translations.Translation_Tickets.Email_body, "\n", link) };
+                message.Subject = Translation_Posts.Email_title;
+                message.Body = new TextPart("plain") { Text = string.Concat(Translation_Posts.Email_body, "\n", link) };
 
                 using (var client = new MailKit.Net.Smtp.SmtpClient())
                 {

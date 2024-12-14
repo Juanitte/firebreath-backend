@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using Common.Utilities;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace FireBreath.PostsMicroservice.Utilities
@@ -10,12 +11,13 @@ namespace FireBreath.PostsMicroservice.Utilities
         /// </summary>
         /// <param name="attachment"><see cref="IFormFile"/> con los datos del archivo adjunto a guardar</param>
         /// <returns>la ruta del archivo guardado</returns>
-        public static async Task<string> SaveAttachmentToFileSystem(IFormFile attachment, int ticketId)
+        public static async Task<string> SaveAttachmentToFileSystem(IFormFile attachment, int containerId, AttachmentContainerType containerType)
         {
             var date = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
 
             var fileName = Path.GetFileNameWithoutExtension(attachment.FileName) + "_" + date + Path.GetExtension(attachment.FileName);
-            string directoryPath = Path.Combine("C:/ProyectoIoT/Back/ApiTest/AttachmentStorage/", ticketId.ToString());
+            string directoryPath = Path.Combine("C:/ProyectoIoT/Back/ApiTest/AttachmentStorage/", containerType.ToString() + "/");
+            directoryPath = Path.Combine(directoryPath, containerId.ToString());
             string filePath = Path.Combine(directoryPath, fileName);
 
             if (!Directory.Exists(directoryPath))

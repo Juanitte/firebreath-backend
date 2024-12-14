@@ -118,28 +118,28 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Email_body" xml:space="preserve">
-    <value>Hi, dear customer. You can keep tracking of your ticket and communicate with a technician using the following link: </value>
+    <value>You've been tagged! You can check it on the website or through the following link.</value>
   </data>
   <data name="Email_title" xml:space="preserve">
-    <value>IoT ticket tracking</value>
+    <value>FireBreath Notifications</value>
   </data>
-  <data name="Error_create_ticket" xml:space="preserve">
-    <value>Couldn't create ticket</value>
+  <data name="Error_create_post" xml:space="preserve">
+    <value>Couldn't create post</value>
   </data>
   <data name="Error_filter" xml:space="preserve">
     <value>The {0} field couldn't be filtered by {1}</value>
   </data>
-  <data name="Error_ticket_filter" xml:space="preserve">
-    <value>Couldn't obtain the filtered tickets</value>
+  <data name="Error_post_filter" xml:space="preserve">
+    <value>Couldn't obtain the filtered posts</value>
   </data>
   <data name="Error_update" xml:space="preserve">
     <value>Error updating tickets</value>
   </data>
+  <data name="Post_not_found" xml:space="preserve">
+    <value>Post not found</value>
+  </data>
   <data name="Ticket_already_assigned" xml:space="preserve">
     <value>The ticket is already assigned to a technician</value>
-  </data>
-  <data name="Ticket_not_found" xml:space="preserve">
-    <value>Ticket not found</value>
   </data>
   <data name="Ticket_no_messages" xml:space="preserve">
     <value>The ticket has no messages</value>
