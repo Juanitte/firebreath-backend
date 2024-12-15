@@ -140,5 +140,16 @@ namespace FireBreath.PostsMicroservice.Translations {
                 return ResourceManager.GetString("Post_not_found", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Busca una cadena traducida similar a Default error.
+        /// </summary>
+        public static string Default_error
+        {
+            get
+            {
+                return ResourceManager.GetString("Default_error", resourceCulture);
+            }
+        }
     }
 }
