@@ -143,7 +143,6 @@ namespace FireBreath.PostsMicroservice.Controllers
             var response = new GenericResponseDto();
             try
             {
-                await JuaniteServiceAttachments.RemoveByPost(id);
                 var result = await JuaniteServicePosts.Remove(id);
                 if (result.Errors != null && result.Errors.Any())
                 {
@@ -173,6 +172,220 @@ namespace FireBreath.PostsMicroservice.Controllers
             catch (Exception e)
             {
                 return new JsonResult(new CreatePostDto());
+            }
+        }
+
+        /// <summary>
+        ///     Gestiona la acción de dar me gusta a un post por un usuario
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        [HttpPost("/posts/like/{userId}/{postId}")]
+        public async Task<IActionResult> LikePost(int userId, int postId)
+        {
+            try
+            {
+                var result = await JuaniteServicePosts.Like(userId, postId);
+
+                return Ok(true);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
+        /// <summary>
+        ///     Gestiona la acción de quitar me gusta a un post por un usuario
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        [HttpDelete("posts/dislike/{userId}/{postId}")]
+        public async Task<IActionResult> DislikePost(int userId, int postId)
+        {
+            var response = new GenericResponseDto();
+            try
+            {
+                var result = await JuaniteServicePosts.Dislike(userId, postId);
+                if (result.Errors != null && result.Errors.Any())
+                {
+                    response.Error = new GenericErrorDto() { Id = ResponseCodes.DataError, Description = result.Errors.ToList().ToDisplayList(), Location = "Posts/DislikePost" };
+                }
+            }
+            catch (Exception e)
+            {
+                response.Error = new GenericErrorDto() { Id = ResponseCodes.OtherError, Description = e.Message, Location = "Posts/DislikePost" };
+            }
+            return Ok(response);
+        }
+
+        /// <summary>
+        ///     Comprueba si un usuario ha dado me gusta a un post
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        [HttpGet("posts/postisliked/{userId}/{postId}")]
+        public async Task<bool> PostIsLiked(int userId, int postId)
+        {
+            try
+            {
+                if (await JuaniteServicePosts.IsLiked(userId, postId))
+                    return true;
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los post a los que le ha dado me gusta un usuario cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <returns></returns>
+        [HttpGet("posts/getliked/{userId}")]
+        public async Task<IActionResult> GetLiked(int userId)
+        {
+            try
+            {
+                var posts = await JuaniteServicePosts.GetLiked(userId);
+
+                return new JsonResult(posts);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new List<PostDto>());
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los usuarios que han dado me gusta a un post cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        [HttpGet("posts/getlikers/{postId}")]
+        public async Task<IActionResult> GetLikers(int postId)
+        {
+            try
+            {
+                var posts = await JuaniteServicePosts.GetLikers(postId);
+
+                return new JsonResult(posts);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new List<PostDto>());
+            }
+        }
+
+        /// <summary>
+        ///     Gestiona la acción de compartir un post por un usuario
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        [HttpPost("/posts/share/{userId}/{postId}")]
+        public async Task<IActionResult> SharePost(int userId, int postId)
+        {
+            try
+            {
+                var result = await JuaniteServicePosts.Share(userId, postId);
+
+                return Ok(true);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
+        /// <summary>
+        ///     Gestiona la acción de dejar de compartir un post por un usuario
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        [HttpDelete("posts/stopsharing/{userId}/{postId}")]
+        public async Task<IActionResult> StopSharingPost(int userId, int postId)
+        {
+            var response = new GenericResponseDto();
+            try
+            {
+                var result = await JuaniteServicePosts.StopSharing(userId, postId);
+                if (result.Errors != null && result.Errors.Any())
+                {
+                    response.Error = new GenericErrorDto() { Id = ResponseCodes.DataError, Description = result.Errors.ToList().ToDisplayList(), Location = "Posts/StopSharingPost" };
+                }
+            }
+            catch (Exception e)
+            {
+                response.Error = new GenericErrorDto() { Id = ResponseCodes.OtherError, Description = e.Message, Location = "Posts/StopSharingPost" };
+            }
+            return Ok(response);
+        }
+
+        /// <summary>
+        ///     Comprueba si un usuario ha compartido un post
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        [HttpGet("posts/postisshared/{userId}/{postId}")]
+        public async Task<bool> PostIsShared(int userId, int postId)
+        {
+            try
+            {
+                if (await JuaniteServicePosts.IsShared(userId, postId))
+                    return true;
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los post que ha compartido un usuario cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <returns></returns>
+        [HttpGet("posts/getshared/{userId}")]
+        public async Task<IActionResult> GetShared(int userId)
+        {
+            try
+            {
+                var posts = await JuaniteServicePosts.GetShared(userId);
+
+                return new JsonResult(posts);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new List<PostDto>());
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los usuarios que han compartido un post cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        [HttpGet("posts/getsharers/{postId}")]
+        public async Task<IActionResult> GetSharers(int postId)
+        {
+            try
+            {
+                var posts = await JuaniteServicePosts.GetSharers(postId);
+
+                return new JsonResult(posts);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new List<PostDto>());
             }
         }
 

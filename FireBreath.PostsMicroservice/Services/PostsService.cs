@@ -73,6 +73,82 @@ namespace FireBreath.PostsMicroservice.Services
         /// <param name="email">el email destino</param>
         /// <param name="link">el enlace al post</param>
         public bool SendMail(string email, string link);
+
+        /// <summary>
+        ///     Gestiona la acción de dar me gusta a un post por un usuario
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public Task<CreateEditRemoveResponseDto> Like(int userId, int postId);
+
+        /// <summary>
+        ///     Gestiona la acción de quitar me gusta a un post por un usuario
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public Task<CreateEditRemoveResponseDto> Dislike(int userId, int postId);
+
+        /// <summary>
+        ///     Comprueba si un usuario ha dado me gusta a un post
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public Task<bool> IsLiked(int userId, int postId);
+
+        /// <summary>
+        ///     Obtiene los post a los que le ha dado me gusta un usuario cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <returns></returns>
+        public Task<List<PostDto>> GetLiked(int userId);
+
+        /// <summary>
+        ///     Obtiene los usuarios que han dado me gusta a un post cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public Task<List<int>> GetLikers(int postId);
+
+        /// <summary>
+        ///     Gestiona la acción de compartir un post por un usuario
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public Task<CreateEditRemoveResponseDto> Share(int userId, int postId);
+
+        /// <summary>
+        ///     Gestiona la acción de dejar de compartir un post por un usuario
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public Task<CreateEditRemoveResponseDto> StopSharing(int userId, int postId);
+
+        /// <summary>
+        ///     Comprueba si un usuario ha compartido un post
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public Task<bool> IsShared(int userId, int postId);
+
+        /// <summary>
+        ///     Obtiene los post que ha compartido un usuario cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <returns></returns>
+        public Task<List<PostDto>> GetShared(int userId);
+
+        /// <summary>
+        ///     Obtiene los usuarios que han compartido un post cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public Task<List<int>> GetSharers(int postId);
     }
     public class PostsService : BaseService, IPostsService
     {
@@ -390,6 +466,284 @@ namespace FireBreath.PostsMicroservice.Services
             catch (Exception e)
             {
                 _logger.LogError(e, "PostsService.Update => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Gestiona la acción de dar me gusta a un post por un usuario
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public async Task<CreateEditRemoveResponseDto> Like(int userId, int postId)
+        {
+            try
+            {
+                var response = new CreateEditRemoveResponseDto();
+
+                var like = new Like(userId, postId);
+
+                if (!IsLiked(userId, postId).Result)
+                {
+
+                    if (_unitOfWork.LikesRepository.Add(like) != null)
+                    {
+                        await _unitOfWork.SaveChanges();
+                        response.IsSuccess(postId);
+                    }
+                }
+                else
+                {
+                    response.Id = 0;
+                    response.Errors = new List<string> { Translation_Posts.Default_error };
+                }
+                return response;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.Like => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Gestiona la acción de quitar me gusta a un post por un usuario
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public async Task<CreateEditRemoveResponseDto> Dislike(int userId, int postId)
+        {
+            try
+            {
+                var response = new CreateEditRemoveResponseDto();
+
+                var post = await Get(postId);
+
+                if (post != null)
+                {
+                    await _unitOfWork.LikesRepository.Remove([userId, postId]);
+                    await _unitOfWork.SaveChanges();
+                }
+                else
+                {
+                    response.Errors = new List<string> { String.Format(Translation_Posts.Default_error, postId) };
+                }
+                response.Id = postId;
+                return response;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.Dislike => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Comprueba si un usuario ha dado me gusta a un post
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public async Task<bool> IsLiked(int userId, int postId)
+        {
+            try
+            {
+                if (await _unitOfWork.LikesRepository.Get([userId, postId]) != null)
+                    return true;
+                return false;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.IsLiked => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los post a los que le ha dado me gusta un usuario cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <returns></returns>
+        public async Task<List<PostDto>> GetLiked(int userId)
+        {
+            try
+            {
+                var likes = _unitOfWork.LikesRepository.GetAll(l => l.UserId == userId);
+                var posts = new List<PostDto>();
+                foreach (var like in likes)
+                {
+                    posts.Add(_unitOfWork.PostsRepository.Get(like.UserId).ConvertModel(new PostDto()));
+                }
+                return posts;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.GetLiked => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los usuarios que han dado me gusta a un post cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public async Task<List<int>> GetLikers(int postId)
+        {
+            try
+            {
+                var likes = _unitOfWork.LikesRepository.GetAll(l => l.PostId == postId);
+                var userIds = new List<int>();
+                foreach (var like in likes)
+                {
+                    userIds.Add(like.UserId);
+                }
+                return userIds;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.GetLikers => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Gestiona la acción de compartir un post por un usuario
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public async Task<CreateEditRemoveResponseDto> Share(int userId, int postId)
+        {
+            try
+            {
+                var response = new CreateEditRemoveResponseDto();
+
+                var share = new Share(userId, postId);
+
+                if (!IsShared(userId, postId).Result)
+                {
+
+                    if (_unitOfWork.SharesRepository.Add(share) != null)
+                    {
+                        await _unitOfWork.SaveChanges();
+                        response.IsSuccess(postId);
+                    }
+                }
+                else
+                {
+                    response.Id = 0;
+                    response.Errors = new List<string> { Translation_Posts.Default_error };
+                }
+                return response;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.Share => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Gestiona la acción de dejar de compartir un post por un usuario
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public async Task<CreateEditRemoveResponseDto> StopSharing(int userId, int postId)
+        {
+            try
+            {
+                var response = new CreateEditRemoveResponseDto();
+
+                var post = await Get(postId);
+
+                if (post != null)
+                {
+                    await _unitOfWork.SharesRepository.Remove([userId, postId]);
+                    await _unitOfWork.SaveChanges();
+                }
+                else
+                {
+                    response.Errors = new List<string> { String.Format(Translation_Posts.Default_error, postId) };
+                }
+                response.Id = postId;
+                return response;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.StopSharing => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Comprueba si un usuario ha compartido un post
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public async Task<bool> IsShared(int userId, int postId)
+        {
+            try
+            {
+                if (await _unitOfWork.SharesRepository.Get([userId, postId]) != null)
+                    return true;
+                return false;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.IsShared => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los post que ha compartido un usuario cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <returns></returns>
+        public async Task<List<PostDto>> GetShared(int userId)
+        {
+            try
+            {
+                var shares = _unitOfWork.SharesRepository.GetAll(l => l.UserId == userId);
+                var posts = new List<PostDto>();
+                foreach (var share in shares)
+                {
+                    posts.Add(_unitOfWork.PostsRepository.Get(share.UserId).ConvertModel(new PostDto()));
+                }
+                return posts;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.GetShared => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los usuarios que han compartido un post cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public async Task<List<int>> GetSharers(int postId)
+        {
+            try
+            {
+                var shares = _unitOfWork.SharesRepository.GetAll(l => l.PostId == postId);
+                var userIds = new List<int>();
+                foreach (var share in shares)
+                {
+                    userIds.Add(share.UserId);
+                }
+                return userIds;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.GetSharers => ");
                 throw;
             }
         }

@@ -283,11 +283,11 @@ namespace FireBreath.PostsMicroservice.Models.Repositories
         ///     Elimina un elemento del tipo <see cref="T"/> de la base de datos en base a su id
         /// </summary>
         /// <param name="id">El id a eliminar</param>
-        public virtual async Task Remove(int id)
+        public virtual async Task Remove(params object[] keyValues)
         {
             try
             {
-                var entity = await Get(id);
+                var entity = await Get(keyValues);
                 if (_context.Entry(entity).State == EntityState.Detached)
                 {
                     _dbSet.Attach(entity);
