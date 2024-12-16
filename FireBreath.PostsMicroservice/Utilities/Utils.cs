@@ -10,6 +10,8 @@ namespace FireBreath.PostsMicroservice.Utilities
         ///     Guarda un archivo adjunto en el sistema de archivos
         /// </summary>
         /// <param name="attachment"><see cref="IFormFile"/> con los datos del archivo adjunto a guardar</param>
+        /// <param name="containerId">el id del post/mensaje</param>
+        /// <param name="containerType"><see cref="AttachmentContainerType"/>que define si el contenedor es un post o un mensaje</param>
         /// <returns>la ruta del archivo guardado</returns>
         public static async Task<string> SaveAttachmentToFileSystem(IFormFile attachment, int containerId, AttachmentContainerType containerType)
         {

@@ -49,18 +49,32 @@ namespace FireBreath.PostsMicroservice.Services
         public Task<CreateEditRemoveResponseDto> Remove(int id);
 
         /// <summary>
-        ///     Obtiene todos los mensajes pertenecientes al ticket cuyo id se pasa como parámetro
+        ///     Elimina los mensajes enviados por un usuario cuyo id se pasa como parámetro
         /// </summary>
-        /// <param name="ticketId">el id del ticket</param>
-        /// <returns>una lista de <see cref="Message"/> con los datos de los mensajes</returns>
-        public Task<List<MessageDto?>> GetByTicket(int ticketId);
+        /// <param name="senderId">el id del emisor</param>
+        /// <returns><see cref="CreateEditRemoveResponseDto"/></returns>
+        public Task<CreateEditRemoveResponseDto> RemoveBySender(int senderId);
 
         /// <summary>
-        ///     Elimina los mensajes pertenecientes a una incidencia cuyo id se pasa como parámetro
+        ///     Elimina los mensajes recibidos por un usuario cuyo id se pasa como parámetro
         /// </summary>
-        /// <param name="ticketId">el id de la incidencia</param>
-        /// <returns><see cref="CreateEditRemoveResponseDto"/></returns>
-        public Task<CreateEditRemoveResponseDto> RemoveByTicket(int ticketId);
+        /// <param name="receiverId">el id del receptor</param>
+        /// <returns></returns>
+        public Task<CreateEditRemoveResponseDto> RemoveByReceiver(int receiverId);
+
+        /// <summary>
+        ///     Obtiene todos los mensajes que ha enviado un usuario cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="senderId">el id del emisor</param>
+        /// <returns></returns>
+        public Task<List<MessageDto>> GetBySender(int senderId);
+
+        /// <summary>
+        ///     Obtiene todos los mensajes que ha recibido un usuario cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="receiverId">el id del receptor</param>
+        /// <returns></returns>
+        public Task<List<MessageDto>> GetByReceiver(int receiverId);
     }
     public class MessagesService : BaseService, IMessagesService
     {
@@ -84,25 +98,24 @@ namespace FireBreath.PostsMicroservice.Services
             try
             {
                 var response = new CreateEditRemoveResponseDto();
-                Console.WriteLine(createMessage.IsTechnician);
                 Message message;
-                message = new Message(createMessage.Content, createMessage.Author, createMessage.TicketId, createMessage.IsTechnician);
+                message = new Message(createMessage.Content, createMessage.Author, createMessage.SenderId, createMessage.ReceiverId);
                 if (!createMessage.Attachments.IsNullOrEmpty())
                 {
                     foreach (var attachment in createMessage.Attachments)
                     {
                         if (attachment != null)
                         {
-                            string attachmentPath = await Utils.SaveAttachmentToFileSystem(attachment, createMessage.TicketId);
-                            Attachment newAttachment = new Attachment(attachmentPath, message.Id);
-                            message.AttachmentPaths.Add(newAttachment);
+                            string attachmentPath = await Utils.SaveAttachmentToFileSystem(attachment, message.Id, AttachmentContainerType.MESSAGE);
+                            Attachment newAttachment = new Attachment(attachmentPath, 0, message.Id);
+                            message.Attachments.Add(newAttachment);
                         }
                     }
                 }
 
-                if (!message.AttachmentPaths.IsNullOrEmpty())
+                if (!message.Attachments.IsNullOrEmpty())
                 {
-                    foreach (var attachmentPath in message.AttachmentPaths)
+                    foreach (var attachmentPath in message.Attachments)
                     {
                         _unitOfWork.AttachmentsRepository.Add(attachmentPath);
                     }
@@ -117,41 +130,6 @@ namespace FireBreath.PostsMicroservice.Services
                     response.Id = message.Id;
                     response.Errors = new List<string> { Translation_Messages.Error_create_message };
                 }
-
-                Ticket ticket = await _unitOfWork.TicketsRepository.Get(createMessage.TicketId);
-                if (ticket != null)
-                {
-                    if (!createMessage.IsTechnician && ticket.Status != Status.FINISHED)
-                    {
-                        ticket.HasNewMessages = true;
-                        ticket.NewMessagesCount++;
-                        _unitOfWork.TicketsRepository.Update(ticket);
-                        await _unitOfWork.SaveChanges();
-                    }
-                    else if (ticket.Status != Status.FINISHED)
-                    {
-                        var ticketMessages = await GetByTicket(ticket.Id);
-                        ticketMessages = ticketMessages.FindAll(t => t.IsTechnician);
-
-                        if (ticketMessages.Any())
-                        {
-                            var coolDownDateTime = ticketMessages.Last().Timestamp.AddHours(1);
-
-                            if (DateTime.Now >= coolDownDateTime)
-                            {
-                                string hashedId = Utils.Hash(ticket.Id.ToString());
-                                var isSent = SendMail(ticket.Email, string.Concat(Literals.Link_Review, hashedId, "/", ticket.Id));
-                            }
-                        }
-                        else
-                        {
-                            string hashedId = Utils.Hash(ticket.Id.ToString());
-                            var isSent = SendMail(ticket.Email, string.Concat(Literals.Link_Review, hashedId, "/", ticket.Id));
-                        }
-                    }
-                }
-
-
                 return response;
             }
             catch (Exception e)
@@ -176,9 +154,9 @@ namespace FireBreath.PostsMicroservice.Services
 
                 if (message != null)
                 {
-                    if (!message.AttachmentPaths.IsNullOrEmpty())
+                    if (!message.Attachments.IsNullOrEmpty())
                     {
-                        foreach (var attachmentPath in message.AttachmentPaths)
+                        foreach (var attachmentPath in message.Attachments)
                         {
                             await _unitOfWork.AttachmentsRepository.Remove(attachmentPath.Id);
                         }
@@ -196,7 +174,7 @@ namespace FireBreath.PostsMicroservice.Services
             }
             catch (Exception e)
             {
-                _logger.LogError(id, "MessagesService.Remove => ");
+                _logger.LogError(e, "MessagesService.Remove => ");
                 throw;
             }
         }
@@ -210,11 +188,11 @@ namespace FireBreath.PostsMicroservice.Services
         {
             try
             {
-                var message = Extensions.ConvertModel(_unitOfWork.MessagesRepository.GetFirst(g => g.Id.Equals(id)), new MessageDto());
+                var message = _unitOfWork.MessagesRepository.GetFirst(g => g.Id.Equals(id)).ConvertModel(new MessageDto());
                 var attachments = await _unitOfWork.AttachmentsRepository.GetAll(a => a.MessageId == message.Id).ToListAsync();
                 foreach (var attachment in attachments)
                 {
-                    message.AttachmentPaths.Add(Extensions.ConvertModel(attachment, new AttachmentDto()));
+                    message.AttachmentPaths.Add(attachment.ConvertModel(new AttachmentDto()));
                 }
                 return message;
             }
@@ -237,11 +215,11 @@ namespace FireBreath.PostsMicroservice.Services
                 List<MessageDto> result = new List<MessageDto>();
                 foreach (var message in messages)
                 {
-                    result.Add(Extensions.ConvertModel(message, new MessageDto()));
+                    result.Add(message.ConvertModel(new MessageDto()));
                     var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.MessageId == message.Id).ToListAsync();
                     foreach (var attachment in attachments)
                     {
-                        result.Last().AttachmentPaths.Add(Extensions.ConvertModel(attachment, new AttachmentDto()));
+                        result.Last().AttachmentPaths.Add(attachment.ConvertModel(new AttachmentDto()));
                     }
                 }
                 return result;
@@ -249,44 +227,6 @@ namespace FireBreath.PostsMicroservice.Services
             catch (Exception e)
             {
                 _logger.LogError(e, "MessagesService.GetAll => ");
-                throw;
-            }
-        }
-
-        /// <summary>
-        ///     Obtiene los mensajes pertenecientes a una incidencia cuyo id se ha pasado como parámetro
-        /// </summary>
-        /// <param name="ticketId">el id de la incidencia</param>
-        /// <returns>una lista con los mensajes <see cref="MessageDto"/></returns>
-        public async Task<List<MessageDto?>> GetByTicket(int ticketId)
-        {
-            try
-            {
-                var messages = await _unitOfWork.MessagesRepository.GetAll(message => message.TicketId == ticketId).ToListAsync();
-                var result = new List<MessageDto?>();
-                if (messages != null)
-                {
-                    foreach (var message in messages)
-                    {
-                        result.Insert(0, Extensions.ConvertModel(message, new MessageDto()));
-
-                        message.AttachmentPaths = await _unitOfWork.AttachmentsRepository.GetAll(a => a.MessageId == message.Id).ToListAsync();
-                        if (!message.AttachmentPaths.IsNullOrEmpty())
-                        {
-                            foreach (var attachment in message.AttachmentPaths)
-                            {
-                                result[0].AttachmentPaths.Add(Extensions.ConvertModel(attachment, new AttachmentDto()));
-                            }
-                        }
-                    }
-                    Console.WriteLine(result.Count);
-                    return result;
-                }
-                return null;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "MessagesService.GetByTicket => ");
                 throw;
             }
         }
@@ -305,21 +245,8 @@ namespace FireBreath.PostsMicroservice.Services
                 var message = await _unitOfWork.MessagesRepository.Get(messageId);
                 if (message != null)
                 {
-                    if (!newMessage.Attachments.IsNullOrEmpty())
-                    {
-                        message.AttachmentPaths.Clear();
-                        foreach (var attachment in newMessage.Attachments)
-                        {
-                            if (attachment != null)
-                            {
-                                string attachmentPath = await Utils.SaveAttachmentToFileSystem(attachment, message.TicketId);
-                                Attachment newAttachment = new Attachment(attachmentPath, message.Id);
-                                message.AttachmentPaths.Add(newAttachment);
-                            }
-                        }
-                    }
                     message.Content = newMessage.Content;
-                    message.AttachmentPaths = message.AttachmentPaths;
+                    message.LastEdited = DateTime.UtcNow;
 
                     _unitOfWork.MessagesRepository.Update(message);
                     await _unitOfWork.SaveChanges();
@@ -340,44 +267,145 @@ namespace FireBreath.PostsMicroservice.Services
         }
 
         /// <summary>
-        ///     Elimina los mensajes pertenecientes a una incidencia cuyo id se pasa como parámetro
+        ///     Elimina los mensajes enviados por un usuario cuyo id se pasa como parámetro
         /// </summary>
-        /// <param name="ticketId">el id de la incidencia</param>
+        /// <param name="senderId">el id del emisor</param>
         /// <returns><see cref="CreateEditRemoveResponseDto"/></returns>
-        public async Task<CreateEditRemoveResponseDto> RemoveByTicket(int ticketId)
+        public async Task<CreateEditRemoveResponseDto> RemoveBySender(int senderId)
         {
             try
             {
                 var response = new CreateEditRemoveResponseDto();
 
-                var messages = _unitOfWork.MessagesRepository.GetAll(message => message.TicketId == ticketId);
+                var messages = _unitOfWork.MessagesRepository.GetAll(g => g.SenderId == senderId);
 
-                if (messages != null)
+                if (!messages.IsNullOrEmpty())
                 {
                     foreach (var message in messages)
                     {
-                        if (!message.AttachmentPaths.IsNullOrEmpty())
+                        if (!message.Attachments.IsNullOrEmpty())
                         {
-                            foreach (var attachmentPath in message.AttachmentPaths)
+                            foreach (var attachmentPath in message.Attachments)
                             {
                                 await _unitOfWork.AttachmentsRepository.Remove(attachmentPath.Id);
                             }
                         }
                         await _unitOfWork.MessagesRepository.Remove(message.Id);
-                        await _unitOfWork.SaveChanges();
                     }
-                    response.IsSuccess(ticketId);
+                    await _unitOfWork.SaveChanges();
+                    response.IsSuccess(senderId);
                 }
                 else
                 {
-                    response.Id = ticketId;
+                    response.Id = senderId;
                     response.Errors = new List<string> { Translation_Messages.Message_not_found };
                 }
                 return response;
             }
             catch (Exception e)
             {
-                _logger.LogError(ticketId, "MessagesService.RemoveByTicket => ");
+                _logger.LogError(e, "MessagesService.RemoveBySender => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Elimina los mensajes recibidos por un usuario cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="receiverId">el id del receptor</param>
+        /// <returns></returns>
+        public async Task<CreateEditRemoveResponseDto> RemoveByReceiver(int receiverId)
+        {
+            try
+            {
+                var response = new CreateEditRemoveResponseDto();
+
+                var messages = _unitOfWork.MessagesRepository.GetAll(g => g.ReceiverId == receiverId);
+
+                if (!messages.IsNullOrEmpty())
+                {
+                    foreach (var message in messages)
+                    {
+                        if (!message.Attachments.IsNullOrEmpty())
+                        {
+                            foreach (var attachmentPath in message.Attachments)
+                            {
+                                await _unitOfWork.AttachmentsRepository.Remove(attachmentPath.Id);
+                            }
+                        }
+                        await _unitOfWork.MessagesRepository.Remove(message.Id);
+                    }
+                    await _unitOfWork.SaveChanges();
+                    response.IsSuccess(receiverId);
+                }
+                else
+                {
+                    response.Id = receiverId;
+                    response.Errors = new List<string> { Translation_Messages.Message_not_found };
+                }
+                return response;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "MessagesService.RemoveByReceiver => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene todos los mensajes que ha enviado un usuario cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="senderId">el id del emisor</param>
+        /// <returns></returns>
+        public async Task<List<MessageDto>> GetBySender(int senderId)
+        {
+            try
+            {
+                var messages = await _unitOfWork.MessagesRepository.GetAll(m => m.SenderId == senderId).ToListAsync();
+                List<MessageDto> result = new List<MessageDto>();
+                foreach (var message in messages)
+                {
+                    result.Add(message.ConvertModel(new MessageDto()));
+                    var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.MessageId == message.Id).ToListAsync();
+                    foreach (var attachment in attachments)
+                    {
+                        result.Last().AttachmentPaths.Add(attachment.ConvertModel(new AttachmentDto()));
+                    }
+                }
+                return result;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "MessagesService.GetBySender => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene todos los mensajes que ha recibido un usuario cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="receiverId">el id del receptor</param>
+        /// <returns></returns>
+        public async Task<List<MessageDto>> GetByReceiver(int receiverId)
+        {
+            try
+            {
+                var messages = await _unitOfWork.MessagesRepository.GetAll(m => m.ReceiverId == receiverId).ToListAsync();
+                List<MessageDto> result = new List<MessageDto>();
+                foreach (var message in messages)
+                {
+                    result.Add(message.ConvertModel(new MessageDto()));
+                    var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.MessageId == message.Id).ToListAsync();
+                    foreach (var attachment in attachments)
+                    {
+                        result.Last().AttachmentPaths.Add(attachment.ConvertModel(new AttachmentDto()));
+                    }
+                }
+                return result;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "MessagesService.GetByReceiver => ");
                 throw;
             }
         }
