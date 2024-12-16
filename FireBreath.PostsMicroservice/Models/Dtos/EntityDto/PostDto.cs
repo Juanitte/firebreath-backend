@@ -8,7 +8,7 @@ namespace FireBreath.PostsMicroservice.Models.Dtos.EntityDto
         public string Author { get; set; }
         public string Content { get; set; }
         public DateTime Timestamp { get; set; }
-        public List<AttachmentDto?> AttachmentPaths { get; set; } = new List<AttachmentDto?>();
+        public List<AttachmentDto?> Attachments { get; set; } = new List<AttachmentDto?>();
         public int UserId { get; set; }
         public int PostId { get; set; }
 

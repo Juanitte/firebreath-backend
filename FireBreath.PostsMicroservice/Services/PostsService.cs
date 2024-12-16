@@ -11,6 +11,7 @@ using MailKit.Security;
 using MimeKit;
 using Microsoft.EntityFrameworkCore;
 using Attachment = FireBreath.PostsMicroservice.Models.Entities.Attachment;
+using Microsoft.Extensions.Hosting;
 
 namespace FireBreath.PostsMicroservice.Services
 {
@@ -59,7 +60,7 @@ namespace FireBreath.PostsMicroservice.Services
         /// </summary>
         /// <param name="userId">el id del usuario</param>
         /// <returns>una lista con los posts asignados al usuario <see cref="Post"/></returns>
-        public IEnumerable<PostDto> GetByUser(int userId);
+        public Task<IEnumerable<PostDto>> GetByUser(int userId);
         
         /// <summary>
         ///     Obtiene los posts filtrados
@@ -240,7 +241,7 @@ namespace FireBreath.PostsMicroservice.Services
             }
             catch (Exception e)
             {
-                _logger.LogError(postId, "PostsService.Remove => ");
+                _logger.LogError(e, "PostsService.Remove => ");
                 throw;
             }
         }
@@ -254,7 +255,16 @@ namespace FireBreath.PostsMicroservice.Services
         {
             try
             {
-                return await Task.FromResult(Extensions.ConvertModel(_unitOfWork.PostsRepository.GetFirst(g => g.Id.Equals(id)), new PostDto()));
+                var post = await Task.FromResult(_unitOfWork.PostsRepository.GetFirst(g => g.Id.Equals(id)).ConvertModel(new PostDto()));
+
+                if (post != null)
+                {
+                    var attachments = _unitOfWork.AttachmentsRepository.GetAll(a => a.PostId == id);
+                    if (attachments != null)
+                        post.Attachments = attachments.Select(att => att.ConvertModel(new AttachmentDto())).ToList();
+                }
+                
+                return post;
             }
             catch (Exception e)
             {
@@ -272,7 +282,16 @@ namespace FireBreath.PostsMicroservice.Services
             try
             {
                 var posts = await _unitOfWork.PostsRepository.GetAll().ToListAsync();
-                List<PostDto> result = posts.Select(t => Extensions.ConvertModel(t, new PostDto())).ToList();
+                List<PostDto> result = new List<PostDto>();
+                foreach (var post in posts)
+                {
+                    result.Add(post.ConvertModel(new PostDto()));
+                    var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == post.Id).ToListAsync();
+                    foreach (var attachment in attachments)
+                    {
+                        result.Last().Attachments.Add(attachment.ConvertModel(new AttachmentDto()));
+                    }
+                }
                 return result;
             }
             catch (Exception e)
@@ -319,13 +338,29 @@ namespace FireBreath.PostsMicroservice.Services
                         .ToList();
                 }
 
-                response.Posts = result.Select(s => s.ConvertModel(new PostDto())).ToList();
+                var resultDto = result.Select(s => s.ConvertModel(new PostDto())).ToList();
+
+                if (!resultDto.IsNullOrEmpty())
+                {
+                    foreach (var post in resultDto)
+                    {
+                        response.Posts.Add(post.ConvertModel(new PostDto()));
+                        var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == post.Id).ToListAsync();
+                        if (!attachments.IsNullOrEmpty())
+                        {
+                            foreach (var attachment in attachments)
+                            {
+                                response.Posts.Last().Attachments.Add(attachment.ConvertModel(new AttachmentDto()));
+                            }
+                        }
+                    }
+                }
 
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                _logger.LogError(ex, Translation_Posts.Error_post_filter);
+                _logger.LogError(e, Translation_Posts.Error_post_filter);
                 throw;
             }
         }
@@ -421,11 +456,21 @@ namespace FireBreath.PostsMicroservice.Services
         /// </summary>
         /// <param name="userId">el id del usuario</param>
         /// <returns>una lista con los posts <see cref="PostDto"/></returns>
-        public IEnumerable<PostDto> GetByUser(int userId)
+        public async Task<IEnumerable<PostDto>> GetByUser(int userId)
         {
             try
             {
                 var posts = _unitOfWork.PostsRepository.GetAll(post => post.UserId == userId).Select(p => p.ConvertModel(new PostDto())).ToList();
+                List<PostDto> result = new List<PostDto>();
+                foreach (var post in posts)
+                {
+                    result.Add(post.ConvertModel(new PostDto()));
+                    var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == post.Id).ToListAsync();
+                    foreach (var attachment in attachments)
+                    {
+                        result.Last().Attachments.Add(attachment.ConvertModel(new AttachmentDto()));
+                    }
+                }
                 return posts;
             }
             catch (Exception e)
@@ -576,7 +621,17 @@ namespace FireBreath.PostsMicroservice.Services
                 {
                     posts.Add(_unitOfWork.PostsRepository.Get(like.UserId).ConvertModel(new PostDto()));
                 }
-                return posts;
+                List<PostDto> result = new List<PostDto>();
+                foreach (var post in posts)
+                {
+                    result.Add(post.ConvertModel(new PostDto()));
+                    var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == post.Id).ToListAsync();
+                    foreach (var attachment in attachments)
+                    {
+                        result.Last().Attachments.Add(attachment.ConvertModel(new AttachmentDto()));
+                    }
+                }
+                return result;
             }
             catch (Exception e)
             {
@@ -715,7 +770,17 @@ namespace FireBreath.PostsMicroservice.Services
                 {
                     posts.Add(_unitOfWork.PostsRepository.Get(share.UserId).ConvertModel(new PostDto()));
                 }
-                return posts;
+                List<PostDto> result = new List<PostDto>();
+                foreach (var post in posts)
+                {
+                    result.Add(post.ConvertModel(new PostDto()));
+                    var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == post.Id).ToListAsync();
+                    foreach (var attachment in attachments)
+                    {
+                        result.Last().Attachments.Add(attachment.ConvertModel(new AttachmentDto()));
+                    }
+                }
+                return result;
             }
             catch (Exception e)
             {
