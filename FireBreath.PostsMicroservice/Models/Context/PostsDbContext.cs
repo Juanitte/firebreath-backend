@@ -43,13 +43,13 @@ namespace FireBreath.PostsMicroservice.Models.Context
 
             modelBuilder.Entity<Attachment>()
                 .HasOne(t => t.Post)
-                .WithMany(m => m.AttachmentPaths)
+                .WithMany(m => m.Attachments)
                 .HasForeignKey(m => m.PostId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Attachment>()
                 .HasOne(t => t.Message)
-                .WithMany(m => m.AttachmentPaths)
+                .WithMany(m => m.Attachments)
                 .HasForeignKey(t => t.MessageId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
