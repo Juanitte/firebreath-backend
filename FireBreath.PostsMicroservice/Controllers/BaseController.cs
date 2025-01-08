@@ -17,7 +17,6 @@ namespace FireBreath.PostsMicroservice.Controllers
         internal IConfiguration Configuration => (IConfiguration)_serviceCollection.GetService(typeof(IConfiguration));
         internal IPostsService JuaniteServicePosts => (IPostsService)_serviceCollection.GetService(typeof(IPostsService));
         internal IMessagesService JuaniteServiceMessages => (IMessagesService)_serviceCollection.GetService(typeof(IMessagesService));
-        internal IAttachmentsService JuaniteServiceAttachments => (IAttachmentsService)_serviceCollection.GetService(typeof(IAttachmentsService));
 
         #endregion
 
