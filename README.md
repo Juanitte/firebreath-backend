@@ -4,7 +4,7 @@ Final project for Web Application Development Grade.
 
 Social media, based on Twitter. In this app, users can post, follow other users and send them private messages.
 
-This is the **backend**. Developed using:
+**Backend** developed using:
 - **.NET 8**
 - **EntityFramework**
 - **Microservices**
