@@ -123,9 +123,8 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 
 //Añadimos servicio de filtro
 builder.Services.AddTransient<IBlockingService, BlockingService>();
-builder.Services.AddScoped<ITicketsService, PostsService>();
+builder.Services.AddScoped<IPostsService, PostsService>();
 builder.Services.AddScoped<IMessagesService, MessagesService>();
-builder.Services.AddScoped<IAttachmentsService, AttachmentsService>();
 
 
 //Añadimos los servicios necesarios
