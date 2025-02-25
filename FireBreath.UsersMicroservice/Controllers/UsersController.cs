@@ -102,7 +102,7 @@ namespace FireBreath.UsersMicroservice.Controllers
                         IsBanned = userDto.IsBanned
                     };
 
-                    string password = HashPassword(userDto.Password);
+                    string password = userDto.Password;
 
                     var createUser = await _userManager.CreateAsync(user, password);
 
