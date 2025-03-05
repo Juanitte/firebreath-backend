@@ -62,8 +62,19 @@ namespace FireBreath.UsersMicroservice.Models.Dtos.ResponseDto
         [JsonProperty("email")]
         public string Email { get; set; }
 
-        public Guid? ClientId { get; set; }
-        public Guid? CompanyId { get; set; }
+        /// <summary>
+        ///     Avatar del usuario logeado
+        /// </summary>
+        [DataMember]
+        [JsonProperty("avatar")]
+        public string Avatar { get; set; }
+
+        /// <summary>
+        ///     Tag del usuario logeado
+        /// </summary>
+        [DataMember]
+        [JsonProperty("tag")]
+        public string Tag { get; set; }
 
         /// <summary>
         ///     Rol del usuario logeado

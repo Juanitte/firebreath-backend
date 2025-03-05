@@ -53,7 +53,8 @@ namespace FireBreath.UsersMicroservice.Controllers
                     new Claim(Literals.Claim_Tag, user.Tag),
                     new Claim(Literals.Claim_Email, user.Email),
                     new Claim(Literals.Claim_PhoneNumber, user.PhoneNumber),
-                    new Claim(Literals.Claim_LanguageId, user.Language.ToString())
+                    new Claim(Literals.Claim_LanguageId, user.Language.ToString()),
+                    new Claim(Literals.Claim_Avatar, user.Avatar)
                 });
 
                 var tokenHandler = new JwtSecurityTokenHandler();
@@ -82,7 +83,9 @@ namespace FireBreath.UsersMicroservice.Controllers
                     PhoneNumber = user.PhoneNumber,
                     LanguageId = user.Language,
                     Role = user.Role,
-                    Token = tokenString
+                    Token = tokenString,
+                    Tag = user.Tag,
+                    Avatar = user.Avatar
                 });
             }
             catch (UserLockedException)

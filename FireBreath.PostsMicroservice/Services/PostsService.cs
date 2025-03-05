@@ -150,6 +150,20 @@ namespace FireBreath.PostsMicroservice.Services
         /// <param name="postId">el id del post</param>
         /// <returns></returns>
         public Task<List<int>> GetSharers(int postId);
+
+        /// <summary>
+        ///     Obtiene los comentarios de un post cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public Task<List<PostDto>> GetComments(int postId);
+
+        /// <summary>
+        ///     Obtiene el numero de comentarios de un post cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public Task<int> GetCommentCount(int postId);
     }
     public class PostsService : BaseService, IPostsService
     {
@@ -164,6 +178,59 @@ namespace FireBreath.PostsMicroservice.Services
         #region Implementación de métodos de la interfaz
 
         /// <summary>
+        ///     Obtiene los comentarios de un post cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public async Task<List<PostDto>> GetComments(int postId)
+        {
+            try
+            {
+                var posts = await _unitOfWork.PostsRepository.GetAll().Where(p => p.PostId == postId).ToListAsync();
+                List<PostDto> result = new List<PostDto>();
+                foreach (var post in posts)
+                {
+                    result.Add(post.ConvertModel(new PostDto()));
+                    var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == post.Id).ToListAsync();
+                    foreach (var attachment in attachments)
+                    {
+                        result.Last().Attachments.Add(attachment.ConvertModel(new AttachmentDto()));
+                    }
+                }
+                return result;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.GetComments => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los comentarios de un post cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public async Task<int> GetCommentCount(int postId)
+        {
+            try
+            {
+                var posts = await _unitOfWork.PostsRepository.GetAll().Where(p => p.PostId == postId).ToListAsync();
+                List<PostDto> result = new List<PostDto>();
+                foreach (var post in posts)
+                {
+                    result.Add(post.ConvertModel(new PostDto()));
+                }
+                return result.Count;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.GetCommentCount => ");
+                throw;
+            }
+        }
+
+        /// <summary>
         ///     Crea un nuevo post
         /// </summary>
         /// <param name="createPost"><see cref="CreatePostDto"/> con los datos del post</param>
@@ -174,7 +241,7 @@ namespace FireBreath.PostsMicroservice.Services
             {
                 var response = new CreateEditRemoveResponseDto();
 
-                var post = new Post(createPost.Author, createPost.AuthorTag, createPost.Content, createPost.UserId, createPost.PostId);
+                var post = new Post(createPost.Author, createPost.AuthorTag, createPost.AuthorAvatar, createPost.Content, createPost.UserId, createPost.PostId);
 
                 if (post != null)
                 {

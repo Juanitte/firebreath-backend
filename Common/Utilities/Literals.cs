@@ -39,6 +39,7 @@ namespace Common.Utilities
         public static string Claim_UserId = "UserId";
         public static string Claim_Email = "Email";
         public static string Claim_PhoneNumber = "PhoneNumber";
+        public static string Claim_Avatar = "Avatar";
 
         #endregion
 

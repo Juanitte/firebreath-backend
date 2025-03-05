@@ -564,6 +564,38 @@
             }
         },
 
+        {
+            "DownstreamPathTemplate": "/posts/getcomments/{postId}",
+            "DownstreamScheme": "https",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7271
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/getcomments/{postId}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/getcommentcount/{postId}",
+            "DownstreamScheme": "https",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7271
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/getcommentcount/{postId}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
         //MENSAJES
         {
             "DownstreamPathTemplate": "/messages/getall",
