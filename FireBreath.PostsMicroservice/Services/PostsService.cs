@@ -174,7 +174,7 @@ namespace FireBreath.PostsMicroservice.Services
             {
                 var response = new CreateEditRemoveResponseDto();
 
-                var post = new Post(createPost.Author, createPost.Content, createPost.UserId, createPost.PostId);
+                var post = new Post(createPost.Author, createPost.AuthorTag, createPost.Content, createPost.UserId, createPost.PostId);
 
                 if (post != null)
                 {
@@ -333,7 +333,7 @@ namespace FireBreath.PostsMicroservice.Services
                 if (filter.ByDate)
                 {
                     result = result
-                        .OrderByDescending(post => post.Timestamp)
+                        .OrderByDescending(post => post.Created)
                         .ThenByDescending(post => equalsQuery.Contains(post) ? int.MaxValue : CalculateCosineSimilarity(post.Content, filter.SearchString))
                         .ToList();
                 }

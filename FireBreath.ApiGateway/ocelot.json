@@ -298,7 +298,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7027
+                    "Port": 7271
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/getall",
@@ -314,7 +314,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7027
+                    "Port": 7271
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/getallfilter",
@@ -330,7 +330,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7027
+                    "Port": 7271
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/getbyid/{id}",
@@ -346,7 +346,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7027
+                    "Port": 7271
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/create",
@@ -362,7 +362,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7027
+                    "Port": 7271
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/update/{postId}",
@@ -378,7 +378,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7027
+                    "Port": 7271
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/remove/{id}",
@@ -394,7 +394,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7027
+                    "Port": 7271
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/getbyuser/{userId}",
@@ -410,7 +410,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7027
+                    "Port": 7271
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/like/{userId}/{postId}",
@@ -426,7 +426,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7027
+                    "Port": 7271
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/dislike/{userId}/{postId}",
@@ -442,7 +442,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7027
+                    "Port": 7271
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/postisliked/{userId}/{postId}",
@@ -458,7 +458,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7027
+                    "Port": 7271
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/getliked/{userId}",
@@ -474,7 +474,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7027
+                    "Port": 7271
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/getlikers/{postId}",
@@ -490,7 +490,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7027
+                    "Port": 7271
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/share/{userId}/{postId}",
@@ -506,7 +506,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7027
+                    "Port": 7271
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/stopsharing/{userId}/{postId}",
@@ -522,7 +522,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7027
+                    "Port": 7271
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/postisshared/{userId}/{postId}",
@@ -538,7 +538,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7027
+                    "Port": 7271
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/getshared/{userId}",
@@ -554,7 +554,7 @@
             "DownstreamHostAndPorts": [
                 {
                     "Host": "localhost",
-                    "Port": 7027
+                    "Port": 7271
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/getsharers/{postId}",
