@@ -14,6 +14,7 @@ namespace FireBreath.PostsMicroservice.Models.Entities
         public string Author { get; set; }
         [Filters]
         public string AuthorTag { get; set; }
+        public string AuthorAvatar {  get; set; }
         [Filters]
         public string Content { get; set; }
         [Filters]
@@ -27,44 +28,49 @@ namespace FireBreath.PostsMicroservice.Models.Entities
         {
             this.Author = string.Empty;
             this.AuthorTag = string.Empty;
+            this.AuthorAvatar = string.Empty;
             this.Content = string.Empty;
             this.UserId = 0;
             this.PostId = 0;
         }
 
-        public Post(string author, string authorTag, string content, int userId, int postId)
+        public Post(string author, string authorTag, string authorAvatar, string content, int userId, int postId)
         {
             this.Author = author;
             this.AuthorTag = authorTag;
+            this.AuthorAvatar = authorAvatar;
             this.Content = content;
             this.UserId = userId;
             this.PostId = postId;
         }
 
-        public Post(string author, string authorTag, string content, DateTime created, int userId, int postId)
+        public Post(string author, string authorTag, string authorAvatar, string content, DateTime created, int userId, int postId)
         {
             this.Author = author;
             this.AuthorTag = authorTag;
+            this.AuthorAvatar = authorAvatar;
             this.Content = content;
             this.Created = created;
             this.UserId = userId;
             this.PostId = postId;
         }
 
-        public Post(string author, string authorTag, string content, List<Attachment?> attachments, int userId, int postId)
+        public Post(string author, string authorTag, string authorAvatar, string content, List<Attachment?> attachments, int userId, int postId)
         {
             this.Author = author;
             this.AuthorTag = authorTag;
+            this.AuthorAvatar = authorAvatar;
             this.Content = content;
             this.Attachments = attachments;
             this.UserId = userId;
             this.PostId = postId;
         }
 
-        public Post(string author, string authorTag, string content, DateTime created, List<Attachment?> attachments, int userId, int postId)
+        public Post(string author, string authorTag, string authorAvatar, string content, DateTime created, List<Attachment?> attachments, int userId, int postId)
         {
             this.Author = author;
             this.AuthorTag = authorTag;
+            this.AuthorAvatar = authorAvatar;
             this.Content = content;
             this.Created = created;
             this.Attachments = attachments;

@@ -389,6 +389,46 @@ namespace FireBreath.PostsMicroservice.Controllers
             }
         }
 
+        /// <summary>
+        ///     Obtiene los comentarios de un post cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        [HttpGet("posts/getcomments/{postId}")]
+        public async Task<IActionResult> GetComments(int postId)
+        {
+            try
+            {
+                var posts = await JuaniteServicePosts.GetComments(postId);
+
+                return new JsonResult(posts);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new List<PostDto>());
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene el numero de comentarios de un post cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        [HttpGet("posts/getcommentcount/{postId}")]
+        public async Task<int> GetCommentCount(int postId)
+        {
+            try
+            {
+                var commentCount = await JuaniteServicePosts.GetCommentCount(postId);
+
+                return commentCount;
+            }
+            catch (Exception e)
+            {
+                return 0;
+            }
+        }
+
         #endregion
     }
 }
