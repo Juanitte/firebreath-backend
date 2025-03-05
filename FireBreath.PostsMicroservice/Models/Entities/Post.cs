@@ -32,7 +32,7 @@ namespace FireBreath.PostsMicroservice.Models.Entities
             this.PostId = 0;
         }
 
-        public Post(string content, string author, string authorTag, int userId, int postId)
+        public Post(string author, string authorTag, string content, int userId, int postId)
         {
             this.Author = author;
             this.AuthorTag = authorTag;
