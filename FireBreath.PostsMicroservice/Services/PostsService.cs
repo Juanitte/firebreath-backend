@@ -186,7 +186,7 @@ namespace FireBreath.PostsMicroservice.Services
         {
             try
             {
-                var posts = await _unitOfWork.PostsRepository.GetAll().Where(p => p.PostId == postId).ToListAsync();
+                var posts = await _unitOfWork.PostsRepository.GetAll().Where(p => p.PostId == postId).OrderByDescending(p => p.Created).ToListAsync();
                 List<PostDto> result = new List<PostDto>();
                 foreach (var post in posts)
                 {
@@ -348,7 +348,7 @@ namespace FireBreath.PostsMicroservice.Services
         {
             try
             {
-                var posts = await _unitOfWork.PostsRepository.GetAll().ToListAsync();
+                var posts = await _unitOfWork.PostsRepository.GetAll().OrderByDescending(p => p.Created).ToListAsync();
                 List<PostDto> result = new List<PostDto>();
                 foreach (var post in posts)
                 {
@@ -527,7 +527,7 @@ namespace FireBreath.PostsMicroservice.Services
         {
             try
             {
-                var posts = _unitOfWork.PostsRepository.GetAll(post => post.UserId == userId).Select(p => p.ConvertModel(new PostDto())).ToList();
+                var posts = _unitOfWork.PostsRepository.GetAll(post => post.UserId == userId).OrderByDescending(p => p.Created).Select(p => p.ConvertModel(new PostDto())).ToList();
                 List<PostDto> result = new List<PostDto>();
                 foreach (var post in posts)
                 {
@@ -687,18 +687,16 @@ namespace FireBreath.PostsMicroservice.Services
                 foreach (var like in likes)
                 {
                     posts.Add(_unitOfWork.PostsRepository.Get(like.UserId).ConvertModel(new PostDto()));
-                }
-                List<PostDto> result = new List<PostDto>();
-                foreach (var post in posts)
-                {
-                    result.Add(post.ConvertModel(new PostDto()));
-                    var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == post.Id).ToListAsync();
+                    var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == posts.Last().Id).ToListAsync();
                     foreach (var attachment in attachments)
                     {
-                        result.Last().Attachments.Add(attachment.ConvertModel(new AttachmentDto()));
+                        posts.Last().Attachments.Add(attachment.ConvertModel(new AttachmentDto()));
                     }
                 }
-                return result;
+
+                posts = posts.OrderByDescending(p => p.Created).ToList();
+
+                return posts;
             }
             catch (Exception e)
             {
@@ -716,7 +714,7 @@ namespace FireBreath.PostsMicroservice.Services
         {
             try
             {
-                var likes = _unitOfWork.LikesRepository.GetAll(l => l.PostId == postId);
+                var likes = await _unitOfWork.LikesRepository.GetAll(l => l.PostId == postId).ToListAsync();
                 var userIds = new List<int>();
                 foreach (var like in likes)
                 {
@@ -836,18 +834,16 @@ namespace FireBreath.PostsMicroservice.Services
                 foreach (var share in shares)
                 {
                     posts.Add(_unitOfWork.PostsRepository.Get(share.UserId).ConvertModel(new PostDto()));
-                }
-                List<PostDto> result = new List<PostDto>();
-                foreach (var post in posts)
-                {
-                    result.Add(post.ConvertModel(new PostDto()));
-                    var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == post.Id).ToListAsync();
+                    var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == posts.Last().Id).ToListAsync();
                     foreach (var attachment in attachments)
                     {
-                        result.Last().Attachments.Add(attachment.ConvertModel(new AttachmentDto()));
+                        posts.Last().Attachments.Add(attachment.ConvertModel(new AttachmentDto()));
                     }
                 }
-                return result;
+
+                posts = posts.OrderByDescending(p => p.Created).ToList();
+
+                return posts;
             }
             catch (Exception e)
             {
@@ -865,7 +861,7 @@ namespace FireBreath.PostsMicroservice.Services
         {
             try
             {
-                var shares = _unitOfWork.SharesRepository.GetAll(l => l.PostId == postId);
+                var shares = await _unitOfWork.SharesRepository.GetAll(l => l.PostId == postId).ToListAsync();
                 var userIds = new List<int>();
                 foreach (var share in shares)
                 {
