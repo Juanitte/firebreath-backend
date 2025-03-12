@@ -89,7 +89,7 @@ ILoggerFactory loggerFactory = new LoggerFactory();
 loggerFactory.AddSerilog(new LoggerConfiguration()
                             .MinimumLevel.Debug()
                             .WriteTo.File(
-                                "C:/ProyectoIoT/Back/Logs/log-{Date}.txt",
+                                "D://Proyectos/.NET/FireBreath_Backend_Storage/Logs/log-{Date}.txt",
                                 rollingInterval: RollingInterval.Day,
                                 restrictedToMinimumLevel: LogEventLevel.Information
                             ).CreateLogger());
