@@ -18,7 +18,7 @@ namespace FireBreath.PostsMicroservice.Utilities
             var date = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
 
             var fileName = Path.GetFileNameWithoutExtension(attachment.FileName) + "_" + date + Path.GetExtension(attachment.FileName);
-            string directoryPath = Path.Combine("C:/ProyectoIoT/Back/ApiTest/AttachmentStorage/", containerType.ToString() + "/");
+            string directoryPath = Path.Combine("D://Proyectos/.NET/FireBreath_Backend_Storage/Files/", containerType.ToString() + "/");
             directoryPath = Path.Combine(directoryPath, containerId.ToString());
             string filePath = Path.Combine(directoryPath, fileName);
 
@@ -33,6 +33,20 @@ namespace FireBreath.PostsMicroservice.Utilities
             }
 
             return filePath;
+        }
+
+        /// <summary>
+        ///     Busca un archivo adjunto en el sistema de archivos y lo devuelve como un FileStream.
+        /// </summary>
+        /// <param name="path">La ruta del archivo en el sistema.</param>
+        /// <returns>Un FileStream si el archivo existe, o null si no se encuentra.</returns>
+        public static FileStream GetAttachmentFromFileSystem(string path)
+        {
+            if (File.Exists(path))
+            {
+                return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            }
+            return null;
         }
 
         /// <summary>

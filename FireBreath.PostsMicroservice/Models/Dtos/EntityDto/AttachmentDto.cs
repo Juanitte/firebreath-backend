@@ -4,8 +4,9 @@
     {
         public int Id { get; set; }
         public string Path { get; set; }
-        public int PostId { get; set; }
-        public int MessageId { get; set; }
+        public string? File { get; set; }
+        public int? PostId { get; set; }
+        public int? MessageId { get; set; }
 
         public AttachmentDto()
         {

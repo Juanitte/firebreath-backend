@@ -12,8 +12,8 @@ namespace FireBreath.PostsMicroservice.Models.Entities
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string Path { get; set; }
-        public int PostId { get; set; }
-        public int MessageId { get; set; }
+        public int? PostId { get; set; }
+        public int? MessageId { get; set; }
         [ForeignKey("PostId")]
         public Post? Post { get; set; }
         [ForeignKey("MessageId")]
@@ -24,7 +24,7 @@ namespace FireBreath.PostsMicroservice.Models.Entities
             this.Path = string.Empty;
         }
 
-        public Attachment(string path, int postId, int messageId)
+        public Attachment(string path, int postId, int? messageId = null)
         {
             this.Path = path;
             this.PostId = postId;

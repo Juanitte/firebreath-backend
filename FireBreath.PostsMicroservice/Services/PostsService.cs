@@ -255,10 +255,12 @@ namespace FireBreath.PostsMicroservice.Services
                         {
                             foreach (var attachment in createPost.Attachments)
                             {
+                                Console.WriteLine(attachment);
                                 if (attachment != null)
                                 {
                                     string attachmentPath = await Utils.SaveAttachmentToFileSystem(attachment, post.Id, AttachmentContainerType.POST);
-                                    Attachment newAttachment = new Attachment(attachmentPath, post.Id, 0);
+                                    Attachment newAttachment = new Attachment(attachmentPath, post.Id);
+
                                     _unitOfWork.AttachmentsRepository.Add(newAttachment);
                                 }
                             }
@@ -356,7 +358,9 @@ namespace FireBreath.PostsMicroservice.Services
                     var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == post.Id).ToListAsync();
                     foreach (var attachment in attachments)
                     {
-                        result.Last().Attachments.Add(attachment.ConvertModel(new AttachmentDto()));
+                        AttachmentDto attachmentDto = attachment.ConvertModel(new AttachmentDto());
+                        attachmentDto.File = Convert.ToBase64String(await File.ReadAllBytesAsync(attachment.Path));
+                        result.Last().Attachments.Add(attachmentDto);
                     }
                 }
                 return result;
