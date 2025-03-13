@@ -243,12 +243,13 @@ namespace FireBreath.UsersMicroservice.Controllers
         /// </summary>
         /// <param name="follow"><see cref="FollowDto"/> con los datos del follow</param>
         /// <returns></returns>
-        [HttpPost("users/followuser")]
-        public async Task<IActionResult> FollowUser(FollowDto follow)
+        [HttpPost("users/followuser/{userId}/{followerId}")]
+        public async Task<IActionResult> FollowUser(int userId, int followerId)
         {
             var response = new GenericResponseDto();
             try
             {
+                var follow = new FollowDto(userId, followerId);
                 await ServiceUsers.FollowUser(follow);
                 response.ReturnData = true;
             }
@@ -287,12 +288,13 @@ namespace FireBreath.UsersMicroservice.Controllers
         /// </summary>
         /// <param name="follow"><see cref="FollowDto"/> con los datos del follow</param>
         /// <returns></returns>
-        [HttpDelete("users/unfollow")]
-        public async Task<IActionResult> UnfollowUser(FollowDto follow)
+        [HttpDelete("users/unfollow/{userId}/{followerId}")]
+        public async Task<IActionResult> UnfollowUser(int userId, int followerId)
         {
             var response = new GenericResponseDto();
             try
             {
+                var follow = new FollowDto(userId, followerId);
                 var result = await ServiceUsers.UnfollowUser(follow);
                 if (result.Errors != null && result.Errors.Any())
                 {
@@ -380,11 +382,12 @@ namespace FireBreath.UsersMicroservice.Controllers
         /// </summary>
         /// <param name="follow"><see cref="FollowDto"/> con los datos del follow</param>
         /// <returns></returns>
-        [HttpGet("users/isfollowing")]
-        public async Task<bool> IsFollowing([FromQuery]FollowDto follow)
+        [HttpGet("users/isfollowing/{userId}/{followerId}")]
+        public async Task<bool> IsFollowing(int userId, int followerId)
         {
             try
             {
+                var follow = new FollowDto(userId, followerId);
                 if (await ServiceUsers.IsFollowing(follow))
                     return true;
                 return false;
@@ -426,6 +429,45 @@ namespace FireBreath.UsersMicroservice.Controllers
             try
             {
                 var result = await ServiceUsers.GetFollowers(userId);
+
+                return new JsonResult(result);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new UserDto());
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene todos los usuarios seguidos por un user cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [HttpGet("users/getfollowing/{userId}")]
+        public async Task<JsonResult> GetFollowing(int userId)
+        {
+            try
+            {
+                var result = await ServiceUsers.GetFollowing(userId);
+
+                return new JsonResult(result);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new UserDto());
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los usuarios con rol User filtrados.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("users/getusersfilter/{searchString}")]
+        public async Task<JsonResult> GetUsersFilter(string searchString)
+        {
+            try
+            {
+                var result = await ServiceUsers.GetUsersFilter(searchString);
 
                 return new JsonResult(result);
             }
