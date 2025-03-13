@@ -164,6 +164,20 @@ namespace FireBreath.PostsMicroservice.Services
         /// <param name="postId">el id del post</param>
         /// <returns></returns>
         public Task<int> GetCommentCount(int postId);
+
+        /// <summary>
+        ///     Obtiene el numero de likes de un post cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public Task<int> GetLikeCount(int postId);
+
+        /// <summary>
+        ///     Obtiene el numero de veces que un post cuyo id se pasa como parámetro se ha compartido
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public Task<int> GetShareCount(int postId);
     }
     public class PostsService : BaseService, IPostsService
     {
@@ -226,6 +240,44 @@ namespace FireBreath.PostsMicroservice.Services
             catch (Exception e)
             {
                 _logger.LogError(e, "PostsService.GetCommentCount => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los likes de un post cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public async Task<int> GetLikeCount(int postId)
+        {
+            try
+            {
+                var likes = await _unitOfWork.LikesRepository.GetAll(l => l.PostId == postId).ToListAsync();
+                return likes.Count;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.GetLikeCount => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene las veces que un post cuyo id se pasa como parámetro ha sido compartido
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public async Task<int> GetShareCount(int postId)
+        {
+            try
+            {
+                var shares = await _unitOfWork.SharesRepository.GetAll(l => l.PostId == postId).ToListAsync();
+                return shares.Count;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.GetShareCount => ");
                 throw;
             }
         }
@@ -329,8 +381,12 @@ namespace FireBreath.PostsMicroservice.Services
                 if (post != null)
                 {
                     var attachments = _unitOfWork.AttachmentsRepository.GetAll(a => a.PostId == id);
-                    if (attachments != null)
-                        post.Attachments = attachments.Select(att => att.ConvertModel(new AttachmentDto())).ToList();
+                    foreach (var attachment in attachments)
+                    {
+                        AttachmentDto attachmentDto = attachment.ConvertModel(new AttachmentDto());
+                        attachmentDto.File = Convert.ToBase64String(await File.ReadAllBytesAsync(attachment.Path));
+                        post.Attachments.Add(attachmentDto);
+                    }
                 }
                 
                 return post;
@@ -421,7 +477,9 @@ namespace FireBreath.PostsMicroservice.Services
                         {
                             foreach (var attachment in attachments)
                             {
-                                response.Posts.Last().Attachments.Add(attachment.ConvertModel(new AttachmentDto()));
+                                AttachmentDto attachmentDto = attachment.ConvertModel(new AttachmentDto());
+                                attachmentDto.File = Convert.ToBase64String(await File.ReadAllBytesAsync(attachment.Path));
+                                response.Posts.Last().Attachments.Add(attachmentDto);
                             }
                         }
                     }
@@ -539,7 +597,9 @@ namespace FireBreath.PostsMicroservice.Services
                     var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == post.Id).ToListAsync();
                     foreach (var attachment in attachments)
                     {
-                        result.Last().Attachments.Add(attachment.ConvertModel(new AttachmentDto()));
+                        AttachmentDto attachmentDto = attachment.ConvertModel(new AttachmentDto());
+                        attachmentDto.File = Convert.ToBase64String(await File.ReadAllBytesAsync(attachment.Path));
+                        result.Last().Attachments.Add(attachmentDto);
                     }
                 }
                 return posts;
@@ -694,7 +754,9 @@ namespace FireBreath.PostsMicroservice.Services
                     var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == posts.Last().Id).ToListAsync();
                     foreach (var attachment in attachments)
                     {
-                        posts.Last().Attachments.Add(attachment.ConvertModel(new AttachmentDto()));
+                        AttachmentDto attachmentDto = attachment.ConvertModel(new AttachmentDto());
+                        attachmentDto.File = Convert.ToBase64String(await File.ReadAllBytesAsync(attachment.Path));
+                        posts.Last().Attachments.Add(attachmentDto);
                     }
                 }
 
@@ -841,7 +903,9 @@ namespace FireBreath.PostsMicroservice.Services
                     var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == posts.Last().Id).ToListAsync();
                     foreach (var attachment in attachments)
                     {
-                        posts.Last().Attachments.Add(attachment.ConvertModel(new AttachmentDto()));
+                        AttachmentDto attachmentDto = attachment.ConvertModel(new AttachmentDto());
+                        attachmentDto.File = Convert.ToBase64String(await File.ReadAllBytesAsync(attachment.Path));
+                        posts.Last().Attachments.Add(attachmentDto);
                     }
                 }
 

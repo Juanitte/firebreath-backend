@@ -189,6 +189,19 @@ namespace FireBreath.UsersMicroservice.Services
         /// <returns></returns>
         Task<List<UserDto>> GetFollowers(int userId);
 
+        /// <summary>
+        ///     Obtiene todos los seguidores de un user cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<List<UserDto>> GetFollowing(int userId);
+
+        /// <summary>
+        ///     Obtiene los usuarios con rol User filtrados.
+        /// </summary>
+        /// <returns></returns>
+        Task<List<UserDto>> GetUsersFilter(string searchString);
+
 
     }
     public sealed class UsersService : BaseService, IUsersService
@@ -217,6 +230,25 @@ namespace FireBreath.UsersMicroservice.Services
         #endregion
 
         #region Implementación IUsersService
+
+        /// <summary>
+        ///     Obtiene los usuarios con rol User filtrados.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<UserDto>> GetUsersFilter(string searchString)
+        {
+            try
+            {
+                var users = await _unitOfWork.UsersRepository.GetAll(user => user.Role == "User").Where(u => u.UserName.Contains(searchString) || u.Tag.Contains(searchString)).ToListAsync();
+                var result = users.Select(u => Extensions.ConvertModel(u, new UserDto())).ToList();
+                return result;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Get Users Filter => ");
+                throw;
+            }
+        }
 
         /// <summary>
         ///     Cambio de idioma al usuario pasado como parámetro
@@ -634,7 +666,7 @@ namespace FireBreath.UsersMicroservice.Services
             List<string> errorMessages = new List<string>();
 
             //Verificar nombre de usuario único
-            var userNameUser = await _unitOfWork.UsersRepository.Any(a => a.UserName == user.UserName);
+            var userNameUser = await _unitOfWork.UsersRepository.Any(a => a.Tag == user.Tag);
             if (userNameUser)
             {
                 errorMessages.Add(string.Format(Translation_UsersRoles.NotAvailable_Username, user.UserName));
@@ -873,6 +905,33 @@ namespace FireBreath.UsersMicroservice.Services
             catch (Exception e)
             {
                 _logger.LogError(e, "UsersService.GetFollowers => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene todos los seguidores de un user cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<List<UserDto>> GetFollowing(int userId)
+        {
+            try
+            {
+                var follows = await _unitOfWork.FollowsRepository.GetAll().Where(f => f.FollowerId == userId).ToListAsync();
+                List<int> followerIds = new List<int>();
+                foreach (var follow in follows)
+                {
+                    if (follow.FollowerId == userId)
+                        followerIds.Add(follow.FollowerId);
+                }
+                var users = await _unitOfWork.UsersRepository.GetAll().Where(u => followerIds.Contains(u.Id)).ToListAsync();
+                var result = users.Select(u => Extensions.ConvertModel(u, new UserDto())).ToList();
+                return result;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "UsersService.GetFollowing => ");
                 throw;
             }
         }

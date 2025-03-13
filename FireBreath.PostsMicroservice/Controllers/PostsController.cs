@@ -4,6 +4,7 @@ using FireBreath.PostsMicroservice.Models.Dtos.CreateDto;
 using FireBreath.PostsMicroservice.Models.Dtos.EntityDto;
 using FireBreath.PostsMicroservice.Models.Dtos.RequestDto;
 using FireBreath.PostsMicroservice.Models.Dtos.ResponseDto;
+using FireBreath.PostsMicroservice.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FireBreath.PostsMicroservice.Controllers
@@ -52,7 +53,7 @@ namespace FireBreath.PostsMicroservice.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("posts/getallfilter")]
-        public async Task<JsonResult> GetAllFilter([FromQuery] PostFilterRequestDto filter)
+        public async Task<JsonResult> GetAllFilter([FromBody] PostFilterRequestDto filter)
         {
             try
             {
@@ -166,7 +167,7 @@ namespace FireBreath.PostsMicroservice.Controllers
         {
             try
             {
-                var posts = JuaniteServicePosts.GetByUser(userId);
+                var posts = await JuaniteServicePosts.GetByUser(userId);
                 return new JsonResult(posts);
             }
             catch (Exception e)
@@ -263,7 +264,7 @@ namespace FireBreath.PostsMicroservice.Controllers
         }
 
         /// <summary>
-        ///     Obtiene los usuarios que han dado me gusta a un post cuyo id se pasa como parámetro
+        ///     Obtiene el id de los usuarios que han dado me gusta a un post cuyo id se pasa como parámetro
         /// </summary>
         /// <param name="postId">el id del post</param>
         /// <returns></returns>
@@ -272,13 +273,13 @@ namespace FireBreath.PostsMicroservice.Controllers
         {
             try
             {
-                var posts = await JuaniteServicePosts.GetLikers(postId);
+                var likers = await JuaniteServicePosts.GetLikers(postId);
 
-                return new JsonResult(posts);
+                return new JsonResult(likers);
             }
             catch (Exception e)
             {
-                return new JsonResult(new List<PostDto>());
+                return new JsonResult(new List<int>());
             }
         }
 
@@ -379,13 +380,13 @@ namespace FireBreath.PostsMicroservice.Controllers
         {
             try
             {
-                var posts = await JuaniteServicePosts.GetSharers(postId);
+                var sharers = await JuaniteServicePosts.GetSharers(postId);
 
-                return new JsonResult(posts);
+                return new JsonResult(sharers);
             }
             catch (Exception e)
             {
-                return new JsonResult(new List<PostDto>());
+                return new JsonResult(new List<int>());
             }
         }
 
@@ -422,6 +423,46 @@ namespace FireBreath.PostsMicroservice.Controllers
                 var commentCount = await JuaniteServicePosts.GetCommentCount(postId);
 
                 return commentCount;
+            }
+            catch (Exception e)
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene el numero de likes de un post cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        [HttpGet("posts/getlikecount/{postId}")]
+        public async Task<int> GetLikeCount(int postId)
+        {
+            try
+            {
+                var likeCount = await JuaniteServicePosts.GetLikeCount(postId);
+
+                return likeCount;
+            }
+            catch (Exception e)
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene el numero de veces que un post cuyo id se pasa como parámetro se ha compartido
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        [HttpGet("posts/getsharecount/{postId}")]
+        public async Task<int> GetShareCount(int postId)
+        {
+            try
+            {
+                var shareCount = await JuaniteServicePosts.GetShareCount(postId);
+
+                return shareCount;
             }
             catch (Exception e)
             {

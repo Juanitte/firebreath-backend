@@ -141,6 +141,22 @@
         },
 
         {
+            "DownstreamPathTemplate": "/Users/users/getusersfilter/{searchString}",
+            "DownstreamScheme": "https",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7063
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/Users/users/getusersfilter/{searchString}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
             "DownstreamPathTemplate": "/Users/users/sendemail/{username}/{domain}/{tld}",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
@@ -167,7 +183,7 @@
         },
 
         {
-            "DownstreamPathTemplate": "/Users/users/followuser",
+            "DownstreamPathTemplate": "/Users/users/followuser/{userId}/{followerId}",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
                 {
@@ -175,7 +191,7 @@
                     "Port": 7063
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/Users/users/followuser",
+            "UpstreamPathTemplate": "/gateway/Users/users/followuser/{userId}/{followerId}",
             "UpstreamHttpMethod": [ "POST" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
@@ -199,7 +215,7 @@
         },
 
         {
-            "DownstreamPathTemplate": "/Users/users/unfollow",
+            "DownstreamPathTemplate": "/Users/users/unfollow/{userId}/{followerId}",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
                 {
@@ -207,7 +223,7 @@
                     "Port": 7063
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/Users/users/unfollow",
+            "UpstreamPathTemplate": "/gateway/Users/users/unfollow/{userId}/{followerId}",
             "UpstreamHttpMethod": [ "DELETE" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
@@ -272,6 +288,22 @@
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/getfollowers/{userId}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/Users/users/getfollowing/{userId}",
+            "DownstreamScheme": "https",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7063
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/Users/users/getfollowing/{userId}",
             "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
@@ -590,6 +622,38 @@
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/getcommentcount/{postId}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/getlikecount/{postId}",
+            "DownstreamScheme": "https",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7271
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/getlikecount/{postId}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/getsharecount/{postId}",
+            "DownstreamScheme": "https",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7271
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/getsharecount/{postId}",
             "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
