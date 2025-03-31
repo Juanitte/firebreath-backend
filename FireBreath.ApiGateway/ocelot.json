@@ -14,6 +14,19 @@
             "UpstreamHttpMethod": [ "POST" ]
         },
 
+        {
+            "DownstreamPathTemplate": "/users/authenticate/verify",
+            "DownstreamScheme": "https",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 7063
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/users/authenticate/verify",
+            "UpstreamHttpMethod": [ "POST" ]
+        },
+
         //USERS
         {
             "DownstreamPathTemplate": "/Users/users/getall",
