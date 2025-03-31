@@ -41,7 +41,6 @@ namespace Common.Utilities
     /// </summary>
     public enum Country
     {
-
         UNDEFINED = 0,
         AFGHANISTAN = 1,
         ALBANIA = 2,
