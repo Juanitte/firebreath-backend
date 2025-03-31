@@ -125,6 +125,47 @@ namespace FireBreath.UsersMicroservice.Controllers
             }
         }
 
+        [HttpPost("users/authenticate/verify")]
+        public async Task<IActionResult> VerifyToken()
+        {
+            try
+            {
+                var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes(Configuration["AppSettings:Secret"]);
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true
+                }, out SecurityToken validatedToken);
+                var jwtToken = (JwtSecurityToken)validatedToken;
+                var userId = jwtToken.Claims.First(x => x.Type == Literals.Claim_UserId).Value;
+                var user = await ServiceUsers.GetById(int.Parse(userId));
+                return Ok(new ResponseLoginDto
+                {
+                    UserId = user.Id.ToString(),
+                    UserName = user.UserName,
+                    FullName = user.FullName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    LanguageId = user.Language,
+                    Role = user.Role,
+                    Tag = user.Tag,
+                    Avatar = user.Avatar
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ResponseLoginDto()
+                {
+                    ErrorDescripcion = ex.Message
+                });
+            }
+        }
+
         #endregion
 
     }
