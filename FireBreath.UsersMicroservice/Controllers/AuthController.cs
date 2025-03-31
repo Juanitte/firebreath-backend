@@ -126,11 +126,11 @@ namespace FireBreath.UsersMicroservice.Controllers
         }
 
         [HttpPost("users/authenticate/verify")]
-        public async Task<IActionResult> VerifyToken()
+        public async Task<IActionResult> VerifyToken([FromBody] string token)
         {
             try
             {
-                var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+                token = JuanitEncoder.DecodeString(token);
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.ASCII.GetBytes(Configuration["AppSettings:Secret"]);
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
