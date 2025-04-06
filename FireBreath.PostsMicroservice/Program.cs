@@ -1,6 +1,7 @@
 using FireBreath.PostsMicroservice.Models.Context;
 using FireBreath.PostsMicroservice.Models.UnitsOfWork;
 using FireBreath.PostsMicroservice.Services;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +13,13 @@ using System.Globalization;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configuración de Kestrel para el tamaño máximo de la carga útil
+builder.WebHost.ConfigureKestrel(options =>
+{
+    // Aquí estamos estableciendo el tamaño máximo de la carga útil (en bytes)
+    options.Limits.MaxRequestBodySize = null; // 100 MB
+});
 
 // Add services to the container.
 builder.Services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
@@ -128,8 +136,6 @@ builder.Services.AddScoped<IMessagesService, MessagesService>();
 
 
 //Añadimos los servicios necesarios
-
-builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 var app = builder.Build();
 

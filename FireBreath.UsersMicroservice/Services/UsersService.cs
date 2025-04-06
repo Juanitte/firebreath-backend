@@ -887,7 +887,7 @@ namespace FireBreath.UsersMicroservice.Services
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<List<UserDto>> GetFollowers(int userId)
+        public async Task<List<UserDto>> GetFollowing(int userId)
         {
             try
             {
@@ -914,7 +914,7 @@ namespace FireBreath.UsersMicroservice.Services
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<List<UserDto>> GetFollowing(int userId)
+        public async Task<List<UserDto>> GetFollowers(int userId)
         {
             try
             {

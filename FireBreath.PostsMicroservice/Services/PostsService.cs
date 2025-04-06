@@ -60,7 +60,7 @@ namespace FireBreath.PostsMicroservice.Services
         /// </summary>
         /// <param name="userId">el id del usuario</param>
         /// <returns>una lista con los posts asignados al usuario <see cref="Post"/></returns>
-        public Task<IEnumerable<PostDto>> GetByUser(int userId);
+        public Task<IEnumerable<PostDto>> GetByUser(int userId, int page, int pageSize=10);
         
         /// <summary>
         ///     Obtiene los posts filtrados
@@ -581,19 +581,31 @@ namespace FireBreath.PostsMicroservice.Services
         #endregion
 
         /// <summary>
-        ///     Obtiene los posts asignados al usuario cuyo id se pasa como parámetro
+        /// Obtiene los posts asignados al usuario cuyo id se pasa como parámetro
         /// </summary>
         /// <param name="userId">el id del usuario</param>
+        /// <param name="page">el número de la página</param>
+        /// <param name="pageSize">el número de posts por página</param>
         /// <returns>una lista con los posts <see cref="PostDto"/></returns>
-        public async Task<IEnumerable<PostDto>> GetByUser(int userId)
+        public async Task<IEnumerable<PostDto>> GetByUser(int userId, int page, int pageSize = 10)
         {
             try
             {
-                var posts = _unitOfWork.PostsRepository.GetAll(post => post.UserId == userId).OrderByDescending(p => p.Created).Select(p => p.ConvertModel(new PostDto())).ToList();
+                var skip = (page - 1) * pageSize;
+
+                var postsQuery = _unitOfWork.PostsRepository.GetAll(post => post.UserId == userId)
+                    .OrderByDescending(p => p.Created)
+                    .Skip(skip)
+                    .Take(pageSize);
+
+                var posts = postsQuery.Select(p => p.ConvertModel(new PostDto())).ToList();
+
                 List<PostDto> result = new List<PostDto>();
+
                 foreach (var post in posts)
                 {
-                    result.Add(post.ConvertModel(new PostDto()));
+                    result.Add(post);
+
                     var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == post.Id).ToListAsync();
                     foreach (var attachment in attachments)
                     {
@@ -602,7 +614,8 @@ namespace FireBreath.PostsMicroservice.Services
                         result.Last().Attachments.Add(attachmentDto);
                     }
                 }
-                return posts;
+
+                return result;
             }
             catch (Exception e)
             {
