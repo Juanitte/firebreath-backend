@@ -421,7 +421,7 @@
         },
 
         {
-            "DownstreamPathTemplate": "/posts/getbyuser/{userId}",
+            "DownstreamPathTemplate": "/posts/getbyuser/{userId}/{page}",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
                 {
@@ -429,7 +429,7 @@
                     "Port": 7271
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/posts/getbyuser/{userId}",
+            "UpstreamPathTemplate": "/gateway/posts/getbyuser/{userId}/{page}",
             "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"

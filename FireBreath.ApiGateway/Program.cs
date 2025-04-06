@@ -8,6 +8,13 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configuración de Kestrel para el tamaño máximo de la carga útil
+builder.WebHost.ConfigureKestrel(options =>
+{
+    // Aquí estamos estableciendo el tamaño máximo de la carga útil (en bytes)
+    options.Limits.MaxRequestBodySize = null; // 100 MB
+});
+
 builder.Services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
 {
     builder.AllowAnyOrigin()

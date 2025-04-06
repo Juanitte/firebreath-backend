@@ -161,13 +161,14 @@ namespace FireBreath.PostsMicroservice.Controllers
         ///     Obtiene los posts pertenecientes a un usuario cuyo id se pasa como parámetro
         /// </summary>
         /// <param name="userId">el id del usuario</param>
+        /// <param name="page">el numero de la pagina</param>
         /// <returns><see cref="JsonResult"/> con los datos de los posts</returns>
-        [HttpGet("/posts/getbyuser/{userId}")]
-        public async Task<JsonResult> GetByUser(int userId)
+        [HttpGet("/posts/getbyuser/{userId}/{page}")]
+        public async Task<JsonResult> GetByUser(int userId, int page)
         {
             try
             {
-                var posts = await JuaniteServicePosts.GetByUser(userId);
+                var posts = await JuaniteServicePosts.GetByUser(userId, page);
                 return new JsonResult(posts);
             }
             catch (Exception e)
