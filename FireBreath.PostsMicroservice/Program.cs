@@ -152,7 +152,12 @@ using (var scope = app.Services.CreateScope())
 {
     var serviceProvider = scope.ServiceProvider;
     var dbContext = serviceProvider.GetRequiredService<PostsDbContext>();
-    dbContext.Database.Migrate();
+
+    // Verifica si la base de datos ya existe
+    if (!dbContext.Database.CanConnect())
+    {
+        dbContext.Database.Migrate();  // Solo migrar si la base de datos no existe
+    }
 }
 
 app.UseHttpsRedirection();

@@ -13,6 +13,7 @@ builder.WebHost.ConfigureKestrel(options =>
 {
     // Aquí estamos estableciendo el tamaño máximo de la carga útil (en bytes)
     options.Limits.MaxRequestBodySize = null; // 100 MB
+    options.ListenAnyIP(80);
 });
 
 builder.Services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
@@ -77,9 +78,9 @@ var configuration = new OcelotPipelineConfiguration
     }
 };
 
-app.UseOcelot(configuration).Wait();
-
-app.UseHttpsRedirection();
-app.UseAuthorization();
 app.UseAuthentication();
+app.UseAuthorization();
+
+await app.UseOcelot(configuration);
+
 app.Run();
