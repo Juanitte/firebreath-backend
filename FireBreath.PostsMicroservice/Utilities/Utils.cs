@@ -18,7 +18,7 @@ namespace FireBreath.PostsMicroservice.Utilities
             var date = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
 
             var fileName = Path.GetFileNameWithoutExtension(attachment.FileName) + "_" + date + Path.GetExtension(attachment.FileName);
-            string directoryPath = Path.Combine("D://Proyectos/.NET/FireBreath_Backend_Storage/Files/", containerType.ToString() + "/");
+            string directoryPath = Path.Combine("/app/Files/", containerType.ToString() + "/");
             directoryPath = Path.Combine(directoryPath, containerId.ToString());
             string filePath = Path.Combine(directoryPath, fileName);
 

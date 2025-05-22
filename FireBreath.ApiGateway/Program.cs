@@ -78,9 +78,10 @@ var configuration = new OcelotPipelineConfiguration
     }
 };
 
+await app.UseOcelot(configuration);
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-await app.UseOcelot(configuration);
 
 app.Run();

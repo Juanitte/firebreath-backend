@@ -208,7 +208,9 @@ namespace FireBreath.PostsMicroservice.Services
                     var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == post.Id).ToListAsync();
                     foreach (var attachment in attachments)
                     {
-                        result.Last().Attachments.Add(attachment.ConvertModel(new AttachmentDto()));
+                        var attachmentDto = attachment.ConvertModel(new AttachmentDto());
+                        attachmentDto.File = Convert.ToBase64String(await File.ReadAllBytesAsync(attachment.Path));
+                        result.Last().Attachments.Add(attachmentDto);
                     }
                 }
                 return result;
@@ -216,6 +218,7 @@ namespace FireBreath.PostsMicroservice.Services
             catch (Exception e)
             {
                 _logger.LogError(e, "PostsService.GetComments => ");
+                Console.WriteLine($"Exception: {e.StackTrace}\nMessage: {e.Message}\nInnerException: {e.InnerException}");
                 throw;
             }
         }
