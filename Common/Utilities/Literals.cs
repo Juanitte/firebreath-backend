@@ -40,6 +40,7 @@ namespace Common.Utilities
         public static string Claim_Email = "Email";
         public static string Claim_PhoneNumber = "PhoneNumber";
         public static string Claim_Avatar = "Avatar";
+        public static string Claim_Country = "Country";
 
         #endregion
 
