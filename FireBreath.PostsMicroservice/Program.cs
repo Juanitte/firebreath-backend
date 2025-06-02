@@ -1,3 +1,4 @@
+using Common.Services;
 using FireBreath.PostsMicroservice.Models.Context;
 using FireBreath.PostsMicroservice.Models.UnitsOfWork;
 using FireBreath.PostsMicroservice.Services;
@@ -9,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using RequestFiltering.Services;
 using Serilog;
 using Serilog.Events;
+using StackExchange.Redis;
 using System.Globalization;
 using System.Text.Json.Serialization;
 
@@ -35,6 +37,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddHttpClient("users-ms", client =>
+{
+    client.BaseAddress = new Uri("http://users-ms");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
 
 var securityScheme = new OpenApiSecurityScheme()
 {
@@ -104,6 +111,11 @@ loggerFactory.AddSerilog(new LoggerConfiguration()
 
 builder.Services.AddSingleton(typeof(ILoggerFactory), loggerFactory);
 builder.Services.AddSingleton(typeof(Microsoft.Extensions.Logging.ILogger), loggerFactory.CreateLogger("FireBreath_PostsMicroservice"));
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+    ConnectionMultiplexer.Connect(builder.Configuration["Redis__Host"] + ":" + builder.Configuration["Redis__Port"])
+);
+builder.Services.AddSingleton<IRedisCacheService, RedisCacheService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 

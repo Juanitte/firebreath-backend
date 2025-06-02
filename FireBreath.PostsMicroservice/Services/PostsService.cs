@@ -12,6 +12,8 @@ using MimeKit;
 using Microsoft.EntityFrameworkCore;
 using Attachment = FireBreath.PostsMicroservice.Models.Entities.Attachment;
 using Microsoft.Extensions.Hosting;
+using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace FireBreath.PostsMicroservice.Services
 {
@@ -178,18 +180,68 @@ namespace FireBreath.PostsMicroservice.Services
         /// <param name="postId">el id del post</param>
         /// <returns></returns>
         public Task<int> GetShareCount(int postId);
+
+        /// <summary>
+        ///     Comprueba si un usuario tiene nuevos posts desde una fecha determinada
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="since"></param>
+        /// <returns></returns>
+        Task<bool> HasNewPostsForUser(int userId, DateTime since);
+
+        /// <summary>
+        ///     Comprueba si un usuario tiene nuevos posts de los usuarios que sigue desde una fecha determinada
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="since"></param>
+        /// <returns></returns>
+        Task<bool> HasNewPostsFromFollowing(int userId, DateTime since);
     }
     public class PostsService : BaseService, IPostsService
     {
+
+        #region Miembros privados
+
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        #endregion
+
         #region Constructores
 
-        public PostsService(JuaniteUnitOfWork juaniteUnitOfWork, ILogger logger) : base(juaniteUnitOfWork, logger)
+        public PostsService(JuaniteUnitOfWork juaniteUnitOfWork, ILogger logger, IHttpClientFactory httpClientFactory) : base(juaniteUnitOfWork, logger)
         {
+            _httpClientFactory = httpClientFactory;
         }
 
         #endregion
 
         #region Implementación de métodos de la interfaz
+
+        /// <summary>
+        ///     Comprueba si un usuario tiene nuevos posts desde una fecha determinada
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="since"></param>
+        /// <returns></returns>
+        public async Task<bool> HasNewPostsForUser(int userId, DateTime since)
+        {
+            return await _unitOfWork.PostsRepository.Any(p => p.UserId == userId && p.Created > since);
+        }
+
+        /// <summary>
+        ///     Comprueba si un usuario tiene nuevos posts de los usuarios que sigue desde una fecha determinada
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="since"></param>
+        /// <returns></returns>
+        public async Task<bool> HasNewPostsFromFollowing(int userId, DateTime since)
+        {
+            var followedUserIds = await GetFollowedUserIdsAsync(userId);
+            if (followedUserIds == null || !followedUserIds.Any()) return false;
+
+            return await _unitOfWork.PostsRepository.Any(p =>
+                followedUserIds.Contains(p.UserId) && p.Created > since);
+        }
 
         /// <summary>
         ///     Obtiene los comentarios de un post cuyo id se pasa como parámetro
@@ -990,6 +1042,18 @@ namespace FireBreath.PostsMicroservice.Services
                 _logger.LogError(e, "Send Mail => ");
                 return false;
             }
+        }
+
+        public async Task<List<int>> GetFollowedUserIdsAsync(int userId)
+        {
+            using var client = _httpClientFactory.CreateClient("users-ms");
+            var response = await client.GetAsync($"api/following/getFollowedIds/{userId}");
+
+            if (!response.IsSuccessStatusCode)
+                return new List<int>();
+
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<List<int>>(json);
         }
 
         #endregion

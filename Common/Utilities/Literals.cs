@@ -28,6 +28,8 @@ namespace Common.Utilities
 
         public static string Role_Admin = "Admin";
         public static string Role_User = "User";
+        public static string Role_Teacher = "Teacher";
+        public static string Role_Student = "Student";
 
         #endregion
 

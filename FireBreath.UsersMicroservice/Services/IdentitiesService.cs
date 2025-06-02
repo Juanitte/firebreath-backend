@@ -468,7 +468,9 @@ namespace FireBreath.UsersMicroservice.Services
                 var roles = new List<IdentityRole<int>>
                 {
                     new IdentityRole<int>() {Name = Literals.Role_Admin},
-                    new IdentityRole<int>() {Name = Literals.Role_User}
+                    new IdentityRole<int>() {Name = Literals.Role_User},
+                    new IdentityRole<int>() {Name = Literals.Role_Teacher},
+                    new IdentityRole<int>() {Name = Literals.Role_Student}
                 };
 
                 foreach (var role in roles)

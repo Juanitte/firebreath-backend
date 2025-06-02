@@ -17,6 +17,8 @@ using FireBreath.UsersMicroservice.Models.Context;
 using FireBreath.UsersMicroservice.Models.Entities;
 using FireBreath.UsersMicroservice.Models.UnitsOfWork;
 using Serilog.Events;
+using Common.Services;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -243,6 +245,11 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 builder.Services.AddTransient<IBlockingService, BlockingService>();
 builder.Services.AddScoped<IIdentitiesService, IdentitiesService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+    ConnectionMultiplexer.Connect(builder.Configuration["Redis__Host"] + ":" + builder.Configuration["Redis__Port"])
+);
+builder.Services.AddSingleton<IRedisCacheService, RedisCacheService>();
 
 #endregion
 

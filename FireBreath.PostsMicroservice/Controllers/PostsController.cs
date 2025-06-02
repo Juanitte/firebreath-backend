@@ -29,6 +29,26 @@ namespace FireBreath.PostsMicroservice.Controllers
 
         #region Métodos públicos
 
+        [HttpGet("posts/hasnew")]
+        public async Task<ActionResult<bool>> HasNewPosts([FromQuery] DateTime since, [FromQuery] int userId, [FromQuery] bool isProfile)
+        {
+            try
+            {
+                if (isProfile)
+                {
+                    return await JuaniteServicePosts.HasNewPostsForUser(userId, since);
+                }
+                else
+                {
+                    return await JuaniteServicePosts.HasNewPostsFromFollowing(userId, since);
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest(false);
+            }
+        }
+
         /// <summary>
         ///     Método que obtiene todos los posts
         /// </summary>
