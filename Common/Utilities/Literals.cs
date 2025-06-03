@@ -63,21 +63,11 @@ namespace Common.Utilities
 
         #endregion
 
-        #region Consultas Base de Datos
+        #region Redis
 
-        public static string Create_Table = "CREATE TABLE";
-        public static string Alter_Table = "ALTER TABLE";
-        public static string Insert = "INSERT INTO";
-        public static string Select = "SELECT";
-        public static string Update = "UPDATE";
-        public static string Set = "SET";
-        public static string Delete = "DELETE";
-        public static string Where = "WHERE";
-        public static string Between = "BETWEEN";
-        public static string From = "FROM";
-        public static string And = "AND";
-        public static string Values = "VALUES";
-
+        public static string Redis_Users_Following = "following:";
+        public static string Redis_New_Posts = "newposts:";
+        public static string Redis_New_Post_Signal = "posts.new";
         #endregion
     }
 }

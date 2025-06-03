@@ -247,7 +247,7 @@ builder.Services.AddScoped<IIdentitiesService, IdentitiesService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-    ConnectionMultiplexer.Connect(builder.Configuration["Redis__Host"] + ":" + builder.Configuration["Redis__Port"])
+    ConnectionMultiplexer.Connect(builder.Configuration["Redis__Host"] + ":" + builder.Configuration["Redis__Port"] + ",abortConnect=false")
 );
 builder.Services.AddSingleton<IRedisCacheService, RedisCacheService>();
 

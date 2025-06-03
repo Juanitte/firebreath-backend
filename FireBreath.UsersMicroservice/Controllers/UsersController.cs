@@ -510,6 +510,20 @@ namespace FireBreath.UsersMicroservice.Controllers
             }
         }
 
+        [HttpGet("users/followingids")]
+        public async Task<IActionResult> GetFollowingIds([FromQuery] int userId)
+        {
+            try
+            {
+                var followingIds = await ServiceUsers.GetFollowingUserIdsCached(userId);
+                return Ok(followingIds);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
         #endregion
 
         #region Métodos Privados

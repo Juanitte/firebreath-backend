@@ -12,6 +12,7 @@ using System.Security.Principal;
 using System.Text;
 using FireBreath.UsersMicroservice.Translations;
 using Microsoft.AspNetCore.Mvc;
+using Common.Services;
 
 namespace FireBreath.UsersMicroservice.Services
 {
@@ -202,29 +203,28 @@ namespace FireBreath.UsersMicroservice.Services
         /// <returns></returns>
         Task<List<UserDto>> GetUsersFilter(string searchString);
 
-
+        /// <summary>
+        ///     Obtiene los ids de los usuarios que sigue un usuario cuyo id se pasa como parámetro.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<List<int>> GetFollowingUserIdsCached(int userId);
     }
     public sealed class UsersService : BaseService, IUsersService
     {
         #region Miembros privados
 
         private IdentitiesService _identitiesService;
+        private readonly IRedisCacheService _redisCacheService;
 
         #endregion
 
         #region Constructores
 
-        public UsersService(JuaniteUnitOfWork juaniteUnitOfWork, ILogger logger) : base(juaniteUnitOfWork, logger)
-        {
-        }
-
-        public UsersService(JuaniteUnitOfWork juaniteUnitOfWork, ILogger logger, IIdentitiesService identitiesService) : base(juaniteUnitOfWork, logger)
+        public UsersService(JuaniteUnitOfWork juaniteUnitOfWork, ILogger logger, IIdentitiesService identitiesService, IRedisCacheService redisCacheService) : base(juaniteUnitOfWork, logger)
         {
             _identitiesService = (IdentitiesService)identitiesService;
-        }
-
-        public UsersService(IPrincipal user, JuaniteUnitOfWork ioTUnitOfWork, ILogger logger) : base(user, ioTUnitOfWork, logger)
-        {
+            _redisCacheService = redisCacheService;
         }
 
         #endregion
@@ -717,6 +717,19 @@ namespace FireBreath.UsersMicroservice.Services
                     response.Errors = new List<string> { Translation_Errors.Error_user_update };
                 }
 
+                if (response.Success)
+                {
+                    var key = $"{Literals.Redis_Users_Following}{follow.UserId}";
+                    var followingIds = await _redisCacheService.GetAsync<List<int>>(key);
+                    if (followingIds == null)
+                        followingIds = await GetFollowingUserIdsCached(follow.UserId);
+
+                    if (followingIds.Remove(follow.FollowerId))
+                    {
+                        await _redisCacheService.SetAsync(key, followingIds, TimeSpan.FromMinutes(60));
+                    }
+                }
+
                 return response;
             }
             catch (Exception e)
@@ -797,6 +810,20 @@ namespace FireBreath.UsersMicroservice.Services
                     response.Errors = new List<string> { String.Format(Translation_UsersRoles.ID_no_found_description, follow.UserId) };
                 }
                 response.Id = follow.UserId;
+
+                if (response.Success)
+                {
+                    var key = $"{Literals.Redis_Users_Following}{follow.UserId}";
+                    var followingIds = await _redisCacheService.GetAsync<List<int>>(key);
+                    if (followingIds == null)
+                        followingIds = await GetFollowingUserIdsCached(follow.UserId);
+
+                    if (followingIds.Remove(follow.FollowerId))
+                    {
+                        await _redisCacheService.SetAsync(key, followingIds, TimeSpan.FromMinutes(60));
+                    }
+                }
+
                 return response;
             }
             catch (Exception e)
@@ -933,6 +960,33 @@ namespace FireBreath.UsersMicroservice.Services
             {
                 _logger.LogError(e, "UsersService.GetFollowing => ");
                 throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los ids de los usuarios que sigue un usuario, almacenados en caché
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<List<int>> GetFollowingUserIdsCached(int userId)
+        {
+            try
+            {
+                return await _redisCacheService.GetOrCreateAsync(
+                    $"{Literals.Redis_Users_Following}{userId}",
+                    async () =>
+                    {
+                        var following = await GetFollowing(userId);
+                        return following.Select(f => f.Id).ToList();
+                    },
+                    TimeSpan.FromMinutes(60)
+                ) ?? new List<int>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Redis] Error obteniendo usuarios seguidos para {userId}: {ex.Message}");
+                _logger.LogError(ex, $"[Redis] Error obteniendo usuarios seguidos para {userId}");
+                return new List<int>(); // No interrumpas el login
             }
         }
 

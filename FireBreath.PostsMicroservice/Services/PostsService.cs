@@ -14,6 +14,8 @@ using Attachment = FireBreath.PostsMicroservice.Models.Entities.Attachment;
 using Microsoft.Extensions.Hosting;
 using System.Net.Http;
 using Newtonsoft.Json;
+using Common.Services;
+using StackExchange.Redis;
 
 namespace FireBreath.PostsMicroservice.Services
 {
@@ -203,14 +205,16 @@ namespace FireBreath.PostsMicroservice.Services
         #region Miembros privados
 
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IRedisCacheService _redisCacheService;
 
         #endregion
 
         #region Constructores
 
-        public PostsService(JuaniteUnitOfWork juaniteUnitOfWork, ILogger logger, IHttpClientFactory httpClientFactory) : base(juaniteUnitOfWork, logger)
+        public PostsService(JuaniteUnitOfWork juaniteUnitOfWork, ILogger logger, IHttpClientFactory httpClientFactory, IRedisCacheService redisCacheService) : base(juaniteUnitOfWork, logger)
         {
             _httpClientFactory = httpClientFactory;
+            _redisCacheService = redisCacheService;
         }
 
         #endregion
@@ -358,6 +362,7 @@ namespace FireBreath.PostsMicroservice.Services
                         await _unitOfWork.SaveChanges();
                         response.IsSuccess(post.Id);
 
+
                         if (!createPost.Attachments.IsNullOrEmpty())
                         {
                             foreach (var attachment in createPost.Attachments)
@@ -373,6 +378,14 @@ namespace FireBreath.PostsMicroservice.Services
                             }
                             await _unitOfWork.SaveChanges();
                         }
+                        var payload = JsonConvert.SerializeObject(new
+                        {
+                            userId = post.UserId,
+                            postId = post.Id,
+                            created = post.Created
+                        });
+
+                        await _redisCacheService.PublishAsync(Literals.Redis_New_Post_Signal, payload);
                     }
                 }
                 else
@@ -1046,14 +1059,9 @@ namespace FireBreath.PostsMicroservice.Services
 
         public async Task<List<int>> GetFollowedUserIdsAsync(int userId)
         {
-            using var client = _httpClientFactory.CreateClient("users-ms");
-            var response = await client.GetAsync($"api/following/getFollowedIds/{userId}");
-
-            if (!response.IsSuccessStatusCode)
-                return new List<int>();
-
-            var json = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<List<int>>(json);
+            var key = $"{Literals.Redis_Users_Following}{userId}";
+            var ids = await _redisCacheService.GetAsync<List<int>>(key);
+            return ids ?? new List<int>();
         }
 
         #endregion

@@ -12,11 +12,14 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using FireBreath.UsersMicroservice.Translations;
+using Common.Services;
+using FireBreath.UsersMicroservice.Services;
 
 namespace FireBreath.UsersMicroservice.Controllers
 {
     public class AuthController : BaseController
     {
+
         #region Constructores
 
         public AuthController(IServiceProvider serviceCollection) : base(serviceCollection)
@@ -44,6 +47,8 @@ namespace FireBreath.UsersMicroservice.Controllers
                 {
                     return BadRequest(new ResponseLoginDto() { ErrorDescripcion = Translation_Account.Incorrect_password });
                 }
+
+                await ServiceUsers.GetFollowingUserIdsCached(user.Id);
 
                 var claims = new ClaimsIdentity(new Claim[]
                 {
