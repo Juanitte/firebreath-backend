@@ -2,18 +2,13 @@
 using FireBreath.UsersMicroservice.Helpers;
 using FireBreath.UsersMicroservice.Models.Dtos.EntityDto;
 using FireBreath.UsersMicroservice.Models.Dtos.ResponseDto;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Org.BouncyCastle.Utilities.Encoders;
 using static FireBreath.UsersMicroservice.Services.UsersService;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using FireBreath.UsersMicroservice.Translations;
-using Common.Services;
-using FireBreath.UsersMicroservice.Services;
 
 namespace FireBreath.UsersMicroservice.Controllers
 {

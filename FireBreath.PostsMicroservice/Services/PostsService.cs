@@ -378,14 +378,6 @@ namespace FireBreath.PostsMicroservice.Services
                             }
                             await _unitOfWork.SaveChanges();
                         }
-                        var payload = JsonConvert.SerializeObject(new
-                        {
-                            userId = post.UserId,
-                            postId = post.Id,
-                            created = post.Created
-                        });
-
-                        await _redisCacheService.PublishAsync(Literals.Redis_New_Post_Signal, payload);
                     }
                 }
                 else
@@ -1059,9 +1051,18 @@ namespace FireBreath.PostsMicroservice.Services
 
         public async Task<List<int>> GetFollowedUserIdsAsync(int userId)
         {
-            var key = $"{Literals.Redis_Users_Following}{userId}";
-            var ids = await _redisCacheService.GetAsync<List<int>>(key);
-            return ids ?? new List<int>();
+            try
+            {
+                var key = $"{Literals.Redis_Users_Following}{userId}";
+                var ids = await _redisCacheService.GetAsync<List<int>>(key);
+                return ids ?? new List<int>();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.GetFollowedUserIdsAsync => ");
+                Console.WriteLine($"Exception: {e.StackTrace}\nMessage: {e.Message}\nInnerException: {e.InnerException}");
+                throw;
+            }
         }
 
         #endregion

@@ -112,10 +112,11 @@ loggerFactory.AddSerilog(new LoggerConfiguration()
 builder.Services.AddSingleton(typeof(ILoggerFactory), loggerFactory);
 builder.Services.AddSingleton(typeof(Microsoft.Extensions.Logging.ILogger), loggerFactory.CreateLogger("FireBreath_PostsMicroservice"));
 
-builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-    ConnectionMultiplexer.Connect(builder.Configuration["Redis__Host"] + ":" + builder.Configuration["Redis__Port"] + ",abortConnect=false")
-);
-builder.Services.AddSingleton<IRedisCacheService, RedisCacheService>();
+builder.Services.AddSingleton<IDatabase>(sp =>
+    sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
+builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect("redis:6379"));
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 

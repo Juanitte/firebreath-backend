@@ -246,10 +246,11 @@ builder.Services.AddTransient<IBlockingService, BlockingService>();
 builder.Services.AddScoped<IIdentitiesService, IdentitiesService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
 
-builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-    ConnectionMultiplexer.Connect(builder.Configuration["Redis__Host"] + ":" + builder.Configuration["Redis__Port"] + ",abortConnect=false")
-);
-builder.Services.AddSingleton<IRedisCacheService, RedisCacheService>();
+builder.Services.AddSingleton<IDatabase>(sp =>
+    sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
+builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect("redis:6379"));
 
 #endregion
 

@@ -45,7 +45,7 @@ namespace FireBreath.PostsMicroservice.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(false);
+                return BadRequest(e);
             }
         }
 

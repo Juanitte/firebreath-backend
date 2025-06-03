@@ -719,12 +719,12 @@ namespace FireBreath.UsersMicroservice.Services
 
                 if (response.Success)
                 {
-                    var key = $"{Literals.Redis_Users_Following}{follow.UserId}";
+                    var key = $"{Literals.Redis_Users_Following}{follow.FollowerId}";
                     var followingIds = await _redisCacheService.GetAsync<List<int>>(key);
                     if (followingIds == null)
-                        followingIds = await GetFollowingUserIdsCached(follow.UserId);
+                        followingIds = await GetFollowingUserIdsCached(follow.FollowerId);
 
-                    if (followingIds.Remove(follow.FollowerId))
+                    if (followingIds.Contains(follow.UserId))
                     {
                         await _redisCacheService.SetAsync(key, followingIds, TimeSpan.FromMinutes(60));
                     }
@@ -813,12 +813,12 @@ namespace FireBreath.UsersMicroservice.Services
 
                 if (response.Success)
                 {
-                    var key = $"{Literals.Redis_Users_Following}{follow.UserId}";
+                    var key = $"{Literals.Redis_Users_Following}{follow.FollowerId}";
                     var followingIds = await _redisCacheService.GetAsync<List<int>>(key);
                     if (followingIds == null)
-                        followingIds = await GetFollowingUserIdsCached(follow.UserId);
+                        followingIds = await GetFollowingUserIdsCached(follow.FollowerId);
 
-                    if (followingIds.Remove(follow.FollowerId))
+                    if (followingIds.Remove(follow.UserId))
                     {
                         await _redisCacheService.SetAsync(key, followingIds, TimeSpan.FromMinutes(60));
                     }

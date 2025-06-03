@@ -678,7 +678,7 @@
 
     ],
     "GlobalConfiguration": {
-        "BaseUrl": "http://api-gateway:8080",
+        "BaseUrl": "https://api.inkas.es",
         "LogLevel": "Debug"
     }
 }

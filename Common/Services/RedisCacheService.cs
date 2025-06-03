@@ -14,18 +14,15 @@ namespace Common.Services
         Task SetAsync<T>(string key, T data, TimeSpan? expiry = null);
         Task RemoveAsync(string key);
         Task<T?> GetOrCreateAsync<T>(string key, Func<Task<T>> factory, TimeSpan ttl, TimeSpan? lockTtl = null);
-        Task PublishAsync(string channel, string message);
     }
 
     public class RedisCacheService : IRedisCacheService
     {
         private readonly IDatabase _redis;
-        private readonly IConnectionMultiplexer _connection;
 
-        public RedisCacheService(IConnectionMultiplexer connection)
+        public RedisCacheService(IDatabase redis)
         {
-            _connection = connection;
-            _redis = connection.GetDatabase();
+            _redis = redis;
         }
 
         public async Task<T?> GetAsync<T>(string key)
@@ -90,12 +87,6 @@ namespace Common.Services
                 await Task.Delay(100);
                 return await GetAsync<T>(key);
             }
-        }
-
-        public async Task PublishAsync(string channel, string message)
-        {
-            var subscriber = _connection.GetSubscriber();
-            await subscriber.PublishAsync(channel, message);
         }
     }
 }

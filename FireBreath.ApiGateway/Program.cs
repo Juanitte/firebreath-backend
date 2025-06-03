@@ -1,6 +1,4 @@
 using Common.Utilities;
-using FireBreath.ApiGateway.Notifications;
-using FireBreath.ApiGateway.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Ocelot.Authorization;
@@ -45,17 +43,10 @@ builder.Services
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("!$Uw6e~T4%tQ@z#sXv9&gYb2^hV*pN7cF"))
         };
     });
-// Add services to the container.
-
-builder.Services.AddSignalR();
-builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-    ConnectionMultiplexer.Connect("redis:6379")); // o tu string de conexión a Redis
-builder.Services.AddHostedService<RedisSubscriberService>();
 
 var app = builder.Build();
 app.UseCors("MyPolicy");
 
-app.MapHub<NotificationHub>("/gateway/hubs/notifications");
 
 var configuration = new OcelotPipelineConfiguration
 {
