@@ -1,4 +1,6 @@
-﻿using Common.Utilities;
+﻿using Azure;
+using Common.Services;
+using Common.Utilities;
 using FireBreath.PostsMicroservice.Models.Dtos.CreateDto;
 using FireBreath.PostsMicroservice.Models.Dtos.EntityDto;
 using FireBreath.PostsMicroservice.Models.Dtos.RequestDto;
@@ -8,14 +10,15 @@ using FireBreath.PostsMicroservice.Models.UnitsOfWork;
 using FireBreath.PostsMicroservice.Translations;
 using FireBreath.PostsMicroservice.Utilities;
 using MailKit.Security;
-using MimeKit;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Attachment = FireBreath.PostsMicroservice.Models.Entities.Attachment;
 using Microsoft.Extensions.Hosting;
-using System.Net.Http;
+using MimeKit;
 using Newtonsoft.Json;
-using Common.Services;
 using StackExchange.Redis;
+using System.Net.Http;
+using Attachment = FireBreath.PostsMicroservice.Models.Entities.Attachment;
 
 namespace FireBreath.PostsMicroservice.Services
 {
@@ -198,6 +201,16 @@ namespace FireBreath.PostsMicroservice.Services
         /// <param name="since"></param>
         /// <returns></returns>
         Task<bool> HasNewPostsFromFollowing(int userId, DateTime since);
+
+        /// <summary>
+        /// Asynchronously retrieves the stream and MIME type of an attachment by its identifier.
+        /// </summary>
+        /// <remarks>The caller is responsible for disposing the returned <see cref="Stream"/> after
+        /// use.</remarks>
+        /// <param name="attachmentId">The unique identifier of the attachment to retrieve. Must be a positive integer.</param>
+        /// <returns>A tuple containing the attachment's <see cref="Stream"/> and its MIME type as a <see cref="string"/>,  or
+        /// <see langword="null"/> if the attachment does not exist.</returns>
+        Task<(Stream Stream, string MimeType)?> GetAttachmentStreamAsync(int attachmentId);
     }
     public class PostsService : BaseService, IPostsService
     {
@@ -261,12 +274,49 @@ namespace FireBreath.PostsMicroservice.Services
                 foreach (var post in posts)
                 {
                     result.Add(post.ConvertModel(new PostDto()));
-                    var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == post.Id).ToListAsync();
-                    foreach (var attachment in attachments)
+                    var attachments = await _unitOfWork.AttachmentsRepository
+                        .GetAll(attachment => attachment.PostId == post.Id)
+                        .ToListAsync();
+                    if (!attachments.IsNullOrEmpty())
                     {
-                        var attachmentDto = attachment.ConvertModel(new AttachmentDto());
-                        attachmentDto.File = Convert.ToBase64String(await File.ReadAllBytesAsync(attachment.Path));
-                        result.Last().Attachments.Add(attachmentDto);
+                        foreach (var attachment in attachments)
+                        {
+                            // Creo el DTO básico
+                            AttachmentDto attachmentDto = attachment.ConvertModel(new AttachmentDto());
+
+                            // Si es imagen, cargo el base64
+                            var ext = Path.GetExtension(attachment.Path).ToLower();
+                            bool isVideo = ext == ".mp4" || ext == ".webm" || ext == ".ogg";
+                            attachmentDto.IsVideo = isVideo;
+
+                            if (!isVideo)
+                            {
+                                // Leer solo la imagen en base64
+                                attachmentDto.File = Convert.ToBase64String(
+                                    await File.ReadAllBytesAsync(attachment.Path));
+                            }
+                            else
+                            {
+                                // 1) Generar el thumbnail con FFmpeg en tiempo real
+                                var thumbBytes = VideoThumbnailGenerator.GenerateThumbnail(attachment.Path, _logger);
+
+                                if (thumbBytes != null && thumbBytes.Length > 0)
+                                {
+                                    // Codifico a Base64 y entrego un data URI
+                                    attachmentDto.Thumbnail = $"data:image/png;base64,{Convert.ToBase64String(thumbBytes)}";
+                                }
+                                else
+                                {
+                                    // Si FFmpeg falló, puedes dejar null o una imagen "placeholder"
+                                    attachmentDto.Thumbnail = null;
+                                }
+                                // → Para vídeo, no asignamos attachmentDto.File (queda null).
+                                //    Podrías llenar attachmentDto.Thumbnail con un poster si lo tuvieras:
+                                //    attachmentDto.Thumbnail = Convert.ToBase64String(File.ReadAllBytes(thumbnailPath));
+                                attachmentDto.File = null;
+                            }
+                            result.Last().Attachments.Add(attachmentDto);
+                        }
                     }
                 }
                 return result;
@@ -440,11 +490,44 @@ namespace FireBreath.PostsMicroservice.Services
 
                 if (post != null)
                 {
-                    var attachments = _unitOfWork.AttachmentsRepository.GetAll(a => a.PostId == id);
+                    var attachments = await _unitOfWork.AttachmentsRepository
+                        .GetAll(attachment => attachment.PostId == post.Id)
+                        .ToListAsync();
                     foreach (var attachment in attachments)
                     {
                         AttachmentDto attachmentDto = attachment.ConvertModel(new AttachmentDto());
-                        attachmentDto.File = Convert.ToBase64String(await File.ReadAllBytesAsync(attachment.Path));
+
+                        // Si es imagen, cargo el base64
+                        var ext = Path.GetExtension(attachment.Path).ToLower();
+                        bool isVideo = ext == ".mp4" || ext == ".webm" || ext == ".ogg";
+                        attachmentDto.IsVideo = isVideo;
+
+                        if (!isVideo)
+                        {
+                            // Leer solo la imagen en base64
+                            attachmentDto.File = Convert.ToBase64String(
+                                await File.ReadAllBytesAsync(attachment.Path));
+                        }
+                        else
+                        {
+                            // 1) Generar el thumbnail con FFmpeg en tiempo real
+                            var thumbBytes = VideoThumbnailGenerator.GenerateThumbnail(attachment.Path, _logger);
+
+                            if (thumbBytes != null && thumbBytes.Length > 0)
+                            {
+                                // Codifico a Base64 y entrego un data URI
+                                attachmentDto.Thumbnail = $"data:image/png;base64,{Convert.ToBase64String(thumbBytes)}";
+                            }
+                            else
+                            {
+                                // Si FFmpeg falló, puedes dejar null o una imagen "placeholder"
+                                attachmentDto.Thumbnail = null;
+                            }
+                            // → Para vídeo, no asignamos attachmentDto.File (queda null).
+                            //    Podrías llenar attachmentDto.Thumbnail con un poster si lo tuvieras:
+                            //    attachmentDto.Thumbnail = Convert.ToBase64String(File.ReadAllBytes(thumbnailPath));
+                            attachmentDto.File = null;
+                        }
                         post.Attachments.Add(attachmentDto);
                     }
                 }
@@ -471,12 +554,49 @@ namespace FireBreath.PostsMicroservice.Services
                 foreach (var post in posts)
                 {
                     result.Add(post.ConvertModel(new PostDto()));
-                    var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == post.Id).ToListAsync();
-                    foreach (var attachment in attachments)
+                    var attachments = await _unitOfWork.AttachmentsRepository
+                        .GetAll(attachment => attachment.PostId == post.Id)
+                        .ToListAsync();
+                    if (!attachments.IsNullOrEmpty())
                     {
-                        AttachmentDto attachmentDto = attachment.ConvertModel(new AttachmentDto());
-                        attachmentDto.File = Convert.ToBase64String(await File.ReadAllBytesAsync(attachment.Path));
-                        result.Last().Attachments.Add(attachmentDto);
+                        foreach (var attachment in attachments)
+                        {
+                            // Creo el DTO básico
+                            AttachmentDto attachmentDto = attachment.ConvertModel(new AttachmentDto());
+
+                            // Si es imagen, cargo el base64
+                            var ext = Path.GetExtension(attachment.Path).ToLower();
+                            bool isVideo = ext == ".mp4" || ext == ".webm" || ext == ".ogg";
+                            attachmentDto.IsVideo = isVideo;
+
+                            if (!isVideo)
+                            {
+                                // Leer solo la imagen en base64
+                                attachmentDto.File = Convert.ToBase64String(
+                                    await File.ReadAllBytesAsync(attachment.Path));
+                            }
+                            else
+                            {
+                                // 1) Generar el thumbnail con FFmpeg en tiempo real
+                                var thumbBytes = VideoThumbnailGenerator.GenerateThumbnail(attachment.Path, _logger);
+
+                                if (thumbBytes != null && thumbBytes.Length > 0)
+                                {
+                                    // Codifico a Base64 y entrego un data URI
+                                    attachmentDto.Thumbnail = $"data:image/png;base64,{Convert.ToBase64String(thumbBytes)}";
+                                }
+                                else
+                                {
+                                    // Si FFmpeg falló, puedes dejar null o una imagen "placeholder"
+                                    attachmentDto.Thumbnail = null;
+                                }
+                                // → Para vídeo, no asignamos attachmentDto.File (queda null).
+                                //    Podrías llenar attachmentDto.Thumbnail con un poster si lo tuvieras:
+                                //    attachmentDto.Thumbnail = Convert.ToBase64String(File.ReadAllBytes(thumbnailPath));
+                                attachmentDto.File = null;
+                            }
+                            result.Last().Attachments.Add(attachmentDto);
+                        }
                     }
                 }
                 return result;
@@ -532,13 +652,47 @@ namespace FireBreath.PostsMicroservice.Services
                     foreach (var post in resultDto)
                     {
                         response.Posts.Add(post.ConvertModel(new PostDto()));
-                        var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == post.Id).ToListAsync();
+                        var attachments = await _unitOfWork.AttachmentsRepository
+                        .GetAll(attachment => attachment.PostId == post.Id)
+                        .ToListAsync();
                         if (!attachments.IsNullOrEmpty())
                         {
                             foreach (var attachment in attachments)
                             {
+                                // Creo el DTO básico
                                 AttachmentDto attachmentDto = attachment.ConvertModel(new AttachmentDto());
-                                attachmentDto.File = Convert.ToBase64String(await File.ReadAllBytesAsync(attachment.Path));
+
+                                // Si es imagen, cargo el base64
+                                var ext = Path.GetExtension(attachment.Path).ToLower();
+                                bool isVideo = ext == ".mp4" || ext == ".webm" || ext == ".ogg";
+                                attachmentDto.IsVideo = isVideo;
+
+                                if (!isVideo)
+                                {
+                                    // Leer solo la imagen en base64
+                                    attachmentDto.File = Convert.ToBase64String(
+                                        await File.ReadAllBytesAsync(attachment.Path));
+                                }
+                                else
+                                {
+                                    // 1) Generar el thumbnail con FFmpeg en tiempo real
+                                    var thumbBytes = VideoThumbnailGenerator.GenerateThumbnail(attachment.Path, _logger);
+
+                                    if (thumbBytes != null && thumbBytes.Length > 0)
+                                    {
+                                        // Codifico a Base64 y entrego un data URI
+                                        attachmentDto.Thumbnail = $"data:image/png;base64,{Convert.ToBase64String(thumbBytes)}";
+                                    }
+                                    else
+                                    {
+                                        // Si FFmpeg falló, puedes dejar null o una imagen "placeholder"
+                                        attachmentDto.Thumbnail = null;
+                                    }
+                                    // → Para vídeo, no asignamos attachmentDto.File (queda null).
+                                    //    Podrías llenar attachmentDto.Thumbnail con un poster si lo tuvieras:
+                                    //    attachmentDto.Thumbnail = Convert.ToBase64String(File.ReadAllBytes(thumbnailPath));
+                                    attachmentDto.File = null;
+                                }
                                 response.Posts.Last().Attachments.Add(attachmentDto);
                             }
                         }
@@ -666,11 +820,51 @@ namespace FireBreath.PostsMicroservice.Services
                 {
                     result.Add(post);
 
-                    var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == post.Id).ToListAsync();
+                    // Obtengo todos los attachments
+                    var attachments = await _unitOfWork.AttachmentsRepository
+                        .GetAll(attachment => attachment.PostId == post.Id)
+                        .ToListAsync();
+
+                    if(attachments.IsNullOrEmpty())
+                        continue; // Si no hay attachments, saltamos al siguiente post
+
                     foreach (var attachment in attachments)
                     {
+                        // Creo el DTO básico
                         AttachmentDto attachmentDto = attachment.ConvertModel(new AttachmentDto());
-                        attachmentDto.File = Convert.ToBase64String(await File.ReadAllBytesAsync(attachment.Path));
+
+                        // Si es imagen, cargo el base64
+                        var ext = Path.GetExtension(attachment.Path).ToLower();
+                        bool isVideo = ext == ".mp4" || ext == ".webm" || ext == ".ogg";
+                        attachmentDto.IsVideo = isVideo;
+
+                        if (!isVideo)
+                        {
+                            // Leer solo la imagen en base64
+                            attachmentDto.File = Convert.ToBase64String(
+                                await File.ReadAllBytesAsync(attachment.Path));
+                        }
+                        else
+                        {
+                            // 1) Generar el thumbnail con FFmpeg en tiempo real
+                            var thumbBytes = VideoThumbnailGenerator.GenerateThumbnail(attachment.Path, _logger);
+
+                            if (thumbBytes != null && thumbBytes.Length > 0)
+                            {
+                                // Codifico a Base64 y entrego un data URI
+                                attachmentDto.Thumbnail = $"data:image/png;base64,{Convert.ToBase64String(thumbBytes)}";
+                            }
+                            else
+                            {
+                                // Si FFmpeg falló, puedes dejar null o una imagen "placeholder"
+                                attachmentDto.Thumbnail = null;
+                            }
+                            // → Para vídeo, no asignamos attachmentDto.File (queda null).
+                            //    Podrías llenar attachmentDto.Thumbnail con un poster si lo tuvieras:
+                            //    attachmentDto.Thumbnail = Convert.ToBase64String(File.ReadAllBytes(thumbnailPath));
+                            attachmentDto.File = null;
+                        }
+
                         result.Last().Attachments.Add(attachmentDto);
                     }
                 }
@@ -824,11 +1018,44 @@ namespace FireBreath.PostsMicroservice.Services
                 foreach (var like in likes)
                 {
                     posts.Add(_unitOfWork.PostsRepository.Get(like.UserId).ConvertModel(new PostDto()));
-                    var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == posts.Last().Id).ToListAsync();
+                    var attachments = await _unitOfWork.AttachmentsRepository
+                        .GetAll(attachment => attachment.PostId == like.PostId)
+                        .ToListAsync();
                     foreach (var attachment in attachments)
                     {
                         AttachmentDto attachmentDto = attachment.ConvertModel(new AttachmentDto());
-                        attachmentDto.File = Convert.ToBase64String(await File.ReadAllBytesAsync(attachment.Path));
+
+                        // Si es imagen, cargo el base64
+                        var ext = Path.GetExtension(attachment.Path).ToLower();
+                        bool isVideo = ext == ".mp4" || ext == ".webm" || ext == ".ogg";
+                        attachmentDto.IsVideo = isVideo;
+
+                        if (!isVideo)
+                        {
+                            // Leer solo la imagen en base64
+                            attachmentDto.File = Convert.ToBase64String(
+                                await File.ReadAllBytesAsync(attachment.Path));
+                        }
+                        else
+                        {
+                            // 1) Generar el thumbnail con FFmpeg en tiempo real
+                            var thumbBytes = VideoThumbnailGenerator.GenerateThumbnail(attachment.Path, _logger);
+
+                            if (thumbBytes != null && thumbBytes.Length > 0)
+                            {
+                                // Codifico a Base64 y entrego un data URI
+                                attachmentDto.Thumbnail = $"data:image/png;base64,{Convert.ToBase64String(thumbBytes)}";
+                            }
+                            else
+                            {
+                                // Si FFmpeg falló, puedes dejar null o una imagen "placeholder"
+                                attachmentDto.Thumbnail = null;
+                            }
+                            // → Para vídeo, no asignamos attachmentDto.File (queda null).
+                            //    Podrías llenar attachmentDto.Thumbnail con un poster si lo tuvieras:
+                            //    attachmentDto.Thumbnail = Convert.ToBase64String(File.ReadAllBytes(thumbnailPath));
+                            attachmentDto.File = null;
+                        }
                         posts.Last().Attachments.Add(attachmentDto);
                     }
                 }
@@ -960,31 +1187,67 @@ namespace FireBreath.PostsMicroservice.Services
         }
 
         /// <summary>
-        ///     Obtiene los post que ha compartido un usuario cuyo id se pasa como parámetro
+        ///     Obtiene los posts que ha compartido un usuario cuyo id se pasa como parámetro
+        ///     y genera thumbnails para cada vídeo si aún no existe uno en la BD.
         /// </summary>
-        /// <param name="userId">el id del usuario</param>
-        /// <returns></returns>
         public async Task<List<PostDto>> GetShared(int userId)
         {
             try
             {
                 var shares = _unitOfWork.SharesRepository.GetAll(l => l.UserId == userId);
                 var posts = new List<PostDto>();
+
                 foreach (var share in shares)
                 {
-                    posts.Add(_unitOfWork.PostsRepository.Get(share.UserId).ConvertModel(new PostDto()));
-                    var attachments = await _unitOfWork.AttachmentsRepository.GetAll(attachment => attachment.PostId == posts.Last().Id).ToListAsync();
+                    // Obtenemos el post principal
+                    var postEntity = await _unitOfWork.PostsRepository.Get(share.PostId);
+                    var postDto = postEntity.ConvertModel(new PostDto());
+                    posts.Add(postDto);
+
+                    // Obtenemos attachments de ese post
+                    var attachments = await _unitOfWork.AttachmentsRepository
+                        .GetAll(attachment => attachment.PostId == share.PostId)
+                        .ToListAsync();
+
                     foreach (var attachment in attachments)
                     {
-                        AttachmentDto attachmentDto = attachment.ConvertModel(new AttachmentDto());
-                        attachmentDto.File = Convert.ToBase64String(await File.ReadAllBytesAsync(attachment.Path));
+                        var attachmentDto = attachment.ConvertModel(new AttachmentDto());
+                        var ext = Path.GetExtension(attachment.Path).ToLower();
+                        bool isVideo = ext == ".mp4" || ext == ".webm" || ext == ".ogg";
+                        attachmentDto.IsVideo = isVideo;
+
+                        if (!isVideo)
+                        {
+                            // Si es imagen, cargo el base64
+                            var bytes = await File.ReadAllBytesAsync(attachment.Path);
+                            attachmentDto.File = Convert.ToBase64String(bytes);
+                            attachmentDto.Thumbnail = null; // No aplica a imagen
+                        }
+                        else
+                        {
+                            // 1) Generar el thumbnail con FFmpeg en tiempo real
+                            var thumbBytes = VideoThumbnailGenerator.GenerateThumbnail(attachment.Path, _logger);
+
+                            if (thumbBytes != null && thumbBytes.Length > 0)
+                            {
+                                // Codifico a Base64 y entrego un data URI
+                                attachmentDto.Thumbnail = $"data:image/png;base64,{Convert.ToBase64String(thumbBytes)}";
+                            }
+                            else
+                            {
+                                // Si FFmpeg falló, puedes dejar null o una imagen "placeholder"
+                                attachmentDto.Thumbnail = null;
+                            }
+
+                            // No cargamos el archivo completo aquí; se descargará bajo demanda
+                            attachmentDto.File = null;
+                        }
+
                         posts.Last().Attachments.Add(attachmentDto);
                     }
                 }
 
-                posts = posts.OrderByDescending(p => p.Created).ToList();
-
-                return posts;
+                return posts.OrderByDescending(p => p.Created).ToList();
             }
             catch (Exception e)
             {
@@ -1062,6 +1325,50 @@ namespace FireBreath.PostsMicroservice.Services
                 _logger.LogError(e, "PostsService.GetFollowedUserIdsAsync => ");
                 Console.WriteLine($"Exception: {e.StackTrace}\nMessage: {e.Message}\nInnerException: {e.InnerException}");
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Busca en la base de datos el attachment con el ID indicado y, si existe,
+        /// abre un FileStream sobre su Path y devuelve también el MimeType apropiado.
+        /// </summary>
+        /// <param name="attachmentId">ID del attachment</param>
+        /// <returns>
+        /// Un tupla (Stream, mimeType) si el attachment existe y el fichero en disco está
+        /// disponible; o null si no se encontró o no existe el fichero.
+        /// </returns>
+        public async Task<(Stream Stream, string MimeType)?> GetAttachmentStreamAsync(int attachmentId)
+        {
+            try
+            {
+                // 1) Obtener el attachment de la BD
+                var attachment = await _unitOfWork.AttachmentsRepository.Get(attachmentId);
+
+                if (attachment == null)
+                    return null;
+
+                // 2) Comprobar que el fichero existe en disco
+                var fullPath = attachment.Path;
+                if (!File.Exists(fullPath))
+                    return null;
+
+                // 3) Determinar el MIME según extensión
+                string mimeType = attachment.Path.ToLower() switch
+                {
+                    var p when p.EndsWith(".mp4") => "video/mp4",
+                    var p when p.EndsWith(".webm") => "video/webm",
+                    var p when p.EndsWith(".ogg") => "video/ogg",
+                    _ => "application/octet-stream"
+                };
+
+                // 4) Abrir el FileStream en modo lectura
+                var stream = File.OpenRead(fullPath);
+                return (stream, mimeType);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error obteniendo stream de attachment {AttachmentId}", attachmentId);
+                return null;
             }
         }
 

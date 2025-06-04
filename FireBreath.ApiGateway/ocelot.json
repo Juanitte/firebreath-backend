@@ -674,6 +674,19 @@
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
             }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/streamattachment/{attachmentId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/streamattachment/{attachmentId}",
+            "UpstreamHttpMethod": [ "GET" ]
         }
 
     ],

@@ -6,6 +6,11 @@ COPY Common/ Common/
 COPY RequestFiltering/ RequestFiltering/
 COPY FireBreath.PostsMicroservice/ FireBreath.PostsMicroservice/
 
+# En el Dockerfile de posts-ms, antes de dotnet restore/build, por ejemplo:
+RUN apt-get update \
+ && apt-get install -y ffmpeg \
+ && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /src/FireBreath.PostsMicroservice
 RUN dotnet restore
 RUN dotnet publish -c Release -o /app/publish

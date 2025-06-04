@@ -918,16 +918,24 @@ namespace FireBreath.UsersMicroservice.Services
         {
             try
             {
-                var follows = await _unitOfWork.FollowsRepository.GetAll().Where(f => f.UserId == userId).ToListAsync();
-                List<int> followerIds = new List<int>();
-                foreach (var follow in follows)
-                {
-                    if(follow.UserId == userId)
-                        followerIds.Add(follow.FollowerId);
-                }
-                var users = await _unitOfWork.UsersRepository.GetAll().Where(u => followerIds.Contains(u.Id)).ToListAsync();
-                var result = users.Select(u => Extensions.ConvertModel(u, new UserDto())).ToList();
-                return result;
+                // 1) Obtén todas las filas donde yo (userId) soy "follower"
+                var follows = await _unitOfWork.FollowsRepository
+                                   .GetAll(f => f.FollowerId == userId)
+                                   .ToListAsync();
+
+                // 2) Extrae los IDs de quienes sigo: f.UserId
+                List<int> followingIds = follows
+                                          .Select(f => f.UserId)
+                                          .Distinct()
+                                          .ToList();
+
+                // 3) Trae esos usuarios de UsersRepository
+                var users = await _unitOfWork.UsersRepository
+                                 .GetAll(u => followingIds.Contains(u.Id))
+                                 .ToListAsync();
+
+                return users.Select(u => Extensions.ConvertModel(u, new UserDto()))
+                            .ToList();
             }
             catch (Exception e)
             {
@@ -945,16 +953,24 @@ namespace FireBreath.UsersMicroservice.Services
         {
             try
             {
-                var follows = await _unitOfWork.FollowsRepository.GetAll().Where(f => f.FollowerId == userId).ToListAsync();
-                List<int> followerIds = new List<int>();
-                foreach (var follow in follows)
-                {
-                    if (follow.FollowerId == userId)
-                        followerIds.Add(follow.FollowerId);
-                }
-                var users = await _unitOfWork.UsersRepository.GetAll().Where(u => followerIds.Contains(u.Id)).ToListAsync();
-                var result = users.Select(u => Extensions.ConvertModel(u, new UserDto())).ToList();
-                return result;
+                // 1) Obtén todas las filas donde ‘yo’ (userId) soy “el seguido”
+                var follows = await _unitOfWork.FollowsRepository
+                                   .GetAll(f => f.UserId == userId)
+                                   .ToListAsync();
+
+                // 2) Extrae los IDs de mis seguidores: f.FollowerId
+                List<int> followerIds = follows
+                                          .Select(f => f.FollowerId)
+                                          .Distinct()
+                                          .ToList();
+
+                // 3) Trae esos usuarios de UsersRepository
+                var users = await _unitOfWork.UsersRepository
+                                 .GetAll(u => followerIds.Contains(u.Id))
+                                 .ToListAsync();
+
+                return users.Select(u => Extensions.ConvertModel(u, new UserDto()))
+                            .ToList();
             }
             catch (Exception e)
             {

@@ -6,6 +6,7 @@ using FireBreath.PostsMicroservice.Models.Dtos.RequestDto;
 using FireBreath.PostsMicroservice.Models.Dtos.ResponseDto;
 using FireBreath.PostsMicroservice.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
 
 namespace FireBreath.PostsMicroservice.Controllers
 {
@@ -488,6 +489,35 @@ namespace FireBreath.PostsMicroservice.Controllers
             catch (Exception e)
             {
                 return 0;
+            }
+        }
+
+        /// <summary>
+        /// Devuelve el fichero de vídeo (o cualquier adjunto) indicado por attachmentId.
+        /// Esta acción admite Range Requests (enableRangeProcessing: true), de modo que el navegador
+        /// puede pedir partes del vídeo y hacer seek/buffering parcial.
+        /// </summary>
+        /// <param name="attachmentId">Id del attachment en BD</param>
+        [HttpGet("posts/streamattachment/{attachmentId}")]
+        public async Task<IActionResult> StreamAttachment(int attachmentId)
+        {
+            try
+            {
+                // Llamamos al servicio para obtener (Stream, mimeType)
+                var result = await JuaniteServicePosts.GetAttachmentStreamAsync(attachmentId);
+
+                if (result == null)
+                    return NotFound(); // 404 si no existe
+
+                var (stream, mimeType) = result.Value;
+
+                // Retornamos FileStreamResult con enableRangeProcessing para streaming
+                return File(stream, mimeType, enableRangeProcessing: true);
+            }
+            catch (Exception ex)
+            {
+                JuaniteLogger.LogError(ex, "Error en StreamAttachment ID={AttachmentId}", attachmentId);
+                return StatusCode(500, "Error al obtener el attachment.");
             }
         }
 
