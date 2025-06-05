@@ -46,6 +46,11 @@ namespace FireBreath.PostsMicroservice.Models.UnitsOfWork
         /// </summary>
         private JuaniteRepository<Share> _sharesRepository;
 
+        /// <summary>
+        ///     Repositorio de saves
+        /// </summary>
+        private JuaniteRepository<Save> _savesRepository;
+
         #endregion
 
         #endregion
@@ -76,6 +81,11 @@ namespace FireBreath.PostsMicroservice.Models.UnitsOfWork
         ///     Repositorio de shares
         /// </summary>
         public JuaniteRepository<Share> SharesRepository => _sharesRepository ?? (_sharesRepository = new JuaniteRepository<Share>(_context, _logger));
+
+        /// <summary>
+        ///     Repositorio de saves
+        /// </summary>
+        public JuaniteRepository<Save> SavesRepository => _savesRepository ?? (_savesRepository = new JuaniteRepository<Save>(_context, _logger));
 
         #endregion
 

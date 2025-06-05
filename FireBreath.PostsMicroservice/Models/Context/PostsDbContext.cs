@@ -13,10 +13,11 @@ namespace FireBreath.PostsMicroservice.Models.Context
         public DbSet<Attachment> AttachmentsDb { get; set; }
         public DbSet<Like> LikesDb { get; set; }
         public DbSet<Share> SharesDb { get; set; }
+        public DbSet<Save> SavesDb { get; set; }
 
         #endregion
 
-        public PostsDbContext(DbContextOptions options)
+        public PostsDbContext(DbContextOptions<PostsDbContext> options)
         : base(options)
         {
         }
@@ -40,6 +41,7 @@ namespace FireBreath.PostsMicroservice.Models.Context
             modelBuilder.Entity<Attachment>().ToTable("Attachments");
             modelBuilder.Entity<Like>().ToTable("Likes");
             modelBuilder.Entity<Share>().ToTable("Shares");
+            modelBuilder.Entity<Save>().ToTable("Saves");
 
             modelBuilder.Entity<Attachment>()
                 .HasOne(t => t.Post)

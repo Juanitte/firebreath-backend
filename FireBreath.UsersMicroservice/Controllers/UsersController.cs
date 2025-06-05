@@ -39,12 +39,12 @@ namespace FireBreath.UsersMicroservice.Controllers
         ///     Método que obtiene todos los usuarios
         /// </summary>
         /// <returns></returns>
-        [HttpGet("users/getall")]
-        public async Task<JsonResult> GetAll()
+        [HttpGet("users/getall/{page}")]
+        public async Task<JsonResult> GetAll(int page)
         {
             try
             {
-                var users = await ServiceUsers.GetAll();
+                var users = await ServiceUsers.GetAll(page);
                 return new JsonResult(users);
             }
             catch (Exception e)
@@ -439,6 +439,26 @@ namespace FireBreath.UsersMicroservice.Controllers
         }
 
         /// <summary>
+        ///     Obtiene todos los seguidores de un user cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [HttpGet("users/getfollowers/{userId}/{page}")]
+        public async Task<JsonResult> GetFollowers(int userId, int page)
+        {
+            try
+            {
+                var result = await ServiceUsers.GetFollowers(userId, page);
+
+                return new JsonResult(result);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new UserDto());
+            }
+        }
+
+        /// <summary>
         ///     Obtiene todos los usuarios seguidos por un user cuyo id se pasa como parámetro
         /// </summary>
         /// <param name="userId"></param>
@@ -459,15 +479,35 @@ namespace FireBreath.UsersMicroservice.Controllers
         }
 
         /// <summary>
-        ///     Obtiene los usuarios con rol User filtrados.
+        ///     Obtiene todos los usuarios seguidos por un user cuyo id se pasa como parámetro
         /// </summary>
+        /// <param name="userId"></param>
         /// <returns></returns>
-        [HttpGet("users/getusersfilter/{searchString}")]
-        public async Task<JsonResult> GetUsersFilter(string searchString)
+        [HttpGet("users/getfollowing/{userId}/{page}")]
+        public async Task<JsonResult> GetFollowing(int userId, int page)
         {
             try
             {
-                var result = await ServiceUsers.GetUsersFilter(searchString);
+                var result = await ServiceUsers.GetFollowing(userId, page);
+
+                return new JsonResult(result);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new UserDto());
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los usuarios con rol User filtrados.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("users/getusersfilter/{searchString}/{page}")]
+        public async Task<JsonResult> GetUsersFilter(string searchString, int page)
+        {
+            try
+            {
+                var result = await ServiceUsers.GetUsersFilter(searchString, page);
 
                 return new JsonResult(result);
             }

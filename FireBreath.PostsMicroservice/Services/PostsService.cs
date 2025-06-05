@@ -12,6 +12,7 @@ using FireBreath.PostsMicroservice.Utilities;
 using MailKit.Security;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using MimeKit;
@@ -31,7 +32,7 @@ namespace FireBreath.PostsMicroservice.Services
         ///     Obtiene todos los posts
         /// </summary>
         /// <returns>una lista de posts <see cref="PostDto"/></returns>
-        public Task<List<PostDto>> GetAll();
+        public Task<List<PostDto>> GetAll(int page, int pageSize=10);
 
         /// <summary>
         ///     Obtiene el post cuyo id se ha pasado como parámetro
@@ -73,7 +74,7 @@ namespace FireBreath.PostsMicroservice.Services
         ///     Obtiene los posts filtrados
         /// </summary>
         /// <returns></returns>
-        Task<ResponseFilterPostDto> GetAllFilter(PostFilterRequestDto filter);
+        Task<ResponseFilterPostDto> GetAllFilter(PostFilterRequestDto filter, int page, int pageSize = 10);
         
         /// <summary>
         ///     Envía un email
@@ -111,7 +112,7 @@ namespace FireBreath.PostsMicroservice.Services
         /// </summary>
         /// <param name="userId">el id del usuario</param>
         /// <returns></returns>
-        public Task<List<PostDto>> GetLiked(int userId);
+        public Task<List<PostDto>> GetLiked(int userId, int page, int pageSize = 10);
 
         /// <summary>
         ///     Obtiene los usuarios que han dado me gusta a un post cuyo id se pasa como parámetro
@@ -129,12 +130,28 @@ namespace FireBreath.PostsMicroservice.Services
         public Task<CreateEditRemoveResponseDto> Share(int userId, int postId);
 
         /// <summary>
+        ///     Gestiona la acción de compartir un post por un usuario
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public Task<CreateEditRemoveResponseDto> Save(int userId, int postId);
+
+        /// <summary>
         ///     Gestiona la acción de dejar de compartir un post por un usuario
         /// </summary>
         /// <param name="userId">el id del usuario</param>
         /// <param name="postId">el id del post</param>
         /// <returns></returns>
         public Task<CreateEditRemoveResponseDto> StopSharing(int userId, int postId);
+
+        /// <summary>
+        ///     Gestiona la acción de dejar de compartir un post por un usuario
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public Task<CreateEditRemoveResponseDto> StopSaving(int userId, int postId);
 
         /// <summary>
         ///     Comprueba si un usuario ha compartido un post
@@ -145,11 +162,26 @@ namespace FireBreath.PostsMicroservice.Services
         public Task<bool> IsShared(int userId, int postId);
 
         /// <summary>
+        ///     Comprueba si un usuario ha compartido un post
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public Task<bool> IsSaved(int userId, int postId);
+
+        /// <summary>
         ///     Obtiene los post que ha compartido un usuario cuyo id se pasa como parámetro
         /// </summary>
         /// <param name="userId">el id del usuario</param>
         /// <returns></returns>
-        public Task<List<PostDto>> GetShared(int userId);
+        public Task<List<PostDto>> GetShared(int userId, int page, int pageSize = 10);
+
+        /// <summary>
+        ///     Obtiene los post que ha compartido un usuario cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <returns></returns>
+        public Task<List<PostDto>> GetSaved(int userId, int page, int pageSize = 10);
 
         /// <summary>
         ///     Obtiene los usuarios que han compartido un post cuyo id se pasa como parámetro
@@ -163,7 +195,7 @@ namespace FireBreath.PostsMicroservice.Services
         /// </summary>
         /// <param name="postId">el id del post</param>
         /// <returns></returns>
-        public Task<List<PostDto>> GetComments(int postId);
+        public Task<List<PostDto>> GetComments(int postId, int page, int pageSize = 10);
 
         /// <summary>
         ///     Obtiene el numero de comentarios de un post cuyo id se pasa como parámetro
@@ -185,6 +217,13 @@ namespace FireBreath.PostsMicroservice.Services
         /// <param name="postId">el id del post</param>
         /// <returns></returns>
         public Task<int> GetShareCount(int postId);
+
+        /// <summary>
+        ///     Obtiene el numero de veces que un post cuyo id se pasa como parámetro se ha compartido
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public Task<int> GetSaveCount(int postId);
 
         /// <summary>
         ///     Comprueba si un usuario tiene nuevos posts desde una fecha determinada
@@ -265,15 +304,20 @@ namespace FireBreath.PostsMicroservice.Services
         /// </summary>
         /// <param name="postId">el id del post</param>
         /// <returns></returns>
-        public async Task<List<PostDto>> GetComments(int postId)
+        public async Task<List<PostDto>> GetComments(int postId, int page, int pageSize = 10)
         {
             try
             {
-                var posts = await _unitOfWork.PostsRepository.GetAll().Where(p => p.PostId == postId).OrderByDescending(p => p.Created).ToListAsync();
+                var skip = (page - 1) * pageSize;
+
+                var postsQuery = _unitOfWork.PostsRepository.GetAll().Where(p => p.PostId == postId).OrderByDescending(p => p.Created).Skip(skip).Take(pageSize);
+
+                var posts = postsQuery.Select(p => p.ConvertModel(new PostDto())).ToList();
+
                 List<PostDto> result = new List<PostDto>();
                 foreach (var post in posts)
                 {
-                    result.Add(post.ConvertModel(new PostDto()));
+                    result.Add(post);
                     var attachments = await _unitOfWork.AttachmentsRepository
                         .GetAll(attachment => attachment.PostId == post.Id)
                         .ToListAsync();
@@ -387,6 +431,25 @@ namespace FireBreath.PostsMicroservice.Services
             catch (Exception e)
             {
                 _logger.LogError(e, "PostsService.GetShareCount => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene las veces que un post cuyo id se pasa como parámetro ha sido compartido
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public async Task<int> GetSaveCount(int postId)
+        {
+            try
+            {
+                var shares = await _unitOfWork.SavesRepository.GetAll(l => l.PostId == postId).ToListAsync();
+                return shares.Count;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.GetSaveCount => ");
                 throw;
             }
         }
@@ -545,15 +608,20 @@ namespace FireBreath.PostsMicroservice.Services
         ///     Obtiene todos los posts
         /// </summary>
         /// <returns></returns>
-        public async Task<List<PostDto>> GetAll()
+        public async Task<List<PostDto>> GetAll(int page, int pageSize = 10)
         {
             try
             {
-                var posts = await _unitOfWork.PostsRepository.GetAll().OrderByDescending(p => p.Created).ToListAsync();
+                var skip = (page - 1) * pageSize;
+
+                var postsQuery = _unitOfWork.PostsRepository.GetAll().OrderByDescending(p => p.Created).Skip(skip).Take(pageSize);
+
+                var posts = postsQuery.Select(p => p.ConvertModel(new PostDto())).ToList();
+
                 List<PostDto> result = new List<PostDto>();
                 foreach (var post in posts)
                 {
-                    result.Add(post.ConvertModel(new PostDto()));
+                    result.Add(post);
                     var attachments = await _unitOfWork.AttachmentsRepository
                         .GetAll(attachment => attachment.PostId == post.Id)
                         .ToListAsync();
@@ -612,20 +680,22 @@ namespace FireBreath.PostsMicroservice.Services
         ///     Obtiene los posts filtrados
         /// </summary>
         /// <returns></returns>
-        public async Task<ResponseFilterPostDto> GetAllFilter(PostFilterRequestDto filter)
+        public async Task<ResponseFilterPostDto> GetAllFilter(PostFilterRequestDto filter, int page, int pageSize = 10)
         {
             try
             {
+                var skip = (page - 1) * pageSize;
+
                 var response = new ResponseFilterPostDto();
 
                 // Filtrar con equals
                 var equalsQuery = string.IsNullOrEmpty(filter.SearchString)
-                    ? _unitOfWork.PostsRepository.GetAll()
-                    : _unitOfWork.PostsRepository.GetFiltered(filter.PropertyName, filter.SearchString, FilterType.equals);
+                    ? _unitOfWork.PostsRepository.GetAll().Skip(skip).Take(pageSize)
+                    : _unitOfWork.PostsRepository.GetFiltered(filter.PropertyName, filter.SearchString, FilterType.equals).Skip(skip).Take(pageSize);
 
                 var containsQuery = string.IsNullOrEmpty(filter.SearchString)
-                    ? _unitOfWork.PostsRepository.GetAll()
-                    : _unitOfWork.PostsRepository.GetFiltered(filter.SearchString);
+                    ? _unitOfWork.PostsRepository.GetAll().Skip(skip).Take(pageSize)
+                    : _unitOfWork.PostsRepository.GetFiltered(filter.SearchString).Skip(skip).Take(pageSize);
 
                 // Combinar resultados, eliminar duplicados y ordenar
                 var result = equalsQuery
@@ -1009,11 +1079,14 @@ namespace FireBreath.PostsMicroservice.Services
         /// </summary>
         /// <param name="userId">el id del usuario</param>
         /// <returns></returns>
-        public async Task<List<PostDto>> GetLiked(int userId)
+        public async Task<List<PostDto>> GetLiked(int userId, int page, int pageSize = 10)
         {
             try
             {
-                var likes = _unitOfWork.LikesRepository.GetAll(l => l.UserId == userId);
+                var skip = (page - 1) * pageSize;
+
+                var likes = _unitOfWork.LikesRepository.GetAll(l => l.UserId == userId).Skip(skip).Take(pageSize);
+
                 var posts = new List<PostDto>();
                 foreach (var like in likes)
                 {
@@ -1133,6 +1206,43 @@ namespace FireBreath.PostsMicroservice.Services
         }
 
         /// <summary>
+        ///     Gestiona la acción de compartir un post por un usuario
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public async Task<CreateEditRemoveResponseDto> Save(int userId, int postId)
+        {
+            try
+            {
+                var response = new CreateEditRemoveResponseDto();
+
+                var share = new Save(userId, postId);
+
+                if (!IsShared(userId, postId).Result)
+                {
+
+                    if (_unitOfWork.SavesRepository.Add(share) != null)
+                    {
+                        await _unitOfWork.SaveChanges();
+                        response.IsSuccess(postId);
+                    }
+                }
+                else
+                {
+                    response.Id = 0;
+                    response.Errors = new List<string> { Translation_Posts.Default_error };
+                }
+                return response;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.Save => ");
+                throw;
+            }
+        }
+
+        /// <summary>
         ///     Gestiona la acción de dejar de compartir un post por un usuario
         /// </summary>
         /// <param name="userId">el id del usuario</param>
@@ -1144,9 +1254,9 @@ namespace FireBreath.PostsMicroservice.Services
             {
                 var response = new CreateEditRemoveResponseDto();
 
-                var post = await Get(postId);
+                var share = await _unitOfWork.SharesRepository.Get([userId, postId]);
 
-                if (post != null)
+                if (share != null)
                 {
                     await _unitOfWork.SharesRepository.Remove([userId, postId]);
                     await _unitOfWork.SaveChanges();
@@ -1161,6 +1271,39 @@ namespace FireBreath.PostsMicroservice.Services
             catch (Exception e)
             {
                 _logger.LogError(e, "PostsService.StopSharing => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Gestiona la acción de dejar de compartir un post por un usuario
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public async Task<CreateEditRemoveResponseDto> StopSaving(int userId, int postId)
+        {
+            try
+            {
+                var response = new CreateEditRemoveResponseDto();
+
+                var save = await _unitOfWork.SavesRepository.Get([userId, postId]);
+
+                if (save != null)
+                {
+                    await _unitOfWork.SharesRepository.Remove([userId, postId]);
+                    await _unitOfWork.SaveChanges();
+                }
+                else
+                {
+                    response.Errors = new List<string> { String.Format(Translation_Posts.Default_error, postId) };
+                }
+                response.Id = postId;
+                return response;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.StopSaving => ");
                 throw;
             }
         }
@@ -1187,14 +1330,109 @@ namespace FireBreath.PostsMicroservice.Services
         }
 
         /// <summary>
-        ///     Obtiene los posts que ha compartido un usuario cuyo id se pasa como parámetro
-        ///     y genera thumbnails para cada vídeo si aún no existe uno en la BD.
+        ///     Comprueba si un usuario ha compartido un post
         /// </summary>
-        public async Task<List<PostDto>> GetShared(int userId)
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        public async Task<bool> IsSaved(int userId, int postId)
         {
             try
             {
-                var shares = _unitOfWork.SharesRepository.GetAll(l => l.UserId == userId);
+                if (await _unitOfWork.SavesRepository.Get([userId, postId]) != null)
+                    return true;
+                return false;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.IsSaved => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los posts que ha compartido un usuario cuyo id se pasa como parámetro
+        ///     y genera thumbnails para cada vídeo si aún no existe uno en la BD.
+        /// </summary>
+        public async Task<List<PostDto>> GetShared(int userId, int page, int pageSize = 10)
+        {
+            try
+            {
+                var skip = (page - 1) * pageSize;
+
+                var shares = _unitOfWork.SharesRepository.GetAll(l => l.UserId == userId).Skip(skip).Take(pageSize);
+                var posts = new List<PostDto>();
+
+                foreach (var share in shares)
+                {
+                    // Obtenemos el post principal
+                    var postEntity = await _unitOfWork.PostsRepository.Get(share.PostId);
+                    var postDto = postEntity.ConvertModel(new PostDto());
+                    posts.Add(postDto);
+
+                    // Obtenemos attachments de ese post
+                    var attachments = await _unitOfWork.AttachmentsRepository
+                        .GetAll(attachment => attachment.PostId == share.PostId)
+                        .ToListAsync();
+
+                    foreach (var attachment in attachments)
+                    {
+                        var attachmentDto = attachment.ConvertModel(new AttachmentDto());
+                        var ext = Path.GetExtension(attachment.Path).ToLower();
+                        bool isVideo = ext == ".mp4" || ext == ".webm" || ext == ".ogg";
+                        attachmentDto.IsVideo = isVideo;
+
+                        if (!isVideo)
+                        {
+                            // Si es imagen, cargo el base64
+                            var bytes = await File.ReadAllBytesAsync(attachment.Path);
+                            attachmentDto.File = Convert.ToBase64String(bytes);
+                            attachmentDto.Thumbnail = null; // No aplica a imagen
+                        }
+                        else
+                        {
+                            // 1) Generar el thumbnail con FFmpeg en tiempo real
+                            var thumbBytes = VideoThumbnailGenerator.GenerateThumbnail(attachment.Path, _logger);
+
+                            if (thumbBytes != null && thumbBytes.Length > 0)
+                            {
+                                // Codifico a Base64 y entrego un data URI
+                                attachmentDto.Thumbnail = $"data:image/png;base64,{Convert.ToBase64String(thumbBytes)}";
+                            }
+                            else
+                            {
+                                // Si FFmpeg falló, puedes dejar null o una imagen "placeholder"
+                                attachmentDto.Thumbnail = null;
+                            }
+
+                            // No cargamos el archivo completo aquí; se descargará bajo demanda
+                            attachmentDto.File = null;
+                        }
+
+                        posts.Last().Attachments.Add(attachmentDto);
+                    }
+                }
+
+                return posts.OrderByDescending(p => p.Created).ToList();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.GetShared => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los posts que ha compartido un usuario cuyo id se pasa como parámetro
+        ///     y genera thumbnails para cada vídeo si aún no existe uno en la BD.
+        /// </summary>
+        public async Task<List<PostDto>> GetSaved(int userId, int page, int pageSize = 10)
+        {
+            try
+            {
+                var skip = (page - 1) * pageSize;
+
+                var shares = _unitOfWork.SharesRepository.GetAll(l => l.UserId == userId).Skip(skip).Take(pageSize);
                 var posts = new List<PostDto>();
 
                 foreach (var share in shares)
