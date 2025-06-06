@@ -211,7 +211,7 @@ namespace FireBreath.PostsMicroservice.Controllers
             {
                 var result = await JuaniteServicePosts.Like(userId, postId);
 
-                return Ok(true);
+                return Ok(result);
             }
             catch (Exception e)
             {
@@ -318,7 +318,7 @@ namespace FireBreath.PostsMicroservice.Controllers
             {
                 var result = await JuaniteServicePosts.Share(userId, postId);
 
-                return Ok(true);
+                return Ok(result);
             }
             catch (Exception e)
             {
@@ -364,7 +364,7 @@ namespace FireBreath.PostsMicroservice.Controllers
             {
                 var result = await JuaniteServicePosts.Save(userId, postId);
 
-                return Ok(true);
+                return Ok(result);
             }
             catch (Exception e)
             {

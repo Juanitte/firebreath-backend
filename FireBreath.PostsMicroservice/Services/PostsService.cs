@@ -1291,7 +1291,7 @@ namespace FireBreath.PostsMicroservice.Services
 
                 if (save != null)
                 {
-                    await _unitOfWork.SharesRepository.Remove([userId, postId]);
+                    await _unitOfWork.SavesRepository.Remove([userId, postId]);
                     await _unitOfWork.SaveChanges();
                 }
                 else
@@ -1432,7 +1432,7 @@ namespace FireBreath.PostsMicroservice.Services
             {
                 var skip = (page - 1) * pageSize;
 
-                var shares = _unitOfWork.SharesRepository.GetAll(l => l.UserId == userId).Skip(skip).Take(pageSize);
+                var shares = _unitOfWork.SavesRepository.GetAll(l => l.UserId == userId).Skip(skip).Take(pageSize);
                 var posts = new List<PostDto>();
 
                 foreach (var share in shares)
