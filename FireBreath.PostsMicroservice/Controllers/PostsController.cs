@@ -185,11 +185,11 @@ namespace FireBreath.PostsMicroservice.Controllers
         /// <param name="page">el numero de la pagina</param>
         /// <returns><see cref="JsonResult"/> con los datos de los posts</returns>
         [HttpGet("/posts/getbyuser/{userId}/{page}")]
-        public async Task<JsonResult> GetByUser(int userId, int page)
+        public async Task<JsonResult> GetByUser(int userId, [FromQuery] bool areComments, int page)
         {
             try
             {
-                var posts = await JuaniteServicePosts.GetByUser(userId, page);
+                var posts = await JuaniteServicePosts.GetByUser(userId, areComments, page);
                 return new JsonResult(posts);
             }
             catch (Exception e)
