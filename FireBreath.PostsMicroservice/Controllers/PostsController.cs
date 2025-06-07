@@ -50,6 +50,58 @@ namespace FireBreath.PostsMicroservice.Controllers
             }
         }
 
+        [HttpGet("posts/hasnewcomments")]
+        public async Task<ActionResult<bool>> HasNewComments([FromQuery] DateTime since, [FromQuery] int userId)
+        {
+            try
+            {
+                return await JuaniteServicePosts.HasNewComments(userId, since);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+
+        [HttpGet("posts/hasnewshares")]
+        public async Task<ActionResult<bool>> HasNewShares([FromQuery] DateTime since, [FromQuery] int userId)
+        {
+            try
+            {
+                return await JuaniteServicePosts.HasNewShares(userId, since);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+
+        [HttpGet("posts/hasnewsaves")]
+        public async Task<ActionResult<bool>> HasNewSaves([FromQuery] DateTime since, [FromQuery] int userId)
+        {
+            try
+            {
+                return await JuaniteServicePosts.HasNewSaves(userId, since);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+
+        [HttpGet("posts/hasnewlikes")]
+        public async Task<ActionResult<bool>> HasNewLikes([FromQuery] DateTime since, [FromQuery] int userId)
+        {
+            try
+            {
+                return await JuaniteServicePosts.HasNewLikes(userId, since);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+
         /// <summary>
         ///     Método que obtiene todos los posts
         /// </summary>
@@ -185,7 +237,7 @@ namespace FireBreath.PostsMicroservice.Controllers
         /// <param name="page">el numero de la pagina</param>
         /// <returns><see cref="JsonResult"/> con los datos de los posts</returns>
         [HttpGet("/posts/getbyuser/{userId}/{page}")]
-        public async Task<JsonResult> GetByUser(int userId, [FromQuery] bool areComments, int page)
+        public async Task<JsonResult> GetByUser(int userId, int page, [FromQuery] bool areComments)
         {
             try
             {

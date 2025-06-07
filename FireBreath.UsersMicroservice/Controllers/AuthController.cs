@@ -72,6 +72,11 @@ namespace FireBreath.UsersMicroservice.Controllers
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
 
+                if(login.RememberMe)
+                {
+                    tokenDescriptor.Expires = DateTime.MaxValue;
+                }
+
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 var tokenString = JuanitEncoder.EncodeString(tokenHandler.WriteToken(token));
 

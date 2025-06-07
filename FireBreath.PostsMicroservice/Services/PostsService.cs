@@ -242,6 +242,38 @@ namespace FireBreath.PostsMicroservice.Services
         Task<bool> HasNewPostsFromFollowing(int userId, DateTime since);
 
         /// <summary>
+        ///     Comprueba si un usuario tiene nuevos comentarios desde una fecha determinada
+        /// </summary>
+        /// <param name="since"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<bool> HasNewComments(int userId, DateTime since);
+
+        /// <summary>
+        ///     Comprueba si un usuario tiene nuevos Shares desde una fecha determinada
+        /// </summary>
+        /// <param name="since"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<bool> HasNewShares(int userId, DateTime since);
+
+        /// <summary>
+        ///     Comprueba si un usuario tiene nuevos Saves desde una fecha determinada
+        /// </summary>
+        /// <param name="since"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<bool> HasNewSaves(int userId, DateTime since);
+
+        /// <summary>
+        ///     Comprueba si un usuario tiene nuevos Likes desde una fecha determinada
+        /// </summary>
+        /// <param name="since"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<bool> HasNewLikes(int userId, DateTime since);
+
+        /// <summary>
         /// Asynchronously retrieves the stream and MIME type of an attachment by its identifier.
         /// </summary>
         /// <remarks>The caller is responsible for disposing the returned <see cref="Stream"/> after
@@ -297,6 +329,50 @@ namespace FireBreath.PostsMicroservice.Services
 
             return await _unitOfWork.PostsRepository.Any(p =>
                 followedUserIds.Contains(p.UserId) && p.Created > since);
+        }
+
+        /// <summary>
+        ///     Comprueba si un usuario tiene nuevos posts desde una fecha determinada
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="since"></param>
+        /// <returns></returns>
+        public async Task<bool> HasNewComments(int userId, DateTime since)
+        {
+            return await _unitOfWork.PostsRepository.Any(p => p.UserId == userId && p.Created > since && p.PostId != 0);
+        }
+
+        /// <summary>
+        ///     Comprueba si un usuario tiene nuevos posts desde una fecha determinada
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="since"></param>
+        /// <returns></returns>
+        public async Task<bool> HasNewShares(int userId, DateTime since)
+        {
+            return await _unitOfWork.SharesRepository.Any(s => s.UserId == userId && s.Timestamp > since);
+        }
+
+        /// <summary>
+        ///     Comprueba si un usuario tiene nuevos posts desde una fecha determinada
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="since"></param>
+        /// <returns></returns>
+        public async Task<bool> HasNewSaves(int userId, DateTime since)
+        {
+            return await _unitOfWork.SavesRepository.Any(s => s.UserId == userId && s.Timestamp > since);
+        }
+
+        /// <summary>
+        ///     Comprueba si un usuario tiene nuevos posts desde una fecha determinada
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="since"></param>
+        /// <returns></returns>
+        public async Task<bool> HasNewLikes(int userId, DateTime since)
+        {
+            return await _unitOfWork.LikesRepository.Any(s => s.UserId == userId && s.Timestamp > since);
         }
 
         /// <summary>
@@ -880,7 +956,7 @@ namespace FireBreath.PostsMicroservice.Services
                 var postsQuery = _unitOfWork.PostsRepository.GetAll(post => post.UserId == userId)
                     .OrderByDescending(p => p.Created);
 
-                var posts = postsQuery.Where(p => p.PostId != 0).Skip(skip).Take(pageSize).Select(p => p.ConvertModel(new PostDto())).ToList();
+                var posts = postsQuery.Where(p => areComments ? p.PostId != 0 : p.PostId == 0).Skip(skip).Take(pageSize).Select(p => p.ConvertModel(new PostDto())).ToList();
 
                 List<PostDto> result = new List<PostDto>();
 
@@ -1083,29 +1159,34 @@ namespace FireBreath.PostsMicroservice.Services
             {
                 var skip = (page - 1) * pageSize;
 
-                var likes = _unitOfWork.LikesRepository.GetAll(l => l.UserId == userId).Skip(skip).Take(pageSize);
-
+                var likes = _unitOfWork.LikesRepository.GetAll(l => l.UserId == userId).OrderByDescending(s => s.Timestamp).Skip(skip).Take(pageSize);
                 var posts = new List<PostDto>();
+
                 foreach (var like in likes)
                 {
-                    posts.Add(_unitOfWork.PostsRepository.Get(like.UserId).ConvertModel(new PostDto()));
+                    // Obtenemos el post principal
+                    var postEntity = await _unitOfWork.PostsRepository.Get(like.PostId);
+                    var postDto = postEntity.ConvertModel(new PostDto());
+                    posts.Add(postDto);
+
+                    // Obtenemos attachments de ese post
                     var attachments = await _unitOfWork.AttachmentsRepository
                         .GetAll(attachment => attachment.PostId == like.PostId)
                         .ToListAsync();
+
                     foreach (var attachment in attachments)
                     {
-                        AttachmentDto attachmentDto = attachment.ConvertModel(new AttachmentDto());
-
-                        // Si es imagen, cargo el base64
+                        var attachmentDto = attachment.ConvertModel(new AttachmentDto());
                         var ext = Path.GetExtension(attachment.Path).ToLower();
                         bool isVideo = ext == ".mp4" || ext == ".webm" || ext == ".ogg";
                         attachmentDto.IsVideo = isVideo;
 
                         if (!isVideo)
                         {
-                            // Leer solo la imagen en base64
-                            attachmentDto.File = Convert.ToBase64String(
-                                await File.ReadAllBytesAsync(attachment.Path));
+                            // Si es imagen, cargo el base64
+                            var bytes = await File.ReadAllBytesAsync(attachment.Path);
+                            attachmentDto.File = Convert.ToBase64String(bytes);
+                            attachmentDto.Thumbnail = null; // No aplica a imagen
                         }
                         else
                         {
@@ -1122,18 +1203,16 @@ namespace FireBreath.PostsMicroservice.Services
                                 // Si FFmpeg falló, puedes dejar null o una imagen "placeholder"
                                 attachmentDto.Thumbnail = null;
                             }
-                            // → Para vídeo, no asignamos attachmentDto.File (queda null).
-                            //    Podrías llenar attachmentDto.Thumbnail con un poster si lo tuvieras:
-                            //    attachmentDto.Thumbnail = Convert.ToBase64String(File.ReadAllBytes(thumbnailPath));
+
+                            // No cargamos el archivo completo aquí; se descargará bajo demanda
                             attachmentDto.File = null;
                         }
+
                         posts.Last().Attachments.Add(attachmentDto);
                     }
                 }
 
-                posts = posts.OrderByDescending(p => p.Created).ToList();
-
-                return posts;
+                return posts.ToList();
             }
             catch (Exception e)
             {
@@ -1358,7 +1437,7 @@ namespace FireBreath.PostsMicroservice.Services
             {
                 var skip = (page - 1) * pageSize;
 
-                var shares = _unitOfWork.SharesRepository.GetAll(l => l.UserId == userId).Skip(skip).Take(pageSize);
+                var shares = _unitOfWork.SharesRepository.GetAll(l => l.UserId == userId).OrderByDescending(s => s.Timestamp).Skip(skip).Take(pageSize);
                 var posts = new List<PostDto>();
 
                 foreach (var share in shares)
@@ -1411,7 +1490,7 @@ namespace FireBreath.PostsMicroservice.Services
                     }
                 }
 
-                return posts.OrderByDescending(p => p.Created).ToList();
+                return posts.ToList();
             }
             catch (Exception e)
             {
@@ -1430,7 +1509,7 @@ namespace FireBreath.PostsMicroservice.Services
             {
                 var skip = (page - 1) * pageSize;
 
-                var shares = _unitOfWork.SavesRepository.GetAll(l => l.UserId == userId).Skip(skip).Take(pageSize);
+                var shares = _unitOfWork.SavesRepository.GetAll(l => l.UserId == userId).OrderByDescending(s => s.Timestamp).Skip(skip).Take(pageSize);
                 var posts = new List<PostDto>();
 
                 foreach (var share in shares)
@@ -1483,7 +1562,7 @@ namespace FireBreath.PostsMicroservice.Services
                     }
                 }
 
-                return posts.OrderByDescending(p => p.Created).ToList();
+                return posts.ToList();
             }
             catch (Exception e)
             {
