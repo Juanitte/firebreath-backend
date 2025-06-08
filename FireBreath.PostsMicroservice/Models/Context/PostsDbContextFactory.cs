@@ -10,7 +10,7 @@ namespace FireBreath.PostsMicroservice.Models.Context
             var optionsBuilder = new DbContextOptionsBuilder<PostsDbContext>();
 
             // Usa aquí tu cadena de conexión real (mejor si la sacas de un archivo temporal .env local o de user-secrets)
-            optionsBuilder.UseSqlServer("Server=sql-users,1433;Database=FireBreath_Users;User Id=sa;Password=Batraci0C0nPeluca;TrustServerCertificate=true;MultipleActiveResultSets=true;");
+            optionsBuilder.UseSqlServer("Server=sql-posts,1433;Database=FireBreath_Posts;User Id=sa;Password=Batraci0C0nPeluca;TrustServerCertificate=true;MultipleActiveResultSets=true;");
 
             return new PostsDbContext(optionsBuilder.Options);
         }

@@ -352,7 +352,26 @@
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/getavatar/{userId}",
-            "UpstreamHttpMethod": [ "GET" ]
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/Users/users/updateavatar/{userId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "users-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/Users/users/updateavatar/{userId}",
+            "UpstreamHttpMethod": [ "PUT" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
         },
 
         //POSTS

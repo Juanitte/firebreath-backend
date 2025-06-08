@@ -1,14 +1,17 @@
 ﻿using Common.Dtos;
 using Common.Utilities;
+using Duende.IdentityServer.Extensions;
 using FireBreath.UsersMicroservice.Models.Dtos.CreateDto;
 using FireBreath.UsersMicroservice.Models.Dtos.EntityDto;
 using FireBreath.UsersMicroservice.Models.Entities;
+using FireBreath.UsersMicroservice.Translations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel;
 using System.Security.Cryptography;
 using System.Text;
-using FireBreath.UsersMicroservice.Translations;
-using Duende.IdentityServer.Extensions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FireBreath.UsersMicroservice.Controllers
 {
@@ -89,6 +92,7 @@ namespace FireBreath.UsersMicroservice.Controllers
                     var user = new User
                     {
                         Tag = userDto.Tag,
+                        Link = userDto.Link,
                         Bio = userDto.Bio,
                         Avatar = userDto.Avatar,
                         UserName = userDto.UserName,
@@ -517,6 +521,66 @@ namespace FireBreath.UsersMicroservice.Controllers
             }
         }
 
+        [HttpPut("users/updateavatar/{userId}")]
+        public async Task<IActionResult> UpdateAvatar(int userId, IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                    return BadRequest("No file uploaded.");
+
+                var user = await ServiceUsers.GetById(userId);
+                if (user == null)
+                    return NotFound("User not found.");
+
+                // Nombre del archivo tal cual lo sube el usuario
+                var fileName = Path.GetFileName(file.FileName);
+                // Ruta completa del directorio del usuario
+                string directoryPath = Path.Combine("/app/Files/", userId.ToString());
+                // Ruta completa del nuevo archivo
+                string filePath = Path.Combine(directoryPath, fileName);
+
+                // Si no existe, creamos la carpeta
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+                else
+                {
+                    // Si existe, eliminamos cualquier archivo dentro de esa carpeta
+                    var existingFiles = Directory.GetFiles(directoryPath);
+                    foreach (var existingFile in existingFiles)
+                    {
+                        try
+                        {
+                            System.IO.File.Delete(existingFile);
+                        }
+                        catch (Exception deleteEx)
+                        {
+                            Console.WriteLine($"Error deleting file {existingFile}: {deleteEx.Message}");
+                        }
+                    }
+                }
+
+                // Guardamos el nuevo avatar
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                var updateAvatar = await ServiceUsers.UpdateAvatar(userId, filePath);
+
+                if(updateAvatar)
+                    return Ok(new { path = filePath });
+                else
+                    return BadRequest("Failed to update avatar.");
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
         /// <summary>
         ///     Obtiene el avatar de un usuario
         /// </summary>
@@ -530,7 +594,7 @@ namespace FireBreath.UsersMicroservice.Controllers
                 var user = await ServiceUsers.GetById(userId);
                 if (user != null)
                 {
-                    string directoryPath = Path.Combine("C:/ProyectoIoT/Back/ApiTest/AttachmentStorage/", userId.ToString());
+                    string directoryPath = Path.Combine("/app/Files/Avatars/", userId.ToString(), "/");
                     string filePath = Path.Combine(directoryPath, user.Avatar);
 
                     if (System.IO.File.Exists(filePath))

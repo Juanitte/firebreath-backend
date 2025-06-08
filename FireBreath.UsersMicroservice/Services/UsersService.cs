@@ -223,6 +223,14 @@ namespace FireBreath.UsersMicroservice.Services
         /// <param name="userId"></param>
         /// <returns></returns>
         Task<List<int>> GetFollowingUserIdsCached(int userId);
+
+        /// <summary>
+        ///     Actualiza el avatar de un usuario cuyo id se pasa como parámetro.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="avatarUrl"></param>
+        /// <returns></returns>
+        Task<bool> UpdateAvatar(int userId, string avatarUrl);
     }
     public sealed class UsersService : BaseService, IUsersService
     {
@@ -244,6 +252,33 @@ namespace FireBreath.UsersMicroservice.Services
         #endregion
 
         #region Implementación IUsersService
+
+        /// <summary>
+        ///     Actualiza el avatar de un usuario cuyo id se pasa como parámetro.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="avatarUrl"></param>
+        /// <returns></returns>
+        public async Task<bool> UpdateAvatar(int userId, string avatarUrl)
+        {
+            try
+            {
+                var user = await _unitOfWork.UsersRepository.Get(userId);
+                if (user != null)
+                {
+                    user.Avatar = avatarUrl;
+                    _unitOfWork.UsersRepository.Update(user);
+                    await _unitOfWork.SaveChanges();
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "UsersService.UpdateUserAvatar => ");
+                return false;
+            }
+        }
 
         /// <summary>
         ///     Obtiene los usuarios con rol User filtrados.
@@ -398,7 +433,7 @@ namespace FireBreath.UsersMicroservice.Services
         {
             try
             {
-                var user = await Task.FromResult(_unitOfWork.UsersRepository.GetFirst(g => g.UserName.Equals(userName)));
+                var user = _unitOfWork.UsersRepository.GetFirst(g => g.UserName.Equals(userName));
                 return Extensions.ConvertModel(user, new UserDto());
             }
             catch (Exception e)
@@ -448,17 +483,8 @@ namespace FireBreath.UsersMicroservice.Services
         {
             try
             {
-                List<User> usersDb = await _unitOfWork.UsersRepository.GetAll().ToListAsync();
-                User userDb = new User();
-
-                foreach (var user in usersDb)
-                {
-                    if (user.Email.Equals(loginDto.Email))
-                    {
-                        userDb = user;
-                    }
-                }
-                if (userDb != new User())
+                User userDb = _unitOfWork.UsersRepository.GetFirst(u => u.Email.Equals(loginDto.Email));
+                if (userDb != null && userDb != new User())
                 {
 
                     var login = await _identitiesService.Login(userDb, loginDto.Password, rememberUser.Value);
@@ -544,6 +570,7 @@ namespace FireBreath.UsersMicroservice.Services
             }
             user.FullName = userDto.FullName;
             user.Bio = userDto.Bio;
+            user.Link = userDto.Link;
             user.Avatar = userDto.Avatar;
             user.Email = userDto.Email;
             user.PhoneNumber = userDto.PhoneNumber;

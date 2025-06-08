@@ -21,6 +21,7 @@ namespace FireBreath.UsersMicroservice.Models.Entities
         public User()
         {
             Tag = string.Empty;
+            Link = string.Empty;
             FullName = string.Empty;
             Country = Country.UNDEFINED;
             Language = Language.English;
@@ -35,6 +36,7 @@ namespace FireBreath.UsersMicroservice.Models.Entities
 
         public string Tag { get; set; }
         public string Bio { get; set; }
+        public string Link { get; set; }
         public string Avatar { get; set; }
         public string FullName { get; set; }
         public Country Country { get; set; }

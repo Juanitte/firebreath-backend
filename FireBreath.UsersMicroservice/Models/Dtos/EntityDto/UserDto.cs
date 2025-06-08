@@ -7,6 +7,7 @@ namespace FireBreath.UsersMicroservice.Models.Dtos.EntityDto
         public int Id { get; set; }
         public string Tag { get; set; }
         public string Bio { get; set; }
+        public string Link { get; set; }
         public string Avatar { get; set; }
         public string FullName { get; set; }
         public Country Country { get; set; }
@@ -23,6 +24,7 @@ namespace FireBreath.UsersMicroservice.Models.Dtos.EntityDto
             Id = 0;
             Tag = string.Empty;
             FullName = string.Empty;
+            Link = string.Empty;
             Country = Country.UNDEFINED;
             Language = 0;
             Created = DateTime.Now;

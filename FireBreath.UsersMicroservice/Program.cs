@@ -270,9 +270,7 @@ using (var scope = app.Services.CreateScope())
     var dbContext = serviceProvider.GetRequiredService<UsersDbContext>();
     var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
     var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
-    // Apply migrations and make sure that the default users and roles have been created
-    if (!dbContext.Database.CanConnect())
-        dbContext.Database.Migrate();
+    dbContext.Database.Migrate();
     var identitiesService = (IdentitiesService)serviceProvider.GetService(typeof(IIdentitiesService));
 
 
