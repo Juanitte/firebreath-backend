@@ -126,7 +126,7 @@ namespace FireBreath.PostsMicroservice.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("posts/getallfilter/{page}")]
-        public async Task<JsonResult> GetAllFilter([FromBody] PostFilterRequestDto filter, int page)
+        public async Task<JsonResult> GetAllFilter([FromQuery] PostFilterRequestDto filter, int page)
         {
             try
             {
