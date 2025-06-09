@@ -761,86 +761,97 @@ namespace FireBreath.PostsMicroservice.Services
             try
             {
                 var skip = (page - 1) * pageSize;
-
                 var response = new ResponseFilterPostDto();
 
-                // Filtrar con equals
-                var equalsQuery = string.IsNullOrEmpty(filter.SearchString)
-                    ? _unitOfWork.PostsRepository.GetAll().Skip(skip).Take(pageSize)
-                    : _unitOfWork.PostsRepository.GetFiltered(filter.PropertyName, filter.SearchString, FilterType.equals).Skip(skip).Take(pageSize);
+                var query = _unitOfWork.PostsRepository.GetAll();
 
-                var containsQuery = string.IsNullOrEmpty(filter.SearchString)
-                    ? _unitOfWork.PostsRepository.GetAll().Skip(skip).Take(pageSize)
-                    : _unitOfWork.PostsRepository.GetFiltered(filter.SearchString).Skip(skip).Take(pageSize);
-
-                // Combinar resultados, eliminar duplicados y ordenar
-                var result = equalsQuery
-                    .Concat(containsQuery)
-                    .Distinct()
-                    .OrderByDescending(post =>
-                        equalsQuery.Contains(post) ? int.MaxValue :
-                        CalculateCosineSimilarity(post.Content, filter.SearchString))
-                    .ToList();
-
-                // Si buscamos los recientes, combinar la ordenación por relevancia y fecha
-                if (filter.ByDate)
+                // ✅ Si no hay SearchString, devuelve todos los posts con paginación
+                if (string.IsNullOrWhiteSpace(filter.SearchString))
                 {
-                    result = result
-                        .OrderByDescending(post => post.Created)
-                        .ThenByDescending(post => equalsQuery.Contains(post) ? int.MaxValue : CalculateCosineSimilarity(post.Content, filter.SearchString))
-                        .ToList();
+                    if (filter.ByDate)
+                    {
+                        query = query.OrderByDescending(p => p.Created);
+                    }
+                    else
+                    {
+                        query = query.OrderByDescending(p => p.Id);
+                    }
+
+                    query = query.Skip(skip).Take(pageSize);
+                }
+                else
+                {
+                    // ✅ Si hay SearchString, aplica los filtros
+                    var equalsQuery = _unitOfWork.PostsRepository
+                        .GetFiltered(filter.PropertyName, filter.SearchString, FilterType.equals);
+
+                    var containsQuery = _unitOfWork.PostsRepository
+                        .GetFiltered(filter.PropertyName, filter.SearchString, FilterType.contains);
+
+                    // Combinar, eliminar duplicados
+                    var combined = equalsQuery
+                        .Concat(containsQuery)
+                        .Distinct();
+
+                    // Ordenar
+                    if (filter.ByDate)
+                    {
+                        combined = combined
+                            .OrderByDescending(post => post.Created)
+                            .ThenByDescending(post =>
+                                equalsQuery.Contains(post)
+                                    ? int.MaxValue
+                                    : CalculateCosineSimilarity(post.Content, filter.SearchString));
+                    }
+                    else
+                    {
+                        combined = combined.OrderByDescending(post =>
+                            equalsQuery.Contains(post)
+                                ? int.MaxValue
+                                : CalculateCosineSimilarity(post.Content, filter.SearchString));
+                    }
+
+                    query = combined.Skip(skip).Take(pageSize);
                 }
 
-                var resultDto = result.Select(s => s.ConvertModel(new PostDto())).ToList();
+                var postsList = query.ToList();
+                var resultDto = postsList.Select(s => s.ConvertModel(new PostDto())).ToList();
 
+                // Agregar adjuntos si hay resultados
                 if (!resultDto.IsNullOrEmpty())
                 {
                     foreach (var post in resultDto)
                     {
-                        response.Posts.Add(post.ConvertModel(new PostDto()));
+                        response.Posts.Add(post);
+
                         var attachments = await _unitOfWork.AttachmentsRepository
-                        .GetAll(attachment => attachment.PostId == post.Id)
-                        .ToListAsync();
-                        if (!attachments.IsNullOrEmpty())
+                            .GetAll(attachment => attachment.PostId == post.Id)
+                            .ToListAsync();
+
+                        foreach (var attachment in attachments)
                         {
-                            foreach (var attachment in attachments)
+                            var attachmentDto = attachment.ConvertModel(new AttachmentDto());
+
+                            var ext = Path.GetExtension(attachment.Path).ToLower();
+                            bool isVideo = ext == ".mp4" || ext == ".webm" || ext == ".ogg";
+                            attachmentDto.IsVideo = isVideo;
+
+                            if (!isVideo)
                             {
-                                // Creo el DTO básico
-                                AttachmentDto attachmentDto = attachment.ConvertModel(new AttachmentDto());
-
-                                // Si es imagen, cargo el base64
-                                var ext = Path.GetExtension(attachment.Path).ToLower();
-                                bool isVideo = ext == ".mp4" || ext == ".webm" || ext == ".ogg";
-                                attachmentDto.IsVideo = isVideo;
-
-                                if (!isVideo)
-                                {
-                                    // Leer solo la imagen en base64
-                                    attachmentDto.File = Convert.ToBase64String(
-                                        await File.ReadAllBytesAsync(attachment.Path));
-                                }
-                                else
-                                {
-                                    // 1) Generar el thumbnail con FFmpeg en tiempo real
-                                    var thumbBytes = VideoThumbnailGenerator.GenerateThumbnail(attachment.Path, _logger);
-
-                                    if (thumbBytes != null && thumbBytes.Length > 0)
-                                    {
-                                        // Codifico a Base64 y entrego un data URI
-                                        attachmentDto.Thumbnail = $"data:image/png;base64,{Convert.ToBase64String(thumbBytes)}";
-                                    }
-                                    else
-                                    {
-                                        // Si FFmpeg falló, puedes dejar null o una imagen "placeholder"
-                                        attachmentDto.Thumbnail = null;
-                                    }
-                                    // → Para vídeo, no asignamos attachmentDto.File (queda null).
-                                    //    Podrías llenar attachmentDto.Thumbnail con un poster si lo tuvieras:
-                                    //    attachmentDto.Thumbnail = Convert.ToBase64String(File.ReadAllBytes(thumbnailPath));
-                                    attachmentDto.File = null;
-                                }
-                                response.Posts.Last().Attachments.Add(attachmentDto);
+                                attachmentDto.File = Convert.ToBase64String(
+                                    await File.ReadAllBytesAsync(attachment.Path));
                             }
+                            else
+                            {
+                                var thumbBytes = VideoThumbnailGenerator.GenerateThumbnail(attachment.Path, _logger);
+                                attachmentDto.Thumbnail = thumbBytes != null && thumbBytes.Length > 0
+                                    ? $"data:image/png;base64,{Convert.ToBase64String(thumbBytes)}"
+                                    : null;
+
+                                attachmentDto.File = null;
+                            }
+
+                            response.Posts.Last().Attachments.Add(attachmentDto);
                         }
                     }
                 }

@@ -284,13 +284,27 @@ namespace FireBreath.UsersMicroservice.Services
         ///     Obtiene los usuarios con rol User filtrados.
         /// </summary>
         /// <returns></returns>
-        public async Task<List<UserDto>> GetUsersFilter(string searchString, int page, int pageSize=10)
+        public async Task<List<UserDto>> GetUsersFilter(string searchString, int page, int pageSize = 10)
         {
             try
             {
                 var skip = (page - 1) * pageSize;
 
-                var users = _unitOfWork.UsersRepository.GetAll(user => user.Role == "User").Where(u => u.UserName.Contains(searchString) || u.Tag.Contains(searchString)).Skip(skip).Take(pageSize);
+                var query = _unitOfWork.UsersRepository
+                    .GetAll(user => user.Role == "User");
+
+                if (!string.IsNullOrWhiteSpace(searchString))
+                {
+                    query = query.Where(u =>
+                        u.UserName.Contains(searchString) ||
+                        u.Tag.Contains(searchString));
+                }
+
+                var users = query
+                    .Skip(skip)
+                    .Take(pageSize)
+                    .ToList();
+
                 var result = users.Select(u => Extensions.ConvertModel(u, new UserDto())).ToList();
                 return result;
             }

@@ -506,8 +506,8 @@ namespace FireBreath.UsersMicroservice.Controllers
         ///     Obtiene los usuarios con rol User filtrados.
         /// </summary>
         /// <returns></returns>
-        [HttpGet("users/getusersfilter/{searchString}/{page}")]
-        public async Task<JsonResult> GetUsersFilter(string searchString, int page)
+        [HttpGet("users/getusersfilter/{page}")]
+        public async Task<JsonResult> GetUsersFilter(int page, [FromQuery] string searchString = "")
         {
             try
             {

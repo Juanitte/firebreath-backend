@@ -141,7 +141,7 @@
         },
 
         {
-            "DownstreamPathTemplate": "/Users/users/getusersfilter/{searchString}/{page}",
+            "DownstreamPathTemplate": "/Users/users/getusersfilter/{page}",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
@@ -149,7 +149,7 @@
                     "Port": 8080
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/Users/users/getusersfilter/{searchString}/{page}",
+            "UpstreamPathTemplate": "/gateway/Users/users/getusersfilter/{page}",
             "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
@@ -247,7 +247,7 @@
         },
 
         {
-            "DownstreamPathTemplate": "/Users/users/isfollowing",
+            "DownstreamPathTemplate": "/Users/users/isfollowing/{userId}/{followerId}",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
@@ -255,7 +255,7 @@
                     "Port": 8080
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/Users/users/isfollowing",
+            "UpstreamPathTemplate": "/gateway/Users/users/isfollowing/{userId}/{followerId}",
             "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
