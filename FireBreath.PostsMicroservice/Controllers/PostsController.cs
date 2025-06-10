@@ -140,6 +140,24 @@ namespace FireBreath.PostsMicroservice.Controllers
         }
 
         /// <summary>
+        ///     Método que obtiene la cantidad de posts filtrados
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("posts/gethowmanyfilter")]
+        public async Task<JsonResult> GetHowManyFilter([FromQuery] PostFilterRequestDto filter)
+        {
+            try
+            {
+                var posts = await JuaniteServicePosts.GetHowManyFilter(filter);
+                return new JsonResult(posts);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(0);
+            }
+        }
+
+        /// <summary>
         ///     Método que obtiene un post según su id
         /// </summary>
         /// <param name="id">El id del post a buscar</param>

@@ -75,7 +75,13 @@ namespace FireBreath.PostsMicroservice.Services
         /// </summary>
         /// <returns></returns>
         Task<ResponseFilterPostDto> GetAllFilter(PostFilterRequestDto filter, int page, int pageSize = 10);
-        
+
+        /// <summary>
+        ///     Obtiene la cantidad de posts filtrados
+        /// </summary>
+        /// <returns></returns>
+        Task<int> GetHowManyFilter(PostFilterRequestDto filter);
+
         /// <summary>
         ///     Envía un email
         /// </summary>
@@ -857,6 +863,53 @@ namespace FireBreath.PostsMicroservice.Services
                 }
 
                 return response;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, Translation_Posts.Error_post_filter);
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los posts filtrados
+        /// </summary>
+        /// <returns></returns>
+        public async Task<int> GetHowManyFilter(PostFilterRequestDto filter)
+        {
+            try
+            {
+                var response = new ResponseFilterPostDto();
+
+                var query = _unitOfWork.PostsRepository.GetAll();
+
+                // ✅ Si no hay SearchString, devuelve todos los posts con paginación
+                if (!string.IsNullOrWhiteSpace(filter.SearchString))
+                {
+                    // ✅ Si hay SearchString, aplica los filtros
+                    var equalsQuery = _unitOfWork.PostsRepository
+                        .GetFiltered(filter.PropertyName, filter.SearchString, FilterType.equals);
+
+                    var containsQuery = _unitOfWork.PostsRepository
+                        .GetFiltered(filter.PropertyName, filter.SearchString, FilterType.contains);
+
+                    // Combinar, eliminar duplicados
+                    var combined = equalsQuery
+                        .Concat(containsQuery)
+                        .Distinct();
+
+                    combined = combined.OrderByDescending(post =>
+                        equalsQuery.Contains(post)
+                            ? int.MaxValue
+                            : CalculateCosineSimilarity(post.Content, filter.SearchString));
+
+                    query = combined;
+                }
+
+                var postsList = query.ToList();
+                var result = postsList.Count;
+
+                return result;
             }
             catch (Exception e)
             {
