@@ -57,6 +57,24 @@ namespace FireBreath.UsersMicroservice.Controllers
         }
 
         /// <summary>
+        ///     Método que obtiene todos los usuarios
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("users/gettopfollowed/{userId}")]
+        public async Task<JsonResult> GetTopFollowed(int userId, int sampleSize = 3, int topLimit = 30)
+        {
+            try
+            {
+                var users = await ServiceUsers.GetTopFollowed(userId, sampleSize, topLimit);
+                return new JsonResult(users);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new List<UserDto>());
+            }
+        }
+
+        /// <summary>
         ///     Método que obtiene un usuario según su id
         /// </summary>
         /// <param name="userId">El id del usuario a buscar</param>

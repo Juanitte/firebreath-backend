@@ -19,6 +19,7 @@ using MimeKit;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using Attachment = FireBreath.PostsMicroservice.Models.Entities.Attachment;
 
 namespace FireBreath.PostsMicroservice.Services
@@ -278,6 +279,13 @@ namespace FireBreath.PostsMicroservice.Services
         /// <param name="userId"></param>
         /// <returns></returns>
         Task<bool> HasNewLikes(int userId, DateTime since);
+
+        /// <summary>
+        ///     Obtiene los hashtags más populares de las últimas 12 horas
+        /// </summary>
+        /// <param name="top"></param>
+        /// <returns></returns>
+        Task<List<HashtagResponseDto>> GetTopHashtagsLastHours(int hours = 12, int top = 10);
 
         /// <summary>
         /// Asynchronously retrieves the stream and MIME type of an attachment by its identifier.
@@ -914,6 +922,66 @@ namespace FireBreath.PostsMicroservice.Services
             catch (Exception e)
             {
                 _logger.LogError(e, Translation_Posts.Error_post_filter);
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///   Devuelve los hashtags más utilizados en los últimos 12 horas,
+        ///   ordenados por recuento descendente.
+        /// </summary>
+        /// <param name="top">Número máximo de hashtags a devolver (por defecto 10).</param>
+        public async Task<List<HashtagResponseDto>> GetTopHashtagsLastHours(int hours = 12, int top = 10)
+        {
+            try
+            {
+                // 1) Definimos el umbral de 12 horas atrás (UTC).
+                var since = DateTime.UtcNow.AddHours(-hours);
+
+                // 2) Traemos sólo los contenidos de los posts recientes.
+                var contents = await _unitOfWork.PostsRepository
+                    .GetAll()
+                    .Where(p => p.Created >= since)
+                    .Select(p => p.Content)
+                    .ToListAsync();
+
+                // 3) Expresión regular para extraer hashtags válidos (#seguidoDeLetrasDigitos_o).
+                var hashtagRegex = new Regex(@"#(\w+)", RegexOptions.Compiled);
+
+                // 4) Contamos ocurrencias en un diccionario (insensible a mayúsculas).
+                var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var content in contents)
+                {
+                    if (string.IsNullOrWhiteSpace(content))
+                        continue;
+
+                    var matches = hashtagRegex.Matches(content);
+                    foreach (Match match in matches)
+                    {
+                        var tag = match.Value;
+                        if (string.IsNullOrWhiteSpace(tag))
+                            continue;
+
+                        if (counts.ContainsKey(tag))
+                            counts[tag]++;
+                        else
+                            counts[tag] = 1;
+                    }
+                }
+
+                // 5) Proyectamos los top N en DTOs y devolvemos.
+                var result = counts
+                    .OrderByDescending(kvp => kvp.Value)
+                    .Take(top)
+                    .Select(kvp => new HashtagResponseDto(kvp.Key, kvp.Value))
+                    .ToList();
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.GetTopHashtagsLast12HoursAsync => ");
                 throw;
             }
         }

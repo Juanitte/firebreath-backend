@@ -231,6 +231,12 @@ namespace FireBreath.UsersMicroservice.Services
         /// <param name="avatarUrl"></param>
         /// <returns></returns>
         Task<bool> UpdateAvatar(int userId, string avatarUrl);
+
+        /// <summary>
+        ///     Obtiene 3 usuarios aleatorios de entre los 30 con más seguidores
+        /// </summary>
+        /// <returns></returns>
+        Task<List<UserDto>> GetTopFollowed(int userId, int sampleSize = 3, int topLimit = 30);
     }
     public sealed class UsersService : BaseService, IUsersService
     {
@@ -396,6 +402,74 @@ namespace FireBreath.UsersMicroservice.Services
             catch (Exception e)
             {
                 _logger.LogError(e, "UsersService.GetAll => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene N usuarios aleatorios de entre los 30 con más seguidores,
+        /// excluyendo al propio usuario y a los que ya sigue.
+        /// </summary>
+        public async Task<List<UserDto>> GetTopFollowed(int userId, int sampleSize = 3, int topLimit = 30)
+        {
+            try
+            {
+                // 1) Carga todos los follows
+                var allFollows = await _unitOfWork.FollowsRepository.GetAll().ToListAsync();
+                Console.WriteLine("Total follows en BD: {0}", allFollows.Count);
+
+                // 2) Determina a quién ya sigue este userId
+                var alreadyFollowingIds = allFollows
+                    .Where(f => f.FollowerId == userId)
+                    .Select(f => f.UserId)
+                    .ToHashSet();
+                Console.WriteLine("User {0} sigue a: {1}", userId, string.Join(",", alreadyFollowingIds));
+
+                // 3) Excluye de los candidatos a ti mismo y a los que ya sigues
+                var filteredFollows = allFollows
+                    .Where(f => f.UserId != userId && !alreadyFollowingIds.Contains(f.UserId))
+                    .ToList();
+                Console.WriteLine("Follows tras filtrar self & already-following: {0}", filteredFollows.Count);
+
+                // 4) Agrupa y cuenta seguidores, solo sobre los permitidos
+                var counts = filteredFollows
+                    .GroupBy(f => f.UserId)
+                    .Select(g => new { UserId = g.Key, Count = g.Count() })
+                    .OrderByDescending(x => x.Count)
+                    .Take(topLimit)
+                    .ToList();
+                Console.WriteLine("Top {0} candidatos (ID:Count): {1}",
+                    topLimit,
+                    string.Join(",", counts.Select(x => $"{x.UserId}:{x.Count}")));
+
+                // 5) Extrae los IDs de esos top candidatos
+                var topUserIds = counts.Select(x => x.UserId).ToList();
+
+                // 6) Trae los datos de usuario
+                var candidates = await _unitOfWork.UsersRepository
+                    .GetAll(u => topUserIds.Contains(u.Id))
+                    .ToListAsync();
+                Console.WriteLine("Usuarios cargados: {0}", candidates.Count);
+
+                // 7) Mapea a DTOs
+                var userDtos = candidates
+                    .Select(u => Extensions.ConvertModel(u, new UserDto()))
+                    .ToList();
+
+                // 8) Mix aleatorio real
+                var rnd = new Random(Guid.NewGuid().GetHashCode());
+                var result = userDtos
+                    .OrderBy(_ => rnd.Next())
+                    .Take(sampleSize)
+                    .ToList();
+
+                Console.WriteLine("Resultado final (IDs): {0}", string.Join(",", result.Select(u => u.Id)));
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "UsersService.GetTopFollowed => ");
                 throw;
             }
         }

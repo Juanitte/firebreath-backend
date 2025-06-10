@@ -157,6 +157,20 @@ namespace FireBreath.PostsMicroservice.Controllers
             }
         }
 
+        [HttpGet("posts/gettophashtags")]
+        public async Task<JsonResult> GetTopHashtags([FromQuery] int hours = 12, [FromQuery] int count = 10)
+        {
+            try
+            {
+                var hashtags = await JuaniteServicePosts.GetTopHashtagsLastHours(hours, count);
+                return new JsonResult(hashtags);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new List<HashtagResponseDto>());
+            }
+        }
+
         /// <summary>
         ///     Método que obtiene un post según su id
         /// </summary>

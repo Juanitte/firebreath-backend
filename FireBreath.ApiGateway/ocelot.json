@@ -141,6 +141,22 @@
         },
 
         {
+            "DownstreamPathTemplate": "/Users/users/gettopfollowed/{userId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "users-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/Users/users/gettopfollowed{userId}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
             "DownstreamPathTemplate": "/Users/users/getusersfilter/{page}",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
@@ -401,6 +417,38 @@
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/getallfilter/{page}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/gethowmanyfilter",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/gethowmanyfilter",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/gettophashtags",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/gettophashtags",
             "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
