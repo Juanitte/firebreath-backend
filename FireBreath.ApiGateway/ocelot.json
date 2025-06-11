@@ -149,7 +149,7 @@
                     "Port": 8080
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/Users/users/gettopfollowed{userId}",
+            "UpstreamPathTemplate": "/gateway/Users/users/gettopfollowed/{userId}",
             "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"

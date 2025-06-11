@@ -406,72 +406,61 @@ namespace FireBreath.UsersMicroservice.Services
             }
         }
 
-        /// <summary>
-        /// Obtiene N usuarios aleatorios de entre los 30 con más seguidores,
-        /// excluyendo al propio usuario y a los que ya sigue.
-        /// </summary>
         public async Task<List<UserDto>> GetTopFollowed(int userId, int sampleSize = 3, int topLimit = 30)
         {
-            try
+            // 1) Carga todos los follows
+            var allFollows = await _unitOfWork.FollowsRepository
+                .GetAll()
+                .ToListAsync();
+
+            // 2) Usuarios que el current user ya sigue
+            var alreadyFollowingIds = allFollows
+                .Where(f => f.FollowerId == userId)
+                .Select(f => f.UserId)
+                .ToHashSet();
+
+            // 3) Trae *todos* los usuarios excepto self y exceptuando ya-following
+            var candidateUsers = await _unitOfWork.UsersRepository
+                .GetAll(u =>
+                    u.Id != userId &&
+                    u.Id != 1 &&
+                    !alreadyFollowingIds.Contains(u.Id))
+                .ToListAsync();
+
+            // 4) Construye un diccionario de counts: userId → número de followers
+            var followCounts = allFollows
+                .GroupBy(f => f.UserId)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            // 5) Proyecta cada candidato con su count (0 si no está en followCounts)
+            var ranked = candidateUsers
+                .Select(u => new
+                {
+                    User = u,
+                    Count = followCounts.TryGetValue(u.Id, out var c) ? c : 0
+                })
+                // 6) Ordena descendentemente y toma hasta topLimit
+                .OrderByDescending(x => x.Count)
+                .Take(topLimit)
+                .ToList();
+
+            // 7) Mapea a DTOs
+            var userDtos = ranked
+                .Select(x => Extensions.ConvertModel(x.User, new UserDto()))
+                .ToList();
+
+            // 8) Shuffle Fisher–Yates + Take sampleSize
+            var rnd = new Random();
+            var list = userDtos.ToList();
+            for (int i = list.Count - 1; i > 0; i--)
             {
-                // 1) Carga todos los follows
-                var allFollows = await _unitOfWork.FollowsRepository.GetAll().ToListAsync();
-                Console.WriteLine("Total follows en BD: {0}", allFollows.Count);
-
-                // 2) Determina a quién ya sigue este userId
-                var alreadyFollowingIds = allFollows
-                    .Where(f => f.FollowerId == userId)
-                    .Select(f => f.UserId)
-                    .ToHashSet();
-                Console.WriteLine("User {0} sigue a: {1}", userId, string.Join(",", alreadyFollowingIds));
-
-                // 3) Excluye de los candidatos a ti mismo y a los que ya sigues
-                var filteredFollows = allFollows
-                    .Where(f => f.UserId != userId && !alreadyFollowingIds.Contains(f.UserId))
-                    .ToList();
-                Console.WriteLine("Follows tras filtrar self & already-following: {0}", filteredFollows.Count);
-
-                // 4) Agrupa y cuenta seguidores, solo sobre los permitidos
-                var counts = filteredFollows
-                    .GroupBy(f => f.UserId)
-                    .Select(g => new { UserId = g.Key, Count = g.Count() })
-                    .OrderByDescending(x => x.Count)
-                    .Take(topLimit)
-                    .ToList();
-                Console.WriteLine("Top {0} candidatos (ID:Count): {1}",
-                    topLimit,
-                    string.Join(",", counts.Select(x => $"{x.UserId}:{x.Count}")));
-
-                // 5) Extrae los IDs de esos top candidatos
-                var topUserIds = counts.Select(x => x.UserId).ToList();
-
-                // 6) Trae los datos de usuario
-                var candidates = await _unitOfWork.UsersRepository
-                    .GetAll(u => topUserIds.Contains(u.Id))
-                    .ToListAsync();
-                Console.WriteLine("Usuarios cargados: {0}", candidates.Count);
-
-                // 7) Mapea a DTOs
-                var userDtos = candidates
-                    .Select(u => Extensions.ConvertModel(u, new UserDto()))
-                    .ToList();
-
-                // 8) Mix aleatorio real
-                var rnd = new Random(Guid.NewGuid().GetHashCode());
-                var result = userDtos
-                    .OrderBy(_ => rnd.Next())
-                    .Take(sampleSize)
-                    .ToList();
-
-                Console.WriteLine("Resultado final (IDs): {0}", string.Join(",", result.Select(u => u.Id)));
-
-                return result;
+                int j = rnd.Next(i + 1);
+                var tmp = list[i];
+                list[i] = list[j];
+                list[j] = tmp;
             }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "UsersService.GetTopFollowed => ");
-                throw;
-            }
+
+            return list.Take(sampleSize).ToList();
         }
 
         /// <summary>
