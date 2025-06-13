@@ -213,38 +213,6 @@ namespace FireBreath.PostsMicroservice.Controllers
             }
         }
 
-        /// <summary>
-        ///     Descarga un archivo cuyo nombre se pasa como parámetro
-        /// </summary>
-        /// <param name="attachmentPath">el nombre del archivo</param>
-        /// <returns></returns>
-        [HttpGet("messages/download/{userId}/{attachmentPath}")]
-        public IActionResult DownloadAttachment(string attachmentPath, int userId)
-        {
-            try
-            {
-                string directoryPath = Path.Combine("C:/ProyectoIoT/Back/ApiTest/AttachmentStorage/", userId.ToString());
-                string filePath = Path.Combine(directoryPath, attachmentPath);
-
-                if (System.IO.File.Exists(filePath))
-                {
-                    byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
-
-                    string contentType = "application/octet-stream";
-
-                    return File(fileBytes, contentType, attachmentPath);
-                }
-                else
-                {
-                    return NotFound("File not found");
-                }
-            }
-            catch (Exception e)
-            {
-                return Problem(e.Message);
-            }
-        }
-
         #endregion
     }
 }

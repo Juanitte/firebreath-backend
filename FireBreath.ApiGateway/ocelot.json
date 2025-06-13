@@ -141,6 +141,22 @@
         },
 
         {
+            "DownstreamPathTemplate": "/Users/users/getbytag/{tag}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "users-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/Users/users/getbytag/{tag}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
             "DownstreamPathTemplate": "/Users/users/gettopfollowed/{userId}",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
@@ -930,6 +946,152 @@
             ],
             "UpstreamPathTemplate": "/gateway/posts/streamattachment/{attachmentId}",
             "UpstreamHttpMethod": [ "GET" ]
+        },
+
+        // MESSAGES
+
+        {
+            "DownstreamPathTemplate": "/messages/getall",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/messages/getall",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/messages/getbyid/{id}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/messages/getbyid/{id}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/messages/create",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/messages/create",
+            "UpstreamHttpMethod": [ "POST" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/messages/update/{messageId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/messages/update/{messageId}",
+            "UpstreamHttpMethod": [ "POST" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/messages/remove/{id}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/messages/remove/{id}",
+            "UpstreamHttpMethod": [ "DELETE" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/messages/removebysender/{senderId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/messages/removebysender/{senderId}",
+            "UpstreamHttpMethod": [ "DELETE" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/messages/removebyreceiver/{receiverId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/messages/removebyreceiver/{receiverId}",
+            "UpstreamHttpMethod": [ "DELETE" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/messages/getbysender/{senderId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/messages/getbysender/{senderId}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/messages/getbyreceiver/{receiverId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/messages/getbyreceiver/{receiverId}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
         }
 
     ],

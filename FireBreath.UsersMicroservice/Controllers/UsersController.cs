@@ -94,6 +94,25 @@ namespace FireBreath.UsersMicroservice.Controllers
         }
 
         /// <summary>
+        ///     Método que obtiene un usuario según su tag
+        /// </summary>
+        /// <param name="tag">El tag del usuario a buscar</param>
+        /// <returns></returns>
+        [HttpGet("users/getbytag/{tag}")]
+        public async Task<JsonResult> GetByTag(string tag)
+        {
+            try
+            {
+                var user = await ServiceUsers.GetByTag(tag);
+                return new JsonResult(user);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new UserDto());
+            }
+        }
+
+        /// <summary>
         ///     Método que crea un nuevo usuario
         /// </summary>
         /// <param name="userDto"><see cref="CreateUserDto"/> con los datos del usuario</param>

@@ -70,6 +70,13 @@ namespace FireBreath.UsersMicroservice.Services
         Task<UserDto> GetByEmail(string email);
 
         /// <summary>
+        ///     Obtiene un usuario según su tag
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <returns><see cref="User"/></returns>
+        Task<UserDto> GetByTag(string tag);
+
+        /// <summary>
         ///     Obtiene un usuario según su id
         /// </summary>
         /// <param name="id"></param>
@@ -478,6 +485,29 @@ namespace FireBreath.UsersMicroservice.Services
             catch (Exception e)
             {
                 _logger.LogError(e, "UsersService.GetByEmail =>");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene el usuario según el tag
+        /// </summary>
+        /// <param name="tag">El tag</param>
+        /// <returns><see cref="UserDto"/> con los datos del usuario</returns>
+        public async Task<UserDto> GetByTag(string tag)
+        {
+            try
+            {
+                var user = _unitOfWork.UsersRepository.GetFirst(g => g.Tag.Equals(tag));
+                if (user == null)
+                {
+                    return new UserDto();
+                }
+                return Extensions.ConvertModel(user, new UserDto());
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "UsersService.GetByTag =>");
                 throw;
             }
         }

@@ -9,7 +9,6 @@ namespace FireBreath.PostsMicroservice.Models.Entities
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        public string Author { get; set; }
         public string Content { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
         public DateTime LastEdited {  get; set; } = DateTime.UtcNow;
@@ -19,34 +18,30 @@ namespace FireBreath.PostsMicroservice.Models.Entities
 
         public Message()
         {
-            this.Author = string.Empty;
             this.Content = string.Empty;
             this.SenderId = 0;
             this.ReceiverId = 0;
         }
 
-        public Message(string content, string author, int senderId, int receiverId)
+        public Message(string content, int senderId, int receiverId)
         {
-            this.Author = author;
             this.Content = content;
             this.SenderId = senderId;
             this.ReceiverId = receiverId;
         }
 
-        public Message(int id, string author, string content, DateTime timestamp, int senderId, int receiverId)
+        public Message(int id, string content, DateTime timestamp, int senderId, int receiverId)
         {
             this.Id = id;
-            this.Author = author;
             this.Content = content;
             this.Timestamp = timestamp;
             this.SenderId = senderId;
             this.ReceiverId = receiverId;
         }
 
-        public Message(int id, string author, string content, DateTime timestamp, List<Attachment?> attachments, int senderId, int receiverId)
+        public Message(int id, string content, DateTime timestamp, List<Attachment?> attachments, int senderId, int receiverId)
         {
             this.Id = id;
-            this.Author = author;
             this.Content = content;
             this.Timestamp = timestamp;
             this.Attachments = attachments;

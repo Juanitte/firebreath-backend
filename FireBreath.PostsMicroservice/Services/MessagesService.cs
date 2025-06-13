@@ -99,7 +99,7 @@ namespace FireBreath.PostsMicroservice.Services
             {
                 var response = new CreateEditRemoveResponseDto();
                 Message message;
-                message = new Message(createMessage.Content, createMessage.Author, createMessage.SenderId, createMessage.ReceiverId);
+                message = new Message(createMessage.Content, createMessage.SenderId, createMessage.ReceiverId);
                 if (!createMessage.Attachments.IsNullOrEmpty())
                 {
                     foreach (var attachment in createMessage.Attachments)
