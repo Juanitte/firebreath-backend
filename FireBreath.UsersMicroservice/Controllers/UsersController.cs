@@ -651,8 +651,8 @@ namespace FireBreath.UsersMicroservice.Controllers
             }
         }
 
-        [HttpGet("users/followingids")]
-        public async Task<IActionResult> GetFollowingIds([FromQuery] int userId)
+        [HttpGet("users/followingids/{userId}")]
+        public async Task<IActionResult> GetFollowingIds(int userId)
         {
             try
             {

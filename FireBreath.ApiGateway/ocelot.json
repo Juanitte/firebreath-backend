@@ -406,6 +406,22 @@
             }
         },
 
+        {
+            "DownstreamPathTemplate": "/Users/users/followingids/{userId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "users-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/Users/users/followingids/{userId}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
         //POSTS
         {
             "DownstreamPathTemplate": "/posts/getall/{page}",
@@ -760,6 +776,22 @@
         },
 
         {
+            "DownstreamPathTemplate": "/posts/getfeed/{userId}/{page}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/getfeed/{userId}/{page}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
             "DownstreamPathTemplate": "/posts/getsharers/{postId}",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
@@ -999,7 +1031,7 @@
         },
 
         {
-            "DownstreamPathTemplate": "/messages/update/{messageId}",
+            "DownstreamPathTemplate": "/messages/update",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
@@ -1007,7 +1039,7 @@
                     "Port": 8080
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/messages/update/{messageId}",
+            "UpstreamPathTemplate": "/gateway/messages/update",
             "UpstreamHttpMethod": [ "POST" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
@@ -1031,7 +1063,7 @@
         },
 
         {
-            "DownstreamPathTemplate": "/messages/removebysender/{senderId}",
+            "DownstreamPathTemplate": "/messages/removebychat/{chatId}",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
@@ -1039,7 +1071,7 @@
                     "Port": 8080
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/messages/removebysender/{senderId}",
+            "UpstreamPathTemplate": "/gateway/messages/removebychat/{chatId}",
             "UpstreamHttpMethod": [ "DELETE" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
@@ -1047,7 +1079,7 @@
         },
 
         {
-            "DownstreamPathTemplate": "/messages/removebyreceiver/{receiverId}",
+            "DownstreamPathTemplate": "/messages/getbychat/{chatId}",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
@@ -1055,40 +1087,120 @@
                     "Port": 8080
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/messages/removebyreceiver/{receiverId}",
+            "UpstreamPathTemplate": "/gateway/messages/getbychat/{chatId}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/messages/getlastbychat/{chatId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/messages/getlastbychat/{chatId}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/chats/create",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/chats/create",
+            "UpstreamHttpMethod": [ "POST" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/chats/update",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/chats/update",
+            "UpstreamHttpMethod": [ "POST" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/chats/getall",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/chats/getall",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/chats/getbyid/{id}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/chats/getbyid/{id}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/chats/getbyuser/{userId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/chats/getbyuser/{userId}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/chats/remove/{id}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/chats/remove/{id}",
             "UpstreamHttpMethod": [ "DELETE" ],
-            "AuthenticationOptions": {
-                "AuthenticationProviderKey": "Bearer"
-            }
-        },
-
-        {
-            "DownstreamPathTemplate": "/messages/getbysender/{senderId}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "posts-ms",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/gateway/messages/getbysender/{senderId}",
-            "UpstreamHttpMethod": [ "GET" ],
-            "AuthenticationOptions": {
-                "AuthenticationProviderKey": "Bearer"
-            }
-        },
-
-        {
-            "DownstreamPathTemplate": "/messages/getbyreceiver/{receiverId}",
-            "DownstreamScheme": "http",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "posts-ms",
-                    "Port": 8080
-                }
-            ],
-            "UpstreamPathTemplate": "/gateway/messages/getbyreceiver/{receiverId}",
-            "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
             }

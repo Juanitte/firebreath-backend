@@ -269,7 +269,7 @@ namespace FireBreath.PostsMicroservice.Controllers
         /// <param name="page">el numero de la pagina</param>
         /// <returns><see cref="JsonResult"/> con los datos de los posts</returns>
         [HttpGet("/posts/getbyuser/{userId}/{page}")]
-        public async Task<JsonResult> GetByUser(int userId, int page, [FromQuery] bool areComments)
+        public async Task<JsonResult> GetByUser(int userId, int page, [FromQuery] bool areComments = false)
         {
             try
             {
@@ -279,6 +279,20 @@ namespace FireBreath.PostsMicroservice.Controllers
             catch (Exception e)
             {
                 return new JsonResult(new CreatePostDto());
+            }
+        }
+
+        [HttpGet("/posts/getfeed/{userId}/{page}")]
+        public async Task<JsonResult> GetFeed(int userId, int page)
+        {
+            try
+            {
+                var posts = await JuaniteServicePosts.GetFeed(userId, page);
+                return new JsonResult(posts);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(e);
             }
         }
 

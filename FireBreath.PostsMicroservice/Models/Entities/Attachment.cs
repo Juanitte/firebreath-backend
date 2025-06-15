@@ -14,10 +14,6 @@ namespace FireBreath.PostsMicroservice.Models.Entities
         public string Path { get; set; }
         public int? PostId { get; set; }
         public int? MessageId { get; set; }
-        [ForeignKey("PostId")]
-        public Post? Post { get; set; }
-        [ForeignKey("MessageId")]
-        public Message? Message { get; set; }
 
         public Attachment()
         {

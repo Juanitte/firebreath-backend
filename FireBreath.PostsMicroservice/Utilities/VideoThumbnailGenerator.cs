@@ -27,7 +27,7 @@ namespace FireBreath.PostsMicroservice.Utilities
                 var psi = new ProcessStartInfo
                 {
                     FileName = "ffmpeg",
-                    Arguments = $"-ss 00:00:02 -i \"{videoPath}\" -frames:v 1 -f image2pipe -vcodec png -",
+                    Arguments = $"-ss 00:00:01 -i \"{videoPath}\" -frames:v 1 -f image2pipe -vcodec png -",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,

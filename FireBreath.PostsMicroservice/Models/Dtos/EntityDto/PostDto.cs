@@ -10,6 +10,10 @@ namespace FireBreath.PostsMicroservice.Models.Dtos.EntityDto
         public string AuthorTag { get; set; }
         public string AuthorAvatar {  get; set; }
         public string Content { get; set; }
+        public bool? IsShared { get; set; } = false;
+        public int? SharedUserId { get; set; } = null;
+        public string? SharedBy { get; set; } = null;
+        public DateTime? SharedAt { get; set; } = null;
         public DateTime Created { get; set; } = DateTime.UtcNow;
         public DateTime LastEdited { get; set; } = DateTime.UtcNow;
         public List<AttachmentDto?> Attachments { get; set; } = new List<AttachmentDto?>();

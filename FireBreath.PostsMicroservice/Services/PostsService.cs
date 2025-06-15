@@ -296,6 +296,15 @@ namespace FireBreath.PostsMicroservice.Services
         /// <returns>A tuple containing the attachment's <see cref="Stream"/> and its MIME type as a <see cref="string"/>,  or
         /// <see langword="null"/> if the attachment does not exist.</returns>
         Task<(Stream Stream, string MimeType)?> GetAttachmentStreamAsync(int attachmentId);
+
+        /// <summary>
+        ///     Obtiene el feed de un usuario, que incluye sus posts y los de los usuarios que sigue
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        Task<IEnumerable<PostDto>> GetFeed(int userId, int page, int pageSize = 10);
     }
     public class PostsService : BaseService, IPostsService
     {
@@ -331,18 +340,34 @@ namespace FireBreath.PostsMicroservice.Services
         }
 
         /// <summary>
-        ///     Comprueba si un usuario tiene nuevos posts de los usuarios que sigue desde una fecha determinada
+        /// Comprueba si un usuario tiene nuevos posts originales o nuevos shares
+        /// de los usuarios que sigue desde una fecha determinada
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="since"></param>
         /// <returns></returns>
         public async Task<bool> HasNewPostsFromFollowing(int userId, DateTime since)
         {
+            // 1) IDs de a quiénes sigue
             var followedUserIds = await GetFollowedUserIdsAsync(userId);
-            if (followedUserIds == null || !followedUserIds.Any()) return false;
+            if (followedUserIds == null || !followedUserIds.Any())
+                return false;
 
-            return await _unitOfWork.PostsRepository.Any(p =>
-                followedUserIds.Contains(p.UserId) && p.Created > since);
+            // 2) ¿Hay posts originales nuevos?
+            var hasNewOriginals = await _unitOfWork.PostsRepository.Any(p =>
+                followedUserIds.Contains(p.UserId)
+                && p.PostId == 0      // sólo posts originales
+                && p.Created > since);
+
+            if (hasNewOriginals)
+                return true;
+
+            // 3) ¿Hay shares nuevos?
+            var hasNewShares = await _unitOfWork.SharesRepository.Any(s =>
+                followedUserIds.Contains(s.UserId)
+                && s.Timestamp > since);
+
+            return hasNewShares;
         }
 
         /// <summary>
@@ -1577,6 +1602,8 @@ namespace FireBreath.PostsMicroservice.Services
                     // Obtenemos el post principal
                     var postEntity = await _unitOfWork.PostsRepository.Get(share.PostId);
                     var postDto = postEntity.ConvertModel(new PostDto());
+                    postDto.IsShared = true; // Marcar como compartido
+                    postDto.SharedAt = share.Timestamp; // Fecha de compartido
                     posts.Add(postDto);
 
                     // Obtenemos attachments de ese post
@@ -1627,6 +1654,93 @@ namespace FireBreath.PostsMicroservice.Services
             catch (Exception e)
             {
                 _logger.LogError(e, "PostsService.GetShared => ");
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<PostDto>> GetFeed(int userId, int page, int pageSize = 10)
+        {
+            try
+            {
+                var skip = (page - 1) * pageSize;
+
+                // 1) IDs de a quiénes sigue
+                var followingIds = await _redisCacheService.GetAsync<List<int>>($"{Literals.Redis_Users_Following}{userId}");
+
+                // 2) Traer posts originales de esos usuarios (PostId == 0)
+                var origPosts = await _unitOfWork.PostsRepository
+                    .GetAll(p => followingIds.Contains(p.UserId) && p.PostId == 0)
+                    .Select(p => p.ConvertModel(new PostDto()))
+                    .ToListAsync();
+
+                // 3) Traer los shares del propio user
+                var shares = await _unitOfWork.SharesRepository
+                    .GetAll(s => followingIds.Contains(s.UserId))
+                    .ToListAsync();
+
+                // 4) Cargar las entidades de post para cada share
+                var sharedPosts = new List<PostDto>();
+                foreach (var s in shares)
+                {
+                    var pe = await _unitOfWork.PostsRepository.Get(s.PostId);
+                    if (pe != null)
+                    {
+                        var postDto = pe.ConvertModel(new PostDto());
+                        postDto.IsShared = true; // Marcar como compartido
+                        postDto.SharedAt = s.Timestamp; // Fecha de compartido
+                        postDto.SharedUserId = s.UserId; // ID del usuario que lo compartió
+                        sharedPosts.Add(postDto);
+                    }
+                }
+
+                // 5) Mezclar y ordenar
+                var feedItems = origPosts
+                    .Concat(sharedPosts)
+                    .OrderByDescending(x => (bool)x.IsShared ? x.SharedAt : x.Created)
+                    .Skip(skip)
+                    .Take(pageSize)
+                    .ToList();
+
+                var result = new List<PostDto>();
+
+                // 6) Convertir a DTO y adjuntar attachments
+                foreach (var item in feedItems)
+                {
+
+                    var atts = await _unitOfWork.AttachmentsRepository
+                        .GetAll(a => a.PostId == item.Id)
+                        .ToListAsync();
+
+                    foreach (var a in atts)
+                    {
+                        var ad = a.ConvertModel(new AttachmentDto());
+                        var ext = Path.GetExtension(a.Path).ToLower();
+                        ad.IsVideo = ext == ".mp4" || ext == ".webm" || ext == ".ogg";
+
+                        if (!ad.IsVideo)
+                        {
+                            ad.File = Convert.ToBase64String(await File.ReadAllBytesAsync(a.Path));
+                        }
+                        else
+                        {
+                            var thumb = VideoThumbnailGenerator.GenerateThumbnail(a.Path, _logger);
+                            ad.Thumbnail = thumb == null
+                                ? null
+                                : $"data:image/png;base64,{Convert.ToBase64String(thumb)}";
+                            ad.File = null;
+                        }
+
+                        item.Attachments.Add(ad);
+                    }
+
+                    result.Add(item);
+                }
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "PostsService.GetFeed => ");
                 throw;
             }
         }

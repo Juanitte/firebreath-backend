@@ -14,39 +14,40 @@ namespace FireBreath.PostsMicroservice.Models.Entities
         public DateTime LastEdited {  get; set; } = DateTime.UtcNow;
         public List<Attachment?> Attachments { get; set; } = new List<Attachment?>();
         public int SenderId { get; set; }
-        public int ReceiverId {  get; set; }
+        public int ChatId { get; set; }
+        public Chat? Chat { get; set; }
 
         public Message()
         {
             this.Content = string.Empty;
+            this.ChatId = 0;
             this.SenderId = 0;
-            this.ReceiverId = 0;
         }
 
-        public Message(string content, int senderId, int receiverId)
+        public Message(string content, int chatId, int senderId)
         {
             this.Content = content;
+            this.ChatId = chatId;
             this.SenderId = senderId;
-            this.ReceiverId = receiverId;
         }
 
-        public Message(int id, string content, DateTime timestamp, int senderId, int receiverId)
+        public Message(int id, string content, DateTime timestamp, int chatId, int senderId)
         {
             this.Id = id;
             this.Content = content;
             this.Timestamp = timestamp;
+            this.ChatId = chatId;
             this.SenderId = senderId;
-            this.ReceiverId = receiverId;
         }
 
-        public Message(int id, string content, DateTime timestamp, List<Attachment?> attachments, int senderId, int receiverId)
+        public Message(int id, string content, DateTime timestamp, List<Attachment?> attachments, int chatId, int senderId)
         {
             this.Id = id;
             this.Content = content;
             this.Timestamp = timestamp;
             this.Attachments = attachments;
+            this.ChatId = chatId;
             this.SenderId = senderId;
-            this.ReceiverId = receiverId;
         }
     }
 }

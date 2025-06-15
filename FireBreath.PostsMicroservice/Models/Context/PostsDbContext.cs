@@ -10,6 +10,7 @@ namespace FireBreath.PostsMicroservice.Models.Context
 
         public DbSet<Post> PostsDb { get; set; }
         public DbSet<Message> MessagesDb { get; set; }
+        public DbSet<Chat> ChatsDb { get; set; }
         public DbSet<Attachment> AttachmentsDb { get; set; }
         public DbSet<Like> LikesDb { get; set; }
         public DbSet<Share> SharesDb { get; set; }
@@ -42,18 +43,13 @@ namespace FireBreath.PostsMicroservice.Models.Context
             modelBuilder.Entity<Like>().ToTable("Likes");
             modelBuilder.Entity<Share>().ToTable("Shares");
             modelBuilder.Entity<Save>().ToTable("Saves");
+            modelBuilder.Entity<Chat>().ToTable("Chats");
 
-            modelBuilder.Entity<Attachment>()
-                .HasOne(t => t.Post)
-                .WithMany(m => m.Attachments)
-                .HasForeignKey(m => m.PostId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Attachment>()
-                .HasOne(t => t.Message)
-                .WithMany(m => m.Attachments)
-                .HasForeignKey(t => t.MessageId)
-                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Message>()
+                .HasOne(t => t.Chat)
+                .WithMany(m => m.Messages)
+                .HasForeignKey(t => t.ChatId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
