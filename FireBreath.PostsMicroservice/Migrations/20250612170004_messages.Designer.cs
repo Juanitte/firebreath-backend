@@ -4,6 +4,7 @@ using FireBreath.PostsMicroservice.Models.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FireBreath.PostsMicroservice.Migrations
 {
     [DbContext(typeof(PostsDbContext))]
-    partial class PostsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250612170004_messages")]
+    partial class messages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,37 +47,9 @@ namespace FireBreath.PostsMicroservice.Migrations
 
                     b.HasIndex("MessageId");
 
+                    b.HasIndex("PostId");
+
                     b.ToTable("Attachments", (string)null);
-                });
-
-            modelBuilder.Entity("FireBreath.PostsMicroservice.Models.Entities.Chat", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastMessage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UnreadMessagesCount")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserIds")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Chats", (string)null);
                 });
 
             modelBuilder.Entity("FireBreath.PostsMicroservice.Models.Entities.Like", b =>
@@ -101,15 +76,15 @@ namespace FireBreath.PostsMicroservice.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ChatId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("LastEdited")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("ReceiverId")
+                        .HasColumnType("int");
 
                     b.Property<int>("SenderId")
                         .HasColumnType("int");
@@ -118,8 +93,6 @@ namespace FireBreath.PostsMicroservice.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ChatId");
 
                     b.ToTable("Messages", (string)null);
                 });
@@ -199,29 +172,27 @@ namespace FireBreath.PostsMicroservice.Migrations
 
             modelBuilder.Entity("FireBreath.PostsMicroservice.Models.Entities.Attachment", b =>
                 {
-                    b.HasOne("FireBreath.PostsMicroservice.Models.Entities.Message", null)
+                    b.HasOne("FireBreath.PostsMicroservice.Models.Entities.Message", "Message")
                         .WithMany("Attachments")
                         .HasForeignKey("MessageId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("FireBreath.PostsMicroservice.Models.Entities.Post", "Post")
+                        .WithMany("Attachments")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Message");
+
+                    b.Navigation("Post");
                 });
 
             modelBuilder.Entity("FireBreath.PostsMicroservice.Models.Entities.Message", b =>
                 {
-                    b.HasOne("FireBreath.PostsMicroservice.Models.Entities.Chat", "Chat")
-                        .WithMany("Messages")
-                        .HasForeignKey("ChatId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Chat");
+                    b.Navigation("Attachments");
                 });
 
-            modelBuilder.Entity("FireBreath.PostsMicroservice.Models.Entities.Chat", b =>
-                {
-                    b.Navigation("Messages");
-                });
-
-            modelBuilder.Entity("FireBreath.PostsMicroservice.Models.Entities.Message", b =>
+            modelBuilder.Entity("FireBreath.PostsMicroservice.Models.Entities.Post", b =>
                 {
                     b.Navigation("Attachments");
                 });

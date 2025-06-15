@@ -97,6 +97,10 @@ namespace FireBreath.UsersMicroservice.Migrations
                     b.Property<int>("Language")
                         .HasColumnType("int");
 
+                    b.Property<string>("Link")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 

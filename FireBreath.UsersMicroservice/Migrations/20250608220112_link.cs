@@ -5,21 +5,25 @@
 namespace FireBreath.UsersMicroservice.Migrations
 {
     /// <inheritdoc />
-    public partial class db2 : Migration
+    public partial class link : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(name: "Posts");
-            migrationBuilder.DropTable(name: "Attachments");
-            migrationBuilder.DropTable(name: "Likes");
-            migrationBuilder.DropTable(name: "Shares");
+            migrationBuilder.AddColumn<string>(
+                name: "Link",
+                table: "Users",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-
+            migrationBuilder.DropColumn(
+                name: "Link",
+                table: "Users");
         }
     }
 }

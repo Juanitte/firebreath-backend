@@ -2,15 +2,15 @@
 
 #nullable disable
 
-namespace FireBreath.UsersMicroservice.Migrations
+namespace FireBreath.PostsMicroservice.Migrations
 {
     /// <inheritdoc />
-    public partial class db4 : Migration
+    public partial class chats3 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(name: "Messages");
+
         }
 
         /// <inheritdoc />

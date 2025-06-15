@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Ocelot.Authorization;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using StackExchange.Redis;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,7 @@ builder.WebHost.ConfigureKestrel(options =>
 {
     // Aquí estamos estableciendo el tamaño máximo de la carga útil (en bytes)
     options.Limits.MaxRequestBodySize = null; // 100 MB
+    options.ListenAnyIP(80);
 });
 
 builder.Services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
@@ -41,10 +43,10 @@ builder.Services
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("!$Uw6e~T4%tQ@z#sXv9&gYb2^hV*pN7cF"))
         };
     });
-// Add services to the container.
 
 var app = builder.Build();
 app.UseCors("MyPolicy");
+
 
 var configuration = new OcelotPipelineConfiguration
 {
@@ -77,9 +79,10 @@ var configuration = new OcelotPipelineConfiguration
     }
 };
 
-app.UseOcelot(configuration).Wait();
+await app.UseOcelot(configuration);
 
-app.UseHttpsRedirection();
-app.UseAuthorization();
 app.UseAuthentication();
+app.UseAuthorization();
+
+
 app.Run();

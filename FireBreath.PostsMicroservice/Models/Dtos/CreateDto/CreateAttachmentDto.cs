@@ -3,8 +3,8 @@
     public class CreateAttachmentDto
     {
         public string Path { get; set; }
-        public int PostId { get; set; }
-        public int MessageId { get; set; }
+        public int? PostId { get; set; }
+        public int? MessageId { get; set; }
 
         public CreateAttachmentDto()
         {

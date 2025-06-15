@@ -20,7 +20,6 @@ namespace FireBreath.PostsMicroservice.Models.Entities
         [Filters]
         public DateTime Created { get; set; } = DateTime.UtcNow;
         public DateTime LastEdited { get; set; } = DateTime.UtcNow;
-        public List<Attachment?> Attachments { get; set; } = new List<Attachment?>();
         public int UserId { get; set; }
         public int PostId { get; set; }
 
@@ -51,29 +50,6 @@ namespace FireBreath.PostsMicroservice.Models.Entities
             this.AuthorAvatar = authorAvatar;
             this.Content = content;
             this.Created = created;
-            this.UserId = userId;
-            this.PostId = postId;
-        }
-
-        public Post(string author, string authorTag, string authorAvatar, string content, List<Attachment?> attachments, int userId, int postId)
-        {
-            this.Author = author;
-            this.AuthorTag = authorTag;
-            this.AuthorAvatar = authorAvatar;
-            this.Content = content;
-            this.Attachments = attachments;
-            this.UserId = userId;
-            this.PostId = postId;
-        }
-
-        public Post(string author, string authorTag, string authorAvatar, string content, DateTime created, List<Attachment?> attachments, int userId, int postId)
-        {
-            this.Author = author;
-            this.AuthorTag = authorTag;
-            this.AuthorAvatar = authorAvatar;
-            this.Content = content;
-            this.Created = created;
-            this.Attachments = attachments;
             this.UserId = userId;
             this.PostId = postId;
         }

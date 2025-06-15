@@ -17,6 +17,8 @@ using FireBreath.UsersMicroservice.Models.Context;
 using FireBreath.UsersMicroservice.Models.Entities;
 using FireBreath.UsersMicroservice.Models.UnitsOfWork;
 using Serilog.Events;
+using Common.Services;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -183,7 +185,7 @@ ILoggerFactory loggerFactory = new LoggerFactory();
 loggerFactory.AddSerilog(new LoggerConfiguration()
                             .MinimumLevel.Debug()
                             .WriteTo.File(
-                                "C:/2ºDAW/Proyecto_Integrado/Storage/Logs/log-{Date}.txt",
+                                "/app/Logs/log-{Date}.txt",
                                 rollingInterval: RollingInterval.Day,
                                 restrictedToMinimumLevel: LogEventLevel.Information
                             ).CreateLogger());
@@ -244,6 +246,12 @@ builder.Services.AddTransient<IBlockingService, BlockingService>();
 builder.Services.AddScoped<IIdentitiesService, IdentitiesService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
 
+builder.Services.AddSingleton<IDatabase>(sp =>
+    sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
+builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect("redis:6379"));
+
 #endregion
 
 builder.Services.AddAuthorization();
@@ -262,7 +270,6 @@ using (var scope = app.Services.CreateScope())
     var dbContext = serviceProvider.GetRequiredService<UsersDbContext>();
     var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
     var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
-    // Apply migrations and make sure that the default users and roles have been created
     dbContext.Database.Migrate();
     var identitiesService = (IdentitiesService)serviceProvider.GetService(typeof(IIdentitiesService));
 

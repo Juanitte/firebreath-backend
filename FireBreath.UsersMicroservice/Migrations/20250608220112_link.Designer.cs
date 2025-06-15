@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FireBreath.UsersMicroservice.Migrations
 {
     [DbContext(typeof(UsersDbContext))]
-    [Migration("20250312033212_db2")]
-    partial class db2
+    [Migration("20250608220112_link")]
+    partial class link
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -99,6 +99,10 @@ namespace FireBreath.UsersMicroservice.Migrations
 
                     b.Property<int>("Language")
                         .HasColumnType("int");
+
+                    b.Property<string>("Link")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");

@@ -32,6 +32,11 @@ namespace FireBreath.PostsMicroservice.Models.UnitsOfWork
         private JuaniteRepository<Message> _messagesRepository;
 
         /// <summary>
+        ///     Repositorio de chats
+        /// </summary>
+        private JuaniteRepository<Chat> _chatsRepository;
+
+        /// <summary>
         ///     Repositorio de archivos adjuntos
         /// </summary>
         private JuaniteRepository<Attachment> _attachmentsRepository;
@@ -45,6 +50,11 @@ namespace FireBreath.PostsMicroservice.Models.UnitsOfWork
         ///     Repositorio de shares
         /// </summary>
         private JuaniteRepository<Share> _sharesRepository;
+
+        /// <summary>
+        ///     Repositorio de saves
+        /// </summary>
+        private JuaniteRepository<Save> _savesRepository;
 
         #endregion
 
@@ -63,6 +73,11 @@ namespace FireBreath.PostsMicroservice.Models.UnitsOfWork
         public JuaniteRepository<Message> MessagesRepository => _messagesRepository ?? (_messagesRepository = new JuaniteRepository<Message>(_context, _logger));
 
         /// <summary>
+        ///     Repositorio de chats
+        /// </summary>
+        public JuaniteRepository<Chat> ChatsRepository => _chatsRepository ?? (_chatsRepository = new JuaniteRepository<Chat>(_context, _logger));
+
+        /// <summary>
         ///     Repositorio de archivos adjuntos
         /// </summary>
         public JuaniteRepository<Attachment> AttachmentsRepository => _attachmentsRepository ?? (_attachmentsRepository = new JuaniteRepository<Attachment>(_context, _logger));
@@ -76,6 +91,11 @@ namespace FireBreath.PostsMicroservice.Models.UnitsOfWork
         ///     Repositorio de shares
         /// </summary>
         public JuaniteRepository<Share> SharesRepository => _sharesRepository ?? (_sharesRepository = new JuaniteRepository<Share>(_context, _logger));
+
+        /// <summary>
+        ///     Repositorio de saves
+        /// </summary>
+        public JuaniteRepository<Save> SavesRepository => _savesRepository ?? (_savesRepository = new JuaniteRepository<Save>(_context, _logger));
 
         #endregion
 

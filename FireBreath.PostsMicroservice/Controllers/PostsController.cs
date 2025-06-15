@@ -6,6 +6,7 @@ using FireBreath.PostsMicroservice.Models.Dtos.RequestDto;
 using FireBreath.PostsMicroservice.Models.Dtos.ResponseDto;
 using FireBreath.PostsMicroservice.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
 
 namespace FireBreath.PostsMicroservice.Controllers
 {
@@ -29,16 +30,88 @@ namespace FireBreath.PostsMicroservice.Controllers
 
         #region Métodos públicos
 
+        [HttpGet("posts/hasnew")]
+        public async Task<ActionResult<bool>> HasNewPosts([FromQuery] DateTime since, [FromQuery] int userId, [FromQuery] bool isProfile)
+        {
+            try
+            {
+                if (isProfile)
+                {
+                    return await JuaniteServicePosts.HasNewPostsForUser(userId, since);
+                }
+                else
+                {
+                    return await JuaniteServicePosts.HasNewPostsFromFollowing(userId, since);
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+
+        [HttpGet("posts/hasnewcomments")]
+        public async Task<ActionResult<bool>> HasNewComments([FromQuery] DateTime since, [FromQuery] int userId)
+        {
+            try
+            {
+                return await JuaniteServicePosts.HasNewComments(userId, since);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+
+        [HttpGet("posts/hasnewshares")]
+        public async Task<ActionResult<bool>> HasNewShares([FromQuery] DateTime since, [FromQuery] int userId)
+        {
+            try
+            {
+                return await JuaniteServicePosts.HasNewShares(userId, since);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+
+        [HttpGet("posts/hasnewsaves")]
+        public async Task<ActionResult<bool>> HasNewSaves([FromQuery] DateTime since, [FromQuery] int userId)
+        {
+            try
+            {
+                return await JuaniteServicePosts.HasNewSaves(userId, since);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+
+        [HttpGet("posts/hasnewlikes")]
+        public async Task<ActionResult<bool>> HasNewLikes([FromQuery] DateTime since, [FromQuery] int userId)
+        {
+            try
+            {
+                return await JuaniteServicePosts.HasNewLikes(userId, since);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+
         /// <summary>
         ///     Método que obtiene todos los posts
         /// </summary>
         /// <returns></returns>
-        [HttpGet("posts/getall")]
-        public async Task<IActionResult> GetAll()
+        [HttpGet("posts/getall/{page}")]
+        public async Task<IActionResult> GetAll(int page)
         {
             try
             {
-                var posts = await JuaniteServicePosts.GetAll();
+                var posts = await JuaniteServicePosts.GetAll(page);
 
                 return new JsonResult(posts);
             }
@@ -52,17 +125,49 @@ namespace FireBreath.PostsMicroservice.Controllers
         ///     Método que obtiene todos los posts filtrados
         /// </summary>
         /// <returns></returns>
-        [HttpGet("posts/getallfilter")]
-        public async Task<JsonResult> GetAllFilter([FromBody] PostFilterRequestDto filter)
+        [HttpGet("posts/getallfilter/{page}")]
+        public async Task<JsonResult> GetAllFilter([FromQuery] PostFilterRequestDto filter, int page)
         {
             try
             {
-                var posts = await JuaniteServicePosts.GetAllFilter(filter);
+                var posts = await JuaniteServicePosts.GetAllFilter(filter, page);
                 return new JsonResult(posts);
             }
             catch (Exception e)
             {
                 return new JsonResult(new ResponseFilterPostDto());
+            }
+        }
+
+        /// <summary>
+        ///     Método que obtiene la cantidad de posts filtrados
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("posts/gethowmanyfilter")]
+        public async Task<JsonResult> GetHowManyFilter([FromQuery] PostFilterRequestDto filter)
+        {
+            try
+            {
+                var posts = await JuaniteServicePosts.GetHowManyFilter(filter);
+                return new JsonResult(posts);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(0);
+            }
+        }
+
+        [HttpGet("posts/gettophashtags")]
+        public async Task<JsonResult> GetTopHashtags([FromQuery] int hours = 12, [FromQuery] int count = 10)
+        {
+            try
+            {
+                var hashtags = await JuaniteServicePosts.GetTopHashtagsLastHours(hours, count);
+                return new JsonResult(hashtags);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new List<HashtagResponseDto>());
             }
         }
 
@@ -164,16 +269,30 @@ namespace FireBreath.PostsMicroservice.Controllers
         /// <param name="page">el numero de la pagina</param>
         /// <returns><see cref="JsonResult"/> con los datos de los posts</returns>
         [HttpGet("/posts/getbyuser/{userId}/{page}")]
-        public async Task<JsonResult> GetByUser(int userId, int page)
+        public async Task<JsonResult> GetByUser(int userId, int page, [FromQuery] bool areComments = false)
         {
             try
             {
-                var posts = await JuaniteServicePosts.GetByUser(userId, page);
+                var posts = await JuaniteServicePosts.GetByUser(userId, areComments, page);
                 return new JsonResult(posts);
             }
             catch (Exception e)
             {
                 return new JsonResult(new CreatePostDto());
+            }
+        }
+
+        [HttpGet("/posts/getfeed/{userId}/{page}")]
+        public async Task<JsonResult> GetFeed(int userId, int page)
+        {
+            try
+            {
+                var posts = await JuaniteServicePosts.GetFeed(userId, page);
+                return new JsonResult(posts);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(e);
             }
         }
 
@@ -190,7 +309,7 @@ namespace FireBreath.PostsMicroservice.Controllers
             {
                 var result = await JuaniteServicePosts.Like(userId, postId);
 
-                return Ok(true);
+                return Ok(result);
             }
             catch (Exception e)
             {
@@ -249,12 +368,12 @@ namespace FireBreath.PostsMicroservice.Controllers
         /// </summary>
         /// <param name="userId">el id del usuario</param>
         /// <returns></returns>
-        [HttpGet("posts/getliked/{userId}")]
-        public async Task<IActionResult> GetLiked(int userId)
+        [HttpGet("posts/getliked/{userId}/{page}")]
+        public async Task<IActionResult> GetLiked(int userId, int page)
         {
             try
             {
-                var posts = await JuaniteServicePosts.GetLiked(userId);
+                var posts = await JuaniteServicePosts.GetLiked(userId, page);
 
                 return new JsonResult(posts);
             }
@@ -297,7 +416,7 @@ namespace FireBreath.PostsMicroservice.Controllers
             {
                 var result = await JuaniteServicePosts.Share(userId, postId);
 
-                return Ok(true);
+                return Ok(result);
             }
             catch (Exception e)
             {
@@ -331,6 +450,93 @@ namespace FireBreath.PostsMicroservice.Controllers
         }
 
         /// <summary>
+        ///     Gestiona la acción de guardar un post por un usuario
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        [HttpPost("/posts/save/{userId}/{postId}")]
+        public async Task<IActionResult> SavePost(int userId, int postId)
+        {
+            try
+            {
+                var result = await JuaniteServicePosts.Save(userId, postId);
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
+        /// <summary>
+        ///     Gestiona la acción de dejar de guardar un post por un usuario
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        [HttpDelete("posts/stopsaving/{userId}/{postId}")]
+        public async Task<IActionResult> StopSavingPost(int userId, int postId)
+        {
+            var response = new GenericResponseDto();
+            try
+            {
+                var result = await JuaniteServicePosts.StopSaving(userId, postId);
+                if (result.Errors != null && result.Errors.Any())
+                {
+                    response.Error = new GenericErrorDto() { Id = ResponseCodes.DataError, Description = result.Errors.ToList().ToDisplayList(), Location = "Posts/StopSavingPost" };
+                }
+            }
+            catch (Exception e)
+            {
+                response.Error = new GenericErrorDto() { Id = ResponseCodes.OtherError, Description = e.Message, Location = "Posts/StopSavingPost" };
+            }
+            return Ok(response);
+        }
+
+        /// <summary>
+        ///     Comprueba si un usuario ha compartido un post
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        [HttpGet("posts/postissaved/{userId}/{postId}")]
+        public async Task<bool> PostIsSaved(int userId, int postId)
+        {
+            try
+            {
+                if (await JuaniteServicePosts.IsSaved(userId, postId))
+                    return true;
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los post que ha compartido un usuario cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId">el id del usuario</param>
+        /// <returns></returns>
+        [HttpGet("posts/getsaved/{userId}/{page}")]
+        public async Task<IActionResult> GetSaved(int userId, int page)
+        {
+            try
+            {
+                var posts = await JuaniteServicePosts.GetSaved(userId, page);
+
+                return new JsonResult(posts);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new List<PostDto>());
+            }
+        }
+
+        /// <summary>
         ///     Comprueba si un usuario ha compartido un post
         /// </summary>
         /// <param name="userId">el id del usuario</param>
@@ -356,12 +562,12 @@ namespace FireBreath.PostsMicroservice.Controllers
         /// </summary>
         /// <param name="userId">el id del usuario</param>
         /// <returns></returns>
-        [HttpGet("posts/getshared/{userId}")]
-        public async Task<IActionResult> GetShared(int userId)
+        [HttpGet("posts/getshared/{userId}/{page}")]
+        public async Task<IActionResult> GetShared(int userId, int page)
         {
             try
             {
-                var posts = await JuaniteServicePosts.GetShared(userId);
+                var posts = await JuaniteServicePosts.GetShared(userId, page);
 
                 return new JsonResult(posts);
             }
@@ -396,12 +602,12 @@ namespace FireBreath.PostsMicroservice.Controllers
         /// </summary>
         /// <param name="postId">el id del post</param>
         /// <returns></returns>
-        [HttpGet("posts/getcomments/{postId}")]
-        public async Task<IActionResult> GetComments(int postId)
+        [HttpGet("posts/getcomments/{postId}/{page}")]
+        public async Task<IActionResult> GetComments(int postId, int page)
         {
             try
             {
-                var posts = await JuaniteServicePosts.GetComments(postId);
+                var posts = await JuaniteServicePosts.GetComments(postId, page);
 
                 return new JsonResult(posts);
             }
@@ -468,6 +674,55 @@ namespace FireBreath.PostsMicroservice.Controllers
             catch (Exception e)
             {
                 return 0;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene el numero de veces que un post cuyo id se pasa como parámetro se ha compartido
+        /// </summary>
+        /// <param name="postId">el id del post</param>
+        /// <returns></returns>
+        [HttpGet("posts/getsavecount/{postId}")]
+        public async Task<int> GetSaveCount(int postId)
+        {
+            try
+            {
+                var shareCount = await JuaniteServicePosts.GetSaveCount(postId);
+
+                return shareCount;
+            }
+            catch (Exception e)
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Devuelve el fichero de vídeo (o cualquier adjunto) indicado por attachmentId.
+        /// Esta acción admite Range Requests (enableRangeProcessing: true), de modo que el navegador
+        /// puede pedir partes del vídeo y hacer seek/buffering parcial.
+        /// </summary>
+        /// <param name="attachmentId">Id del attachment en BD</param>
+        [HttpGet("posts/streamattachment/{attachmentId}")]
+        public async Task<IActionResult> StreamAttachment(int attachmentId)
+        {
+            try
+            {
+                // Llamamos al servicio para obtener (Stream, mimeType)
+                var result = await JuaniteServicePosts.GetAttachmentStreamAsync(attachmentId);
+
+                if (result == null)
+                    return NotFound(); // 404 si no existe
+
+                var (stream, mimeType) = result.Value;
+
+                // Retornamos FileStreamResult con enableRangeProcessing para streaming
+                return File(stream, mimeType, enableRangeProcessing: true);
+            }
+            catch (Exception ex)
+            {
+                JuaniteLogger.LogError(ex, "Error en StreamAttachment ID={AttachmentId}", attachmentId);
+                return StatusCode(500, "Error al obtener el attachment.");
             }
         }
 

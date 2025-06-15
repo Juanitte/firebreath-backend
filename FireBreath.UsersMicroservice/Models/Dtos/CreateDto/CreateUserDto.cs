@@ -6,6 +6,7 @@ namespace FireBreath.UsersMicroservice.Models.Dtos.CreateDto
     {
         public string Tag {  get; set; }
         public string Bio { get; set; }
+        public string Link { get; set; }
         public string Avatar { get; set; }
         public string UserName { get; set; }
         public string Email { get; set; }
@@ -30,9 +31,10 @@ namespace FireBreath.UsersMicroservice.Models.Dtos.CreateDto
             this.Password = string.Empty;
             this.Bio = string.Empty;
             this.Avatar = string.Empty;
+            this.Link = string.Empty;
         }
 
-        public CreateUserDto(string tag, string bio, string avatar, string userName, string password, string email, string phoneNumber, string fullName, Country country, Language language)
+        public CreateUserDto(string tag, string bio, string link, string avatar, string userName, string password, string email, string phoneNumber, string fullName, Country country, Language language)
         {
             this.Tag = tag;
             this.UserName = userName;
@@ -43,6 +45,7 @@ namespace FireBreath.UsersMicroservice.Models.Dtos.CreateDto
             this.Country = country;
             this.Language = language;
             this.Bio = bio;
+            this.Link = link;
             this.Avatar = avatar;
         }
     }

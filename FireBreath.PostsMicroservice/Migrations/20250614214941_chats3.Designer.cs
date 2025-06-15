@@ -4,6 +4,7 @@ using FireBreath.PostsMicroservice.Models.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FireBreath.PostsMicroservice.Migrations
 {
     [DbContext(typeof(PostsDbContext))]
-    partial class PostsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250614214941_chats3")]
+    partial class chats3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,6 +46,8 @@ namespace FireBreath.PostsMicroservice.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("MessageId");
+
+                    b.HasIndex("PostId");
 
                     b.ToTable("Attachments", (string)null);
                 });
@@ -203,6 +208,11 @@ namespace FireBreath.PostsMicroservice.Migrations
                         .WithMany("Attachments")
                         .HasForeignKey("MessageId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("FireBreath.PostsMicroservice.Models.Entities.Post", null)
+                        .WithMany("Attachments")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("FireBreath.PostsMicroservice.Models.Entities.Message", b =>
@@ -222,6 +232,11 @@ namespace FireBreath.PostsMicroservice.Migrations
                 });
 
             modelBuilder.Entity("FireBreath.PostsMicroservice.Models.Entities.Message", b =>
+                {
+                    b.Navigation("Attachments");
+                });
+
+            modelBuilder.Entity("FireBreath.PostsMicroservice.Models.Entities.Post", b =>
                 {
                     b.Navigation("Attachments");
                 });

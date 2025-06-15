@@ -83,6 +83,12 @@ namespace FireBreath.UsersMicroservice.Models.Dtos.ResponseDto
         public string Role { get; set; }
 
         /// <summary>
+        ///     País del usuario logeado
+        /// </summary>
+        [JsonProperty("country")]
+        public string Country { get; set; }
+
+        /// <summary>
         ///     Identificador del idioma del usuario logeado
         /// </summary>
         [DataMember]

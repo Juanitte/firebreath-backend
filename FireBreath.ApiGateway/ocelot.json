@@ -3,11 +3,11 @@
         //AUTHENTICATION
         {
             "DownstreamPathTemplate": "/users/authenticate",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/users/authenticate",
@@ -16,15 +16,15 @@
 
         //USERS
         {
-            "DownstreamPathTemplate": "/Users/users/getall",
-            "DownstreamScheme": "https",
+            "DownstreamPathTemplate": "/Users/users/getall/{page}",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/Users/users/getall",
+            "UpstreamPathTemplate": "/gateway/Users/users/getall/{page}",
             "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
@@ -33,11 +33,11 @@
 
         {
             "DownstreamPathTemplate": "/Users/users/getbyid/{id}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/getbyid/{id}",
@@ -46,11 +46,11 @@
 
         {
             "DownstreamPathTemplate": "/Users/users/create",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/create",
@@ -59,11 +59,11 @@
 
         {
             "DownstreamPathTemplate": "/Users/users/update/{userId}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/update/{userId}",
@@ -75,11 +75,11 @@
 
         {
             "DownstreamPathTemplate": "/Users/users/changelanguage/{userId}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/changelanguage/{userId}",
@@ -91,11 +91,11 @@
 
         {
             "DownstreamPathTemplate": "/Users/users/remove/{id}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/remove/{id}",
@@ -107,11 +107,11 @@
 
         {
             "DownstreamPathTemplate": "/Users/users/getadmins",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/getadmins",
@@ -126,11 +126,11 @@
 
         {
             "DownstreamPathTemplate": "/Users/users/getusers",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/getusers",
@@ -141,15 +141,47 @@
         },
 
         {
-            "DownstreamPathTemplate": "/Users/users/getusersfilter/{searchString}",
-            "DownstreamScheme": "https",
+            "DownstreamPathTemplate": "/Users/users/getbytag/{tag}",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/Users/users/getusersfilter/{searchString}",
+            "UpstreamPathTemplate": "/gateway/Users/users/getbytag/{tag}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/Users/users/gettopfollowed/{userId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "users-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/Users/users/gettopfollowed/{userId}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/Users/users/getusersfilter/{page}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "users-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/Users/users/getusersfilter/{page}",
             "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
@@ -158,11 +190,11 @@
 
         {
             "DownstreamPathTemplate": "/Users/users/sendemail/{username}/{domain}/{tld}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/sendemail/{username}/{domain}/{tld}",
@@ -171,11 +203,11 @@
 
         {
             "DownstreamPathTemplate": "/Users/users/resetpassword",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/resetpassword",
@@ -184,11 +216,11 @@
 
         {
             "DownstreamPathTemplate": "/Users/users/followuser/{userId}/{followerId}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/followuser/{userId}/{followerId}",
@@ -200,11 +232,11 @@
 
         {
             "DownstreamPathTemplate": "/Users/users/blockuser",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/blockuser",
@@ -216,11 +248,11 @@
 
         {
             "DownstreamPathTemplate": "/Users/users/unfollow/{userId}/{followerId}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/unfollow/{userId}/{followerId}",
@@ -232,11 +264,11 @@
 
         {
             "DownstreamPathTemplate": "/Users/users/unblock",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/unblock",
@@ -247,15 +279,15 @@
         },
 
         {
-            "DownstreamPathTemplate": "/Users/users/isfollowing",
-            "DownstreamScheme": "https",
+            "DownstreamPathTemplate": "/Users/users/isfollowing/{userId}/{followerId}",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/Users/users/isfollowing",
+            "UpstreamPathTemplate": "/gateway/Users/users/isfollowing/{userId}/{followerId}",
             "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
@@ -264,11 +296,11 @@
 
         {
             "DownstreamPathTemplate": "/Users/users/isblocked",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/isblocked",
@@ -280,11 +312,11 @@
 
         {
             "DownstreamPathTemplate": "/Users/users/getfollowers/{userId}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/getfollowers/{userId}",
@@ -295,12 +327,28 @@
         },
 
         {
-            "DownstreamPathTemplate": "/Users/users/getfollowing/{userId}",
-            "DownstreamScheme": "https",
+            "DownstreamPathTemplate": "/Users/users/getfollowers/{userId}/{page}",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/Users/users/getfollowers/{userId}/{page}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/Users/users/getfollowing/{userId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/Users/users/getfollowing/{userId}",
@@ -311,29 +359,15 @@
         },
 
         {
-            "DownstreamPathTemplate": "/Users/users/getavatar/{userId}",
-            "DownstreamScheme": "https",
+            "DownstreamPathTemplate": "/Users/users/getfollowing/{userId}/{page}",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7063
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/Users/users/getavatar/{userId}",
-            "UpstreamHttpMethod": [ "GET" ]
-        },
-
-        //POSTS
-        {
-            "DownstreamPathTemplate": "/posts/getall",
-            "DownstreamScheme": "https",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 7271
-                }
-            ],
-            "UpstreamPathTemplate": "/gateway/posts/getall",
+            "UpstreamPathTemplate": "/gateway/Users/users/getfollowing/{userId}/{page}",
             "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
@@ -341,15 +375,112 @@
         },
 
         {
-            "DownstreamPathTemplate": "/posts/getallfilter",
-            "DownstreamScheme": "https",
+            "DownstreamPathTemplate": "/Users/users/getavatar/{userId}",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "users-ms",
+                    "Port": 8080
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/posts/getallfilter",
+            "UpstreamPathTemplate": "/gateway/Users/users/getavatar/{userId}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/Users/users/updateavatar/{userId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "users-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/Users/users/updateavatar/{userId}",
+            "UpstreamHttpMethod": [ "PUT" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/Users/users/followingids/{userId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "users-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/Users/users/followingids/{userId}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        //POSTS
+        {
+            "DownstreamPathTemplate": "/posts/getall/{page}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/getall/{page}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/getallfilter/{page}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/getallfilter/{page}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/gethowmanyfilter",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/gethowmanyfilter",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/gettophashtags",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/gettophashtags",
             "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
@@ -358,11 +489,11 @@
 
         {
             "DownstreamPathTemplate": "/posts/getbyid/{id}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/getbyid/{id}",
@@ -374,11 +505,11 @@
 
         {
             "DownstreamPathTemplate": "/posts/create",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/create",
@@ -390,11 +521,11 @@
 
         {
             "DownstreamPathTemplate": "/posts/update/{postId}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/update/{postId}",
@@ -406,11 +537,11 @@
 
         {
             "DownstreamPathTemplate": "/posts/remove/{id}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/remove/{id}",
@@ -422,11 +553,11 @@
 
         {
             "DownstreamPathTemplate": "/posts/getbyuser/{userId}/{page}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/getbyuser/{userId}/{page}",
@@ -438,11 +569,11 @@
 
         {
             "DownstreamPathTemplate": "/posts/like/{userId}/{postId}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/like/{userId}/{postId}",
@@ -454,11 +585,11 @@
 
         {
             "DownstreamPathTemplate": "/posts/dislike/{userId}/{postId}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/dislike/{userId}/{postId}",
@@ -470,11 +601,11 @@
 
         {
             "DownstreamPathTemplate": "/posts/postisliked/{userId}/{postId}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/postisliked/{userId}/{postId}",
@@ -485,15 +616,15 @@
         },
 
         {
-            "DownstreamPathTemplate": "/posts/getliked/{userId}",
-            "DownstreamScheme": "https",
+            "DownstreamPathTemplate": "/posts/getliked/{userId}/{page}",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/posts/getliked/{userId}",
+            "UpstreamPathTemplate": "/gateway/posts/getliked/{userId}/{page}",
             "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
@@ -502,11 +633,11 @@
 
         {
             "DownstreamPathTemplate": "/posts/getlikers/{postId}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/getlikers/{postId}",
@@ -518,11 +649,11 @@
 
         {
             "DownstreamPathTemplate": "/posts/share/{userId}/{postId}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/share/{userId}/{postId}",
@@ -533,12 +664,28 @@
         },
 
         {
-            "DownstreamPathTemplate": "/posts/stopsharing/{userId}/{postId}",
-            "DownstreamScheme": "https",
+            "DownstreamPathTemplate": "/posts/save/{userId}/{postId}",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/save/{userId}/{postId}",
+            "UpstreamHttpMethod": [ "POST" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/stopsharing/{userId}/{postId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/stopsharing/{userId}/{postId}",
@@ -549,12 +696,28 @@
         },
 
         {
-            "DownstreamPathTemplate": "/posts/postisshared/{userId}/{postId}",
-            "DownstreamScheme": "https",
+            "DownstreamPathTemplate": "/posts/stopsaving/{userId}/{postId}",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/stopsaving/{userId}/{postId}",
+            "UpstreamHttpMethod": [ "DELETE" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/postisshared/{userId}/{postId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/postisshared/{userId}/{postId}",
@@ -565,15 +728,63 @@
         },
 
         {
-            "DownstreamPathTemplate": "/posts/getshared/{userId}",
-            "DownstreamScheme": "https",
+            "DownstreamPathTemplate": "/posts/postissaved/{userId}/{postId}",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/posts/getshared/{userId}",
+            "UpstreamPathTemplate": "/gateway/posts/postissaved/{userId}/{postId}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/getshared/{userId}/{page}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/getshared/{userId}/{page}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/getsaved/{userId}/{page}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/getsaved/{userId}/{page}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/getfeed/{userId}/{page}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/getfeed/{userId}/{page}",
             "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
@@ -582,11 +793,11 @@
 
         {
             "DownstreamPathTemplate": "/posts/getsharers/{postId}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/getsharers/{postId}",
@@ -597,15 +808,15 @@
         },
 
         {
-            "DownstreamPathTemplate": "/posts/getcomments/{postId}",
-            "DownstreamScheme": "https",
+            "DownstreamPathTemplate": "/posts/getcomments/{postId}/{page}",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/posts/getcomments/{postId}",
+            "UpstreamPathTemplate": "/gateway/posts/getcomments/{postId}/{page}",
             "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
@@ -614,11 +825,11 @@
 
         {
             "DownstreamPathTemplate": "/posts/getcommentcount/{postId}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/getcommentcount/{postId}",
@@ -630,11 +841,11 @@
 
         {
             "DownstreamPathTemplate": "/posts/getlikecount/{postId}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/getlikecount/{postId}",
@@ -646,11 +857,11 @@
 
         {
             "DownstreamPathTemplate": "/posts/getsharecount/{postId}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7271
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/posts/getsharecount/{postId}",
@@ -660,52 +871,156 @@
             }
         },
 
-        //MENSAJES
         {
-            "DownstreamPathTemplate": "/messages/getall",
-            "DownstreamScheme": "https",
+            "DownstreamPathTemplate": "/posts/getsavecount/{postId}",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7027
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/getsavecount/{postId}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/hasnew",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/hasnew",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/hasnewcomments",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/hasnewcomments",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/hasnewshares",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/hasnewshares",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/hasnewsaves",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/hasnewsaves",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/hasnewlikes",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/hasnewlikes",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/posts/streamattachment/{attachmentId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/posts/streamattachment/{attachmentId}",
+            "UpstreamHttpMethod": [ "GET" ]
+        },
+
+        // MESSAGES
+
+        {
+            "DownstreamPathTemplate": "/messages/getall",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/messages/getall",
             "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
-            },
-            "RouteClaimsRequirement": {
-                "Role": "Support"
             }
         },
 
         {
             "DownstreamPathTemplate": "/messages/getbyid/{id}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7027
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/messages/getbyid/{id}",
             "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
-            },
-            "RouteClaimsRequirement": {
-                "Role": "Support"
             }
         },
 
         {
             "DownstreamPathTemplate": "/messages/create",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7027
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/messages/create",
@@ -716,92 +1031,176 @@
         },
 
         {
-            "DownstreamPathTemplate": "/messages/update/{messageId}",
-            "DownstreamScheme": "https",
+            "DownstreamPathTemplate": "/messages/update",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7027
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/messages/update/{messageId}",
+            "UpstreamPathTemplate": "/gateway/messages/update",
             "UpstreamHttpMethod": [ "POST" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
-            },
-            "RouteClaimsRequirement": {
-                "Role": "Support"
             }
         },
 
         {
             "DownstreamPathTemplate": "/messages/remove/{id}",
-            "DownstreamScheme": "https",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7027
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/gateway/messages/remove/{id}",
             "UpstreamHttpMethod": [ "DELETE" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
-            },
-            "RouteClaimsRequirement": {
-                "Role": "Support"
             }
         },
 
         {
-            "DownstreamPathTemplate": "/messages/removebyticket/{ticketId}",
-            "DownstreamScheme": "https",
+            "DownstreamPathTemplate": "/messages/removebychat/{chatId}",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7027
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/messages/removebyticket/{ticketId}",
+            "UpstreamPathTemplate": "/gateway/messages/removebychat/{chatId}",
             "UpstreamHttpMethod": [ "DELETE" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
-            },
-            "RouteClaimsRequirement": {
-                "Role": "Support"
             }
         },
 
         {
-            "DownstreamPathTemplate": "/messages/getbyticket/{ticketId}",
-            "DownstreamScheme": "https",
+            "DownstreamPathTemplate": "/messages/getbychat/{chatId}",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7027
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/messages/getbyticket/{ticketId}",
+            "UpstreamPathTemplate": "/gateway/messages/getbychat/{chatId}",
             "UpstreamHttpMethod": [ "GET" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
-            },
-            "RouteClaimsRequirement": {
-                "Role": "Support"
             }
         },
 
         {
-            "DownstreamPathTemplate": "/messages/download/{ticketId}/{attachmentPath}",
-            "DownstreamScheme": "https",
+            "DownstreamPathTemplate": "/messages/getlastbychat/{chatId}",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 7027
+                    "Host": "posts-ms",
+                    "Port": 8080
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/messages/download/{ticketId}/{attachmentPath}",
+            "UpstreamPathTemplate": "/gateway/messages/getlastbychat/{chatId}",
             "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/chats/create",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/chats/create",
+            "UpstreamHttpMethod": [ "POST" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/chats/update",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/chats/update",
+            "UpstreamHttpMethod": [ "POST" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/chats/getall",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/chats/getall",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/chats/getbyid/{id}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/chats/getbyid/{id}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/chats/getbyuser/{userId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/chats/getbyuser/{userId}",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer"
+            }
+        },
+
+        {
+            "DownstreamPathTemplate": "/chats/remove/{id}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "posts-ms",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/chats/remove/{id}",
+            "UpstreamHttpMethod": [ "DELETE" ],
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "Bearer"
             }
@@ -809,7 +1208,7 @@
 
     ],
     "GlobalConfiguration": {
-        "BaseUrl": "https://localhost:7131",
+        "BaseUrl": "https://api.inkas.es",
         "LogLevel": "Debug"
     }
 }

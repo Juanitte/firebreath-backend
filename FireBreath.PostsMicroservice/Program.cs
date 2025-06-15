@@ -1,3 +1,4 @@
+using Common.Services;
 using FireBreath.PostsMicroservice.Models.Context;
 using FireBreath.PostsMicroservice.Models.UnitsOfWork;
 using FireBreath.PostsMicroservice.Services;
@@ -9,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using RequestFiltering.Services;
 using Serilog;
 using Serilog.Events;
+using StackExchange.Redis;
 using System.Globalization;
 using System.Text.Json.Serialization;
 
@@ -35,6 +37,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddHttpClient("users-ms", client =>
+{
+    client.BaseAddress = new Uri("http://users-ms");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
 
 var securityScheme = new OpenApiSecurityScheme()
 {
@@ -97,13 +104,19 @@ ILoggerFactory loggerFactory = new LoggerFactory();
 loggerFactory.AddSerilog(new LoggerConfiguration()
                             .MinimumLevel.Debug()
                             .WriteTo.File(
-                                "D://Proyectos/.NET/FireBreath_Backend_Storage/Logs/log-{Date}.txt",
+                                "/app/Logs/log-{Date}.txt",
                                 rollingInterval: RollingInterval.Day,
                                 restrictedToMinimumLevel: LogEventLevel.Information
                             ).CreateLogger());
 
 builder.Services.AddSingleton(typeof(ILoggerFactory), loggerFactory);
 builder.Services.AddSingleton(typeof(Microsoft.Extensions.Logging.ILogger), loggerFactory.CreateLogger("FireBreath_PostsMicroservice"));
+
+builder.Services.AddSingleton<IDatabase>(sp =>
+    sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
+builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect("redis:6379"));
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -152,7 +165,8 @@ using (var scope = app.Services.CreateScope())
 {
     var serviceProvider = scope.ServiceProvider;
     var dbContext = serviceProvider.GetRequiredService<PostsDbContext>();
-    dbContext.Database.Migrate();
+
+        dbContext.Database.Migrate();
 }
 
 app.UseHttpsRedirection();

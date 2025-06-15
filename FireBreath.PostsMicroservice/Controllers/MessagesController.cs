@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FireBreath.PostsMicroservice.Controllers
 {
+    [ApiController]
     public class MessagesController : BaseController
     {
         #region Miembros privados
@@ -88,14 +89,14 @@ namespace FireBreath.PostsMicroservice.Controllers
         ///     Método que actualiza un mensaje con id proporcionado como parámetro
         /// </summary>
         /// <param name="messageId">El id del mensaje a editar</param>
-        /// <param name="newMessage"><see cref="CreateMessageDto"/> con los nuevos datos del mensaje</param>
+        /// <param name="newMessage"><see cref="MessageDto"/> con los nuevos datos del mensaje</param>
         /// <returns></returns>
-        [HttpPost("messages/update/{messageId}")]
-        public async Task<IActionResult> Update(int messageId, CreateMessageDto newMessage)
+        [HttpPost("messages/update")]
+        public async Task<IActionResult> Update(MessageDto newMessage)
         {
             try
             {
-                var result = await JuaniteServiceMessages.Update(messageId, newMessage);
+                var result = await JuaniteServiceMessages.Update(newMessage);
                 return Ok(result);
             }
             catch (Exception e)
@@ -134,45 +135,21 @@ namespace FireBreath.PostsMicroservice.Controllers
         /// </summary>
         /// <param name="senderId">el id del remitente</param>
         /// <returns></returns>
-        [HttpDelete("messages/removebysender/{senderId}")]
-        public async Task<IActionResult> RemoveBySender(int senderId)
+        [HttpDelete("messages/removebychat/{chatId}")]
+        public async Task<IActionResult> RemoveByChat(int chatId)
         {
             var response = new GenericResponseDto();
             try
             {
-                var result = await JuaniteServiceMessages.RemoveBySender(senderId);
+                var result = await JuaniteServiceMessages.RemoveByChat(chatId);
                 if (result.Errors != null && result.Errors.Any())
                 {
-                    response.Error = new GenericErrorDto() { Id = ResponseCodes.DataError, Description = result.Errors.ToList().ToDisplayList(), Location = "Messages/RemoveBySender" };
+                    response.Error = new GenericErrorDto() { Id = ResponseCodes.DataError, Description = result.Errors.ToList().ToDisplayList(), Location = "Messages/RemoveByChat" };
                 }
             }
             catch (Exception e)
             {
-                response.Error = new GenericErrorDto() { Id = ResponseCodes.OtherError, Description = e.Message, Location = "Messages/RemoveBySender" };
-            }
-            return Ok(response);
-        }
-
-        /// <summary>
-        ///     Elimina los mensajes recibidos por el usuario cuyo id se pasa como parámetro
-        /// </summary>
-        /// <param name="receiverId">el id del receptor</param>
-        /// <returns></returns>
-        [HttpDelete("messages/removebyreceiver/{receiverId}")]
-        public async Task<IActionResult> RemoveByReceiver(int receiverId)
-        {
-            var response = new GenericResponseDto();
-            try
-            {
-                var result = await JuaniteServiceMessages.RemoveByReceiver(receiverId);
-                if (result.Errors != null && result.Errors.Any())
-                {
-                    response.Error = new GenericErrorDto() { Id = ResponseCodes.DataError, Description = result.Errors.ToList().ToDisplayList(), Location = "Messages/RemoveByReceiver" };
-                }
-            }
-            catch (Exception e)
-            {
-                response.Error = new GenericErrorDto() { Id = ResponseCodes.OtherError, Description = e.Message, Location = "Messages/RemoveByReceiver" };
+                response.Error = new GenericErrorDto() { Id = ResponseCodes.OtherError, Description = e.Message, Location = "Messages/RemoveByChat" };
             }
             return Ok(response);
         }
@@ -182,12 +159,12 @@ namespace FireBreath.PostsMicroservice.Controllers
         /// </summary>
         /// <param name="senderId">el id de remitente</param>
         /// <returns>un <see cref="IEnumerable{T}"/> de <see cref="MessageDto"/> con los mensajes del usuario</returns>
-        [HttpGet("messages/getbysender/{senderId}")]
-        public async Task<ActionResult<IEnumerable<MessageDto?>>> GetBySender(int senderId)
+        [HttpGet("messages/getbychat/{chatId}")]
+        public async Task<ActionResult<IEnumerable<MessageDto?>>> GetByChat(int chatId)
         {
             try
             {
-                return await JuaniteServiceMessages.GetBySender(senderId);
+                return await JuaniteServiceMessages.GetByChat(chatId);
             }
             catch (Exception e)
             {
@@ -196,16 +173,16 @@ namespace FireBreath.PostsMicroservice.Controllers
         }
 
         /// <summary>
-        ///     Obtiene los mensajes recibidos por el usuario cuyo id se pasa como parámetro
+        ///     Obtiene los mensajes enviados por el usuario cuyo id se pasa como parámetro
         /// </summary>
-        /// <param name="receiverId">el id de receptor</param>
+        /// <param name="senderId">el id de remitente</param>
         /// <returns>un <see cref="IEnumerable{T}"/> de <see cref="MessageDto"/> con los mensajes del usuario</returns>
-        [HttpGet("messages/getbyreceiver/{receiverId}")]
-        public async Task<ActionResult<IEnumerable<MessageDto?>>> GetByReceiver(int receiverId)
+        [HttpGet("messages/getlastbychat/{chatId}")]
+        public async Task<ActionResult<MessageDto?>> GetLastByChat(int chatId)
         {
             try
             {
-                return await JuaniteServiceMessages.GetByReceiver(receiverId);
+                return await JuaniteServiceMessages.GetLastByChat(chatId);
             }
             catch (Exception e)
             {
@@ -213,31 +190,83 @@ namespace FireBreath.PostsMicroservice.Controllers
             }
         }
 
-        /// <summary>
-        ///     Descarga un archivo cuyo nombre se pasa como parámetro
-        /// </summary>
-        /// <param name="attachmentPath">el nombre del archivo</param>
-        /// <returns></returns>
-        [HttpGet("messages/download/{userId}/{attachmentPath}")]
-        public IActionResult DownloadAttachment(string attachmentPath, int userId)
+        [HttpPost("chats/create")]
+        public async Task<IActionResult> CreateChat([FromBody] CreateChatDto createChat)
         {
             try
             {
-                string directoryPath = Path.Combine("C:/ProyectoIoT/Back/ApiTest/AttachmentStorage/", userId.ToString());
-                string filePath = Path.Combine(directoryPath, attachmentPath);
+                var response = await JuaniteServiceMessages.CreateChat(createChat);
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
 
-                if (System.IO.File.Exists(filePath))
-                {
-                    byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
+        [HttpGet("chats/getbyid/{id}")]
+        public async Task<IActionResult> GetChatById(int id)
+        {
+            try
+            {
+                var chat = await JuaniteServiceMessages.GetChat(id);
+                return Ok(chat);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
 
-                    string contentType = "application/octet-stream";
+        [HttpGet("chats/getall")]
+        public async Task<IActionResult> GetAllChats()
+        {
+            try
+            {
+                var chats = await JuaniteServiceMessages.GetAllChats();
+                return Ok(chats);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
 
-                    return File(fileBytes, contentType, attachmentPath);
-                }
-                else
-                {
-                    return NotFound("File not found");
-                }
+        [HttpPost("chats/update")]
+        public async Task<IActionResult> UpdateChat([FromBody] ChatDto chatDto)
+        {
+            try
+            {
+                var result = await JuaniteServiceMessages.UpdateChat(chatDto);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
+        [HttpDelete("chats/remove/{id}")]
+        public async Task<IActionResult> RemoveChat(int id)
+        {
+            try
+            {
+                var result = await JuaniteServiceMessages.RemoveChat(id);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
+        [HttpGet("chats/getbyuser/{userId}")]
+        public async Task<IActionResult> GetChatsByUser(int userId)
+        {
+            try
+            {
+                var chats = await JuaniteServiceMessages.GetChatsByUser(userId);
+                return Ok(chats);
             }
             catch (Exception e)
             {

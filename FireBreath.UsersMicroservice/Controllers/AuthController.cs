@@ -2,11 +2,8 @@
 using FireBreath.UsersMicroservice.Helpers;
 using FireBreath.UsersMicroservice.Models.Dtos.EntityDto;
 using FireBreath.UsersMicroservice.Models.Dtos.ResponseDto;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Org.BouncyCastle.Utilities.Encoders;
 using static FireBreath.UsersMicroservice.Services.UsersService;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -17,6 +14,7 @@ namespace FireBreath.UsersMicroservice.Controllers
 {
     public class AuthController : BaseController
     {
+
         #region Constructores
 
         public AuthController(IServiceProvider serviceCollection) : base(serviceCollection)
@@ -45,6 +43,8 @@ namespace FireBreath.UsersMicroservice.Controllers
                     return BadRequest(new ResponseLoginDto() { ErrorDescripcion = Translation_Account.Incorrect_password });
                 }
 
+                await ServiceUsers.GetFollowingUserIdsCached(user.Id);
+
                 var claims = new ClaimsIdentity(new Claim[]
                 {
                     new Claim(Literals.Claim_UserId, user.Id.ToString()),
@@ -54,7 +54,8 @@ namespace FireBreath.UsersMicroservice.Controllers
                     new Claim(Literals.Claim_Email, user.Email),
                     new Claim(Literals.Claim_PhoneNumber, user.PhoneNumber),
                     new Claim(Literals.Claim_LanguageId, user.Language.ToString()),
-                    new Claim(Literals.Claim_Avatar, user.Avatar)
+                    new Claim(Literals.Claim_Avatar, user.Avatar),
+                    new Claim(Literals.Claim_Country, user.Country.ToString() ?? string.Empty)
                 });
 
                 var tokenHandler = new JwtSecurityTokenHandler();
@@ -71,6 +72,11 @@ namespace FireBreath.UsersMicroservice.Controllers
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
 
+                if(login.RememberMe)
+                {
+                    tokenDescriptor.Expires = DateTime.MaxValue;
+                }
+
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 var tokenString = JuanitEncoder.EncodeString(tokenHandler.WriteToken(token));
 
@@ -85,7 +91,8 @@ namespace FireBreath.UsersMicroservice.Controllers
                     Role = user.Role,
                     Token = tokenString,
                     Tag = user.Tag,
-                    Avatar = user.Avatar
+                    Avatar = user.Avatar,
+                    Country = user.Country.ToString() ?? string.Empty
                 });
             }
             catch (UserLockedException)

@@ -12,6 +12,7 @@ using System.Security.Principal;
 using System.Text;
 using FireBreath.UsersMicroservice.Translations;
 using Microsoft.AspNetCore.Mvc;
+using Common.Services;
 
 namespace FireBreath.UsersMicroservice.Services
 {
@@ -52,7 +53,7 @@ namespace FireBreath.UsersMicroservice.Services
         /// Obtiene todos los usuarios
         /// </summary>
         /// <returns></returns>
-        Task<List<UserDto>> GetAll();
+        Task<List<UserDto>> GetAll(int page, int pageSize = 10);
 
         /// <summary>
         ///     Obtiene un usuario según su nombre de usuario
@@ -67,6 +68,13 @@ namespace FireBreath.UsersMicroservice.Services
         /// <param name="email"></param>
         /// <returns><see cref="User"/></returns>
         Task<UserDto> GetByEmail(string email);
+
+        /// <summary>
+        ///     Obtiene un usuario según su tag
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <returns><see cref="User"/></returns>
+        Task<UserDto> GetByTag(string tag);
 
         /// <summary>
         ///     Obtiene un usuario según su id
@@ -194,37 +202,64 @@ namespace FireBreath.UsersMicroservice.Services
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
+        Task<List<UserDto>> GetFollowers(int userId, int page, int pageSize=10);
+
+        /// <summary>
+        ///     Obtiene todos los seguidores de un user cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         Task<List<UserDto>> GetFollowing(int userId);
+
+        /// <summary>
+        ///     Obtiene todos los seguidores de un user cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<List<UserDto>> GetFollowing(int userId, int page, int pageSize = 10);
 
         /// <summary>
         ///     Obtiene los usuarios con rol User filtrados.
         /// </summary>
         /// <returns></returns>
-        Task<List<UserDto>> GetUsersFilter(string searchString);
+        Task<List<UserDto>> GetUsersFilter(string searchStringint,int page, int pageSize = 10);
 
+        /// <summary>
+        ///     Obtiene los ids de los usuarios que sigue un usuario cuyo id se pasa como parámetro.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<List<int>> GetFollowingUserIdsCached(int userId);
 
+        /// <summary>
+        ///     Actualiza el avatar de un usuario cuyo id se pasa como parámetro.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="avatarUrl"></param>
+        /// <returns></returns>
+        Task<bool> UpdateAvatar(int userId, string avatarUrl);
+
+        /// <summary>
+        ///     Obtiene 3 usuarios aleatorios de entre los 30 con más seguidores
+        /// </summary>
+        /// <returns></returns>
+        Task<List<UserDto>> GetTopFollowed(int userId, int sampleSize = 3, int topLimit = 30);
     }
     public sealed class UsersService : BaseService, IUsersService
     {
         #region Miembros privados
 
         private IdentitiesService _identitiesService;
+        private readonly IRedisCacheService _redisCacheService;
 
         #endregion
 
         #region Constructores
 
-        public UsersService(JuaniteUnitOfWork juaniteUnitOfWork, ILogger logger) : base(juaniteUnitOfWork, logger)
-        {
-        }
-
-        public UsersService(JuaniteUnitOfWork juaniteUnitOfWork, ILogger logger, IIdentitiesService identitiesService) : base(juaniteUnitOfWork, logger)
+        public UsersService(JuaniteUnitOfWork juaniteUnitOfWork, ILogger logger, IIdentitiesService identitiesService, IRedisCacheService redisCacheService) : base(juaniteUnitOfWork, logger)
         {
             _identitiesService = (IdentitiesService)identitiesService;
-        }
-
-        public UsersService(IPrincipal user, JuaniteUnitOfWork ioTUnitOfWork, ILogger logger) : base(user, ioTUnitOfWork, logger)
-        {
+            _redisCacheService = redisCacheService;
         }
 
         #endregion
@@ -232,14 +267,57 @@ namespace FireBreath.UsersMicroservice.Services
         #region Implementación IUsersService
 
         /// <summary>
-        ///     Obtiene los usuarios con rol User filtrados.
+        ///     Actualiza el avatar de un usuario cuyo id se pasa como parámetro.
         /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="avatarUrl"></param>
         /// <returns></returns>
-        public async Task<List<UserDto>> GetUsersFilter(string searchString)
+        public async Task<bool> UpdateAvatar(int userId, string avatarUrl)
         {
             try
             {
-                var users = await _unitOfWork.UsersRepository.GetAll(user => user.Role == "User").Where(u => u.UserName.Contains(searchString) || u.Tag.Contains(searchString)).ToListAsync();
+                var user = await _unitOfWork.UsersRepository.Get(userId);
+                if (user != null)
+                {
+                    user.Avatar = avatarUrl;
+                    _unitOfWork.UsersRepository.Update(user);
+                    await _unitOfWork.SaveChanges();
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "UsersService.UpdateUserAvatar => ");
+                return false;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los usuarios con rol User filtrados.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<UserDto>> GetUsersFilter(string searchString, int page, int pageSize = 10)
+        {
+            try
+            {
+                var skip = (page - 1) * pageSize;
+
+                var query = _unitOfWork.UsersRepository
+                    .GetAll(user => user.Role == "User");
+
+                if (!string.IsNullOrWhiteSpace(searchString))
+                {
+                    query = query.Where(u =>
+                        u.UserName.Contains(searchString) ||
+                        u.Tag.Contains(searchString));
+                }
+
+                var users = query
+                    .Skip(skip)
+                    .Take(pageSize)
+                    .ToList();
+
                 var result = users.Select(u => Extensions.ConvertModel(u, new UserDto())).ToList();
                 return result;
             }
@@ -318,11 +396,13 @@ namespace FireBreath.UsersMicroservice.Services
         ///     Obtiene todos los usuarios
         /// </summary>
         /// <returns></returns>
-        public async Task<List<UserDto>> GetAll()
+        public async Task<List<UserDto>> GetAll(int page, int pageSize=10)
         {
             try
             {
-                var users = await _unitOfWork.UsersRepository.GetAll().ToListAsync();
+                var skip = (page - 1) * pageSize;
+
+                var users = _unitOfWork.UsersRepository.GetAll().Skip(skip).Take(pageSize);
                 var result = users.Select(u => Extensions.ConvertModel(u, new UserDto())).ToList();
                 return result;
             }
@@ -331,6 +411,63 @@ namespace FireBreath.UsersMicroservice.Services
                 _logger.LogError(e, "UsersService.GetAll => ");
                 throw;
             }
+        }
+
+        public async Task<List<UserDto>> GetTopFollowed(int userId, int sampleSize = 3, int topLimit = 30)
+        {
+            // 1) Carga todos los follows
+            var allFollows = await _unitOfWork.FollowsRepository
+                .GetAll()
+                .ToListAsync();
+
+            // 2) Usuarios que el current user ya sigue
+            var alreadyFollowingIds = allFollows
+                .Where(f => f.FollowerId == userId)
+                .Select(f => f.UserId)
+                .ToHashSet();
+
+            // 3) Trae *todos* los usuarios excepto self y exceptuando ya-following
+            var candidateUsers = await _unitOfWork.UsersRepository
+                .GetAll(u =>
+                    u.Id != userId &&
+                    u.Id != 1 &&
+                    !alreadyFollowingIds.Contains(u.Id))
+                .ToListAsync();
+
+            // 4) Construye un diccionario de counts: userId → número de followers
+            var followCounts = allFollows
+                .GroupBy(f => f.UserId)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            // 5) Proyecta cada candidato con su count (0 si no está en followCounts)
+            var ranked = candidateUsers
+                .Select(u => new
+                {
+                    User = u,
+                    Count = followCounts.TryGetValue(u.Id, out var c) ? c : 0
+                })
+                // 6) Ordena descendentemente y toma hasta topLimit
+                .OrderByDescending(x => x.Count)
+                .Take(topLimit)
+                .ToList();
+
+            // 7) Mapea a DTOs
+            var userDtos = ranked
+                .Select(x => Extensions.ConvertModel(x.User, new UserDto()))
+                .ToList();
+
+            // 8) Shuffle Fisher–Yates + Take sampleSize
+            var rnd = new Random();
+            var list = userDtos.ToList();
+            for (int i = list.Count - 1; i > 0; i--)
+            {
+                int j = rnd.Next(i + 1);
+                var tmp = list[i];
+                list[i] = list[j];
+                list[j] = tmp;
+            }
+
+            return list.Take(sampleSize).ToList();
         }
 
         /// <summary>
@@ -348,6 +485,29 @@ namespace FireBreath.UsersMicroservice.Services
             catch (Exception e)
             {
                 _logger.LogError(e, "UsersService.GetByEmail =>");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene el usuario según el tag
+        /// </summary>
+        /// <param name="tag">El tag</param>
+        /// <returns><see cref="UserDto"/> con los datos del usuario</returns>
+        public async Task<UserDto> GetByTag(string tag)
+        {
+            try
+            {
+                var user = _unitOfWork.UsersRepository.GetFirst(g => g.Tag.Equals(tag));
+                if (user == null)
+                {
+                    return new UserDto();
+                }
+                return Extensions.ConvertModel(user, new UserDto());
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "UsersService.GetByTag =>");
                 throw;
             }
         }
@@ -380,7 +540,7 @@ namespace FireBreath.UsersMicroservice.Services
         {
             try
             {
-                var user = await Task.FromResult(_unitOfWork.UsersRepository.GetFirst(g => g.UserName.Equals(userName)));
+                var user = _unitOfWork.UsersRepository.GetFirst(g => g.UserName.Equals(userName));
                 return Extensions.ConvertModel(user, new UserDto());
             }
             catch (Exception e)
@@ -430,17 +590,8 @@ namespace FireBreath.UsersMicroservice.Services
         {
             try
             {
-                List<User> usersDb = await _unitOfWork.UsersRepository.GetAll().ToListAsync();
-                User userDb = new User();
-
-                foreach (var user in usersDb)
-                {
-                    if (user.Email.Equals(loginDto.Email))
-                    {
-                        userDb = user;
-                    }
-                }
-                if (userDb != new User())
+                User userDb = _unitOfWork.UsersRepository.GetFirst(u => u.Email.Equals(loginDto.Email));
+                if (userDb != null && userDb != new User())
                 {
 
                     var login = await _identitiesService.Login(userDb, loginDto.Password, rememberUser.Value);
@@ -526,6 +677,7 @@ namespace FireBreath.UsersMicroservice.Services
             }
             user.FullName = userDto.FullName;
             user.Bio = userDto.Bio;
+            user.Link = userDto.Link;
             user.Avatar = userDto.Avatar;
             user.Email = userDto.Email;
             user.PhoneNumber = userDto.PhoneNumber;
@@ -717,6 +869,19 @@ namespace FireBreath.UsersMicroservice.Services
                     response.Errors = new List<string> { Translation_Errors.Error_user_update };
                 }
 
+                if (response.Success)
+                {
+                    var key = $"{Literals.Redis_Users_Following}{follow.FollowerId}";
+                    var followingIds = await _redisCacheService.GetAsync<List<int>>(key);
+                    if (followingIds == null)
+                        followingIds = await GetFollowingUserIdsCached(follow.FollowerId);
+
+                    if (followingIds.Contains(follow.UserId))
+                    {
+                        await _redisCacheService.SetAsync(key, followingIds, TimeSpan.FromMinutes(60));
+                    }
+                }
+
                 return response;
             }
             catch (Exception e)
@@ -797,6 +962,20 @@ namespace FireBreath.UsersMicroservice.Services
                     response.Errors = new List<string> { String.Format(Translation_UsersRoles.ID_no_found_description, follow.UserId) };
                 }
                 response.Id = follow.UserId;
+
+                if (response.Success)
+                {
+                    var key = $"{Literals.Redis_Users_Following}{follow.FollowerId}";
+                    var followingIds = await _redisCacheService.GetAsync<List<int>>(key);
+                    if (followingIds == null)
+                        followingIds = await GetFollowingUserIdsCached(follow.FollowerId);
+
+                    if (followingIds.Remove(follow.UserId))
+                    {
+                        await _redisCacheService.SetAsync(key, followingIds, TimeSpan.FromMinutes(60));
+                    }
+                }
+
                 return response;
             }
             catch (Exception e)
@@ -891,16 +1070,63 @@ namespace FireBreath.UsersMicroservice.Services
         {
             try
             {
-                var follows = await _unitOfWork.FollowsRepository.GetAll().Where(f => f.UserId == userId).ToListAsync();
-                List<int> followerIds = new List<int>();
-                foreach (var follow in follows)
-                {
-                    if(follow.UserId == userId)
-                        followerIds.Add(follow.FollowerId);
-                }
-                var users = await _unitOfWork.UsersRepository.GetAll().Where(u => followerIds.Contains(u.Id)).ToListAsync();
-                var result = users.Select(u => Extensions.ConvertModel(u, new UserDto())).ToList();
-                return result;
+                // 1) Obtén todas las filas donde yo (userId) soy "follower"
+                var follows = await _unitOfWork.FollowsRepository
+                                   .GetAll(f => f.FollowerId == userId)
+                                   .ToListAsync();
+
+                // 2) Extrae los IDs de quienes sigo: f.UserId
+                List<int> followingIds = follows
+                                          .Select(f => f.UserId)
+                                          .Distinct()
+                                          .ToList();
+
+                // 3) Trae esos usuarios de UsersRepository
+                var users = await _unitOfWork.UsersRepository
+                                 .GetAll(u => followingIds.Contains(u.Id))
+                                 .ToListAsync();
+
+                return users.Select(u => Extensions.ConvertModel(u, new UserDto()))
+                            .ToList();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "UsersService.GetFollowers => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene todos los seguidores de un user cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<List<UserDto>> GetFollowing(int userId, int page, int pageSize = 10)
+        {
+            try
+            {
+                var skip = (page - 1) * pageSize;
+
+                // 1) Obtén todas las filas donde yo (userId) soy "follower"
+                var follows = await _unitOfWork.FollowsRepository
+                                   .GetAll(f => f.FollowerId == userId)
+                                   .Skip(skip)
+                                   .Take(pageSize)
+                                   .ToListAsync();
+
+                // 2) Extrae los IDs de quienes sigo: f.UserId
+                List<int> followingIds = follows
+                                          .Select(f => f.UserId)
+                                          .Distinct()
+                                          .ToList();
+
+                // 3) Trae esos usuarios de UsersRepository
+                var users = await _unitOfWork.UsersRepository
+                                 .GetAll(u => followingIds.Contains(u.Id))
+                                 .ToListAsync();
+
+                return users.Select(u => Extensions.ConvertModel(u, new UserDto()))
+                            .ToList();
             }
             catch (Exception e)
             {
@@ -918,21 +1144,97 @@ namespace FireBreath.UsersMicroservice.Services
         {
             try
             {
-                var follows = await _unitOfWork.FollowsRepository.GetAll().Where(f => f.FollowerId == userId).ToListAsync();
-                List<int> followerIds = new List<int>();
-                foreach (var follow in follows)
-                {
-                    if (follow.FollowerId == userId)
-                        followerIds.Add(follow.FollowerId);
-                }
-                var users = await _unitOfWork.UsersRepository.GetAll().Where(u => followerIds.Contains(u.Id)).ToListAsync();
-                var result = users.Select(u => Extensions.ConvertModel(u, new UserDto())).ToList();
-                return result;
+
+                // 1) Obtén todas las filas donde ‘yo’ (userId) soy “el seguido”
+                var follows = await _unitOfWork.FollowsRepository
+                                   .GetAll(f => f.UserId == userId)
+                                   .ToListAsync();
+
+                // 2) Extrae los IDs de mis seguidores: f.FollowerId
+                List<int> followerIds = follows
+                                          .Select(f => f.FollowerId)
+                                          .Distinct()
+                                          .ToList();
+
+                // 3) Trae esos usuarios de UsersRepository
+                var users = await _unitOfWork.UsersRepository
+                                 .GetAll(u => followerIds.Contains(u.Id))
+                                 .ToListAsync();
+
+                return users.Select(u => Extensions.ConvertModel(u, new UserDto()))
+                            .ToList();
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "UsersService.GetFollowing => ");
                 throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene todos los seguidores de un user cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<List<UserDto>> GetFollowers(int userId, int page, int pageSize = 10)
+        {
+            try
+            {
+
+                var skip = (page - 1) * pageSize;
+
+                // 1) Obtén todas las filas donde ‘yo’ (userId) soy “el seguido”
+                var follows = await _unitOfWork.FollowsRepository
+                                   .GetAll(f => f.UserId == userId)
+                                   .Skip(skip)
+                                   .Take(pageSize)
+                                   .ToListAsync();
+
+                // 2) Extrae los IDs de mis seguidores: f.FollowerId
+                List<int> followerIds = follows
+                                          .Select(f => f.FollowerId)
+                                          .Distinct()
+                                          .ToList();
+
+                // 3) Trae esos usuarios de UsersRepository
+                var users = await _unitOfWork.UsersRepository
+                                 .GetAll(u => followerIds.Contains(u.Id))
+                                 .ToListAsync();
+
+                return users.Select(u => Extensions.ConvertModel(u, new UserDto()))
+                            .ToList();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "UsersService.GetFollowing => ");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los ids de los usuarios que sigue un usuario, almacenados en caché
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<List<int>> GetFollowingUserIdsCached(int userId)
+        {
+            try
+            {
+                return await _redisCacheService.GetOrCreateAsync(
+                    $"{Literals.Redis_Users_Following}{userId}",
+                    async () =>
+                    {
+                        var following = await GetFollowing(userId);
+                        return following.Select(f => f.Id).ToList();
+                    },
+                    TimeSpan.FromMinutes(60)
+                ) ?? new List<int>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Redis] Error obteniendo usuarios seguidos para {userId}: {ex.Message}");
+                _logger.LogError(ex, $"[Redis] Error obteniendo usuarios seguidos para {userId}");
+                return new List<int>(); // No interrumpas el login
             }
         }
 

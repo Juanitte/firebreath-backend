@@ -1,14 +1,17 @@
 ﻿using Common.Dtos;
 using Common.Utilities;
+using Duende.IdentityServer.Extensions;
 using FireBreath.UsersMicroservice.Models.Dtos.CreateDto;
 using FireBreath.UsersMicroservice.Models.Dtos.EntityDto;
 using FireBreath.UsersMicroservice.Models.Entities;
+using FireBreath.UsersMicroservice.Translations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel;
 using System.Security.Cryptography;
 using System.Text;
-using FireBreath.UsersMicroservice.Translations;
-using Duende.IdentityServer.Extensions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FireBreath.UsersMicroservice.Controllers
 {
@@ -39,12 +42,30 @@ namespace FireBreath.UsersMicroservice.Controllers
         ///     Método que obtiene todos los usuarios
         /// </summary>
         /// <returns></returns>
-        [HttpGet("users/getall")]
-        public async Task<JsonResult> GetAll()
+        [HttpGet("users/getall/{page}")]
+        public async Task<JsonResult> GetAll(int page)
         {
             try
             {
-                var users = await ServiceUsers.GetAll();
+                var users = await ServiceUsers.GetAll(page);
+                return new JsonResult(users);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new List<UserDto>());
+            }
+        }
+
+        /// <summary>
+        ///     Método que obtiene todos los usuarios
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("users/gettopfollowed/{userId}")]
+        public async Task<JsonResult> GetTopFollowed(int userId, int sampleSize = 3, int topLimit = 30)
+        {
+            try
+            {
+                var users = await ServiceUsers.GetTopFollowed(userId, sampleSize, topLimit);
                 return new JsonResult(users);
             }
             catch (Exception e)
@@ -73,6 +94,25 @@ namespace FireBreath.UsersMicroservice.Controllers
         }
 
         /// <summary>
+        ///     Método que obtiene un usuario según su tag
+        /// </summary>
+        /// <param name="tag">El tag del usuario a buscar</param>
+        /// <returns></returns>
+        [HttpGet("users/getbytag/{tag}")]
+        public async Task<JsonResult> GetByTag(string tag)
+        {
+            try
+            {
+                var user = await ServiceUsers.GetByTag(tag);
+                return new JsonResult(user);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new UserDto());
+            }
+        }
+
+        /// <summary>
         ///     Método que crea un nuevo usuario
         /// </summary>
         /// <param name="userDto"><see cref="CreateUserDto"/> con los datos del usuario</param>
@@ -89,6 +129,7 @@ namespace FireBreath.UsersMicroservice.Controllers
                     var user = new User
                     {
                         Tag = userDto.Tag,
+                        Link = userDto.Link,
                         Bio = userDto.Bio,
                         Avatar = userDto.Avatar,
                         UserName = userDto.UserName,
@@ -439,6 +480,26 @@ namespace FireBreath.UsersMicroservice.Controllers
         }
 
         /// <summary>
+        ///     Obtiene todos los seguidores de un user cuyo id se pasa como parámetro
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [HttpGet("users/getfollowers/{userId}/{page}")]
+        public async Task<JsonResult> GetFollowers(int userId, int page)
+        {
+            try
+            {
+                var result = await ServiceUsers.GetFollowers(userId, page);
+
+                return new JsonResult(result);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new UserDto());
+            }
+        }
+
+        /// <summary>
         ///     Obtiene todos los usuarios seguidos por un user cuyo id se pasa como parámetro
         /// </summary>
         /// <param name="userId"></param>
@@ -459,21 +520,101 @@ namespace FireBreath.UsersMicroservice.Controllers
         }
 
         /// <summary>
-        ///     Obtiene los usuarios con rol User filtrados.
+        ///     Obtiene todos los usuarios seguidos por un user cuyo id se pasa como parámetro
         /// </summary>
+        /// <param name="userId"></param>
         /// <returns></returns>
-        [HttpGet("users/getusersfilter/{searchString}")]
-        public async Task<JsonResult> GetUsersFilter(string searchString)
+        [HttpGet("users/getfollowing/{userId}/{page}")]
+        public async Task<JsonResult> GetFollowing(int userId, int page)
         {
             try
             {
-                var result = await ServiceUsers.GetUsersFilter(searchString);
+                var result = await ServiceUsers.GetFollowing(userId, page);
 
                 return new JsonResult(result);
             }
             catch (Exception e)
             {
                 return new JsonResult(new UserDto());
+            }
+        }
+
+        /// <summary>
+        ///     Obtiene los usuarios con rol User filtrados.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("users/getusersfilter/{page}")]
+        public async Task<JsonResult> GetUsersFilter(int page, [FromQuery] string searchString = "")
+        {
+            try
+            {
+                var result = await ServiceUsers.GetUsersFilter(searchString, page);
+
+                return new JsonResult(result);
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new UserDto());
+            }
+        }
+
+        [HttpPut("users/updateavatar/{userId}")]
+        public async Task<IActionResult> UpdateAvatar(int userId, IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                    return BadRequest("No file uploaded.");
+
+                var user = await ServiceUsers.GetById(userId);
+                if (user == null)
+                    return NotFound("User not found.");
+
+                // Nombre del archivo tal cual lo sube el usuario
+                var fileName = Path.GetFileName(file.FileName);
+                // Ruta completa del directorio del usuario
+                string directoryPath = Path.Combine("/app/Files/", userId.ToString());
+                // Ruta completa del nuevo archivo
+                string filePath = Path.Combine(directoryPath, fileName);
+
+                // Si no existe, creamos la carpeta
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+                else
+                {
+                    // Si existe, eliminamos cualquier archivo dentro de esa carpeta
+                    var existingFiles = Directory.GetFiles(directoryPath);
+                    foreach (var existingFile in existingFiles)
+                    {
+                        try
+                        {
+                            System.IO.File.Delete(existingFile);
+                        }
+                        catch (Exception deleteEx)
+                        {
+                            Console.WriteLine($"Error deleting file {existingFile}: {deleteEx.Message}");
+                        }
+                    }
+                }
+
+                // Guardamos el nuevo avatar
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                var updateAvatar = await ServiceUsers.UpdateAvatar(userId, filePath);
+
+                if(updateAvatar)
+                    return Ok(new { path = filePath });
+                else
+                    return BadRequest("Failed to update avatar.");
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
             }
         }
 
@@ -490,7 +631,7 @@ namespace FireBreath.UsersMicroservice.Controllers
                 var user = await ServiceUsers.GetById(userId);
                 if (user != null)
                 {
-                    string directoryPath = Path.Combine("C:/ProyectoIoT/Back/ApiTest/AttachmentStorage/", userId.ToString());
+                    string directoryPath = Path.Combine("/app/Files/Avatars/", userId.ToString(), "/");
                     string filePath = Path.Combine(directoryPath, user.Avatar);
 
                     if (System.IO.File.Exists(filePath))
@@ -503,6 +644,20 @@ namespace FireBreath.UsersMicroservice.Controllers
                     }
                 }
                 return NotFound("File not found");
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
+        [HttpGet("users/followingids/{userId}")]
+        public async Task<IActionResult> GetFollowingIds(int userId)
+        {
+            try
+            {
+                var followingIds = await ServiceUsers.GetFollowingUserIdsCached(userId);
+                return Ok(followingIds);
             }
             catch (Exception e)
             {
